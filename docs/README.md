@@ -44,14 +44,14 @@
       <span class="dpr-home-dashboard-kicker">2026-08-13 ~ 2026-08-22</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 0 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 16 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
-    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>0</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>0</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>2 次</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>5</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>11</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-08-22 10:43:06 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-08-22 11:17:34 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日无新推荐，系统未产出可展示论文。</p>
+<p>过去十天精读5篇、速读11篇，共16篇，聚焦少样本与开放世界检测。</p>
+<p>最值得看《SED-FOD》（10分）：散射感知专家分解实现跨传感器SAR目标检测，另有LLM生成样本几何过滤提升少样本文本分类。</p>
+<p>建议优先复现SED-FOD思路，并关注类几何监督与流形引导的多模态方法对开放世界场景的适配。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +73,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">0 篇</strong>
+    <strong class="dpr-home-dashboard-count">5 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p class="dpr-home-dashboard-empty">今日暂无推荐。</p>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="SED-FOD: Scattering-Aware Expert Decomposition for Few-Shot Cross-Sensor SAR Object Detection">SED-FOD: Scattering-Aware Expert Decomposition for Few-Shot Cross-Sensor SAR Object Detection</span></li><li><span class="dpr-home-dashboard-paper-title" title="Geometric Filtering of LLM-Generated Samples for Few-Shot Text Classification">Geometric Filtering of LLM-Generated Samples for Few-Shot Text Classification</span></li><li><span class="dpr-home-dashboard-paper-title" title="FETERS: Few-Shot Early Time-Series Classification via Effective Ratio Selection">FETERS: Few-Shot Early Time-Series Classification via Effective Ratio Selection</span></li></ul>
   </div>
-
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">few-shot <strong>5</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +86,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">0 篇</strong>
+    <strong class="dpr-home-dashboard-count">11 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p class="dpr-home-dashboard-empty">今日暂无推荐。</p>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Class Geometry as Supervision for Sample-Efficient Open-World Detection">Class Geometry as Supervision for Sample-Efficient Open-World Detection</span></li><li><span class="dpr-home-dashboard-paper-title" title="MAG: MAnifold Guided Semi-Supervised Multi-modal In-Context Learning">MAG: MAnifold Guided Semi-Supervised Multi-modal In-Context Learning</span></li><li><span class="dpr-home-dashboard-paper-title" title="Structuring Semantic Embeddings for Principle Evaluation: A Prototype-Guided Contrastive Learning Approach">Structuring Semantic Embeddings for Principle Evaluation: A Prototype-Guided Contrastive Learning Approach</span></li></ul>
   </div>
-
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">few-shot <strong>11</strong></span></div>
 </section>
 </div>
 

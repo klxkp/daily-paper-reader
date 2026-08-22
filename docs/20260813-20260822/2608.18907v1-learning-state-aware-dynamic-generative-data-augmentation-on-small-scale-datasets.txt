@@ -1,0 +1,528 @@
+Title: Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets
+
+URL Source: https://arxiv.org/pdf/2608.18907v1
+
+Published Time: Thu, 20 Aug 2026 01:00:17 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# LEARNING -S TATE -A WARE DYNAMIC GENERATIVE DATA 
+
+# AUGMENTATION ON SMALL -S CALE DATASETS 
+
+Ting Xiang, Chenxi Deng, Jinhui Zhao, Bingting Jiang, Ke Zhang, Changjian Chen, Zhuo Tang 
+
+Hunan University 
+
+{txiang, changjianchen, ztang}@hnu.edu.cn 
+
+# ABSTRACT 
+
+Small-scale image classification is often limited by the scarcity of training data. Generative data augmentation (GDA) based on pretrained generative models has emerged as an effective solution. However, existing methods rely on task-agnostic augmentation strategies that overlook downstream model needs. Although recent dynamic GDA methods incorporate model feedback to guide aug-mentation, they still struggle to reliably determine sample-specific augmentation strengths and adapt augmentation strategies to different image regions while balancing image diversity and class semantics. To address these issues, we propose learning-state-aware dynamic generative data augmenta-tion (LSADA). Specifically, LSADA constructs a learning state for each sample based on its current loss and loss-decrease rate, which is then mapped to a sample-specific augmentation strength. Further-more, LSADA introduces a decoupled data augmentation and diffusion fusion strategy that applies strength-controlled transformations to class-relevant regions and generates diverse class-irrelevant regions, progressively fusing them to improve image diversity while preserving class semantics. Experiments on nine public datasets show that LSADA outperforms the existing SOTA dynamic GDA method by an average of 4.5% on six natural image datasets and 2.5% on three medical image datasets. 
+
+# 1 Introduction 
+
+The success of deep learning heavily relies on large-scale, high-quality datasets [1]. This reliance greatly limits the applicability of deep learning in small-scale data scenarios, where collecting and manually annotating sufficient training data is often costly and time-consuming [2]. Recently, generative data augmentation (GDA) has emerged as a promising solution to this challenge by leveraging pretrained generative models ( e.g. , Stable Diffusion [3]) to generate diverse training images. However, existing GDA methods often achieve limited performance gains because their generation process is independent of the downstream model. Consequently, the generated images may fail to address the specific weaknesses of the model being trained. For example, while a downstream classifier may struggle with ambiguous samples near its decision boundary or with underrepresented classes, a task-agnostic GDA method may continue to produce redundant and easily classified images. To address this issue, dynamic GDA has been proposed, which uses downstream model prediction results ( e.g. ,uncertainty estimates or classification results) as feedback to select samples for further augmentation, such as ActGen [4] and DisCL [5]. Although effective to some extent, these dynamic GDA methods still face two key challenges. Challenge 1 (Fig. 1(a1)): different samples require different augmentation strengths. For example, easy samples may benefit from stronger augmentation to increase their difficulty, whereas hard samples typically require only mild augmentation to avoid underfitting. However, the prediction-based feedback of existing GDA methods only determines which samples should be augmented with a unified strength. Accurately estimating a sample-specific augmentation strength remains challenging, particularly in small-scale data scenarios, where model predictions during training are often unstable and unreliable. Challenge 2 (Fig. 1(a2)): even within a single image, different areas require different augmentation strengths. For example, class-relevant regions should undergo mild augmentation to avoid class-semantic distortion, whereas class-irrelevant regions can be augmented more strongly to increase image diversity. However, existing arXiv:2608.18907v1 [cs.CV] 19 Aug 2026 Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets Original images Generated images Generation Model 
+
+Decoupled DA and Diffusion Fusion 
+
+Correct Low Strength Correct High Strength Prediction Feedback 
+
+Learning State Feedback 
+
+# (a) Existing Methods (b) LSADA Unified Strength 
+
+## a1 
+
+Hard 
+
+Easy 
+
+Hard 
+
+Easy 
+
+Class Distortion 
+
+Limited Diversity 
+
+Class Preservation High Diversity 
+
+## a2 
+
+Figure 1: Comparison between (a) existing dynamic GDA methods and (b) our method, LSADA. methods typically apply uniform augmentation across the entire image, overlooking such region-specific augmentation requirements. To address these challenges, we propose LSADA , a learning-state-aware dynamic generative data augmentation method. Instead of relying solely on prediction results, LSADA uses the current loss and loss-decrease rate to characterize each sample’s learning state ( Challenge 1 ). The learning state is then mapped to a sample-specific augmentation strength, where larger values receive weaker augmentation to preserve semantic features, while smaller values receive stronger augmentation to improve diversity. Then, LSADA introduces a decoupled data augmentation and diffusion fusion strategy to adapt to the derived augmentation strength ( Challenge 2 ). It applies strength-controlled rule-based transformations to class-relevant regions and uses LLM-guided prompts to generate diverse class-irrelevant regions. The two components are progressively fused during reverse denoising, improving image diversity while preserving class semantics (Fig. 1(b)). We experimentally validate the effectiveness of LSADA on nine public datasets. Experiments show that our method outperforms the existing SOTA dynamic GDA method by an average of 4.5% on six natural image datasets and 2.5% on three medical image datasets. In summary, the main contributions of our work are: • A sample-specific augmentation policy that dynamically adjusts augmentation strength according to the learning state of the downstream model. • A decoupled data augmentation and diffusion fusion generation strategy that further ensures the diversity and class semantics of generated images. • A series of experimental results demonstrates the effectiveness of our method. 
+
+# 2 Related Work 
+
+According to DA evolution (Fig. 2), existing methods can be broadly categorized into rule-based data augmentation and generative data augmentation. 2Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets (a) Rule-based DA Rule-based Transform 
+
+# 
+
+> (b) Static GDA
+
+# 
+
+> Generative Model
+> 2
+
+t1t 3t nt 
+
+> Training Process 2
+
+t1t 3t nt
+
+> Training Process (c) Dynamic GDA (e.g., ActGen)
+> 2
+
+t1t 3t nt
+
+> Training Process (d) Ours
+
+# 
+
+> 2
+
+t1t 3t nt 
+
+> Training Process Select(1) Skip(0) Strong Weak
+
+#  
+
+> Generative Model Forward Process Backward Process
+> Generative Model
+
+Figure 2: Evolution of data augmentation. 
+
+2.1 Rule-based Data Augmentation 
+
+Rule-based data augmentation improves model generalization by applying predefined transformations to original images (Fig. 2(a)). Representative methods include CutOut [6], MixUp [7, 8], CutMix [9], AutoAugment [10], and RandAugment [11]. Subsequent studies extended this paradigm by selecting sample-specific transformations, including OHL-Auto-Aug [12], AdaAug [13], InstaAug [14], MADAug [15], EntAugment [16], and AdaAugment [17]. Although effective in certain scenarios, these methods are limited in generating diverse images because they only vary images at the pixel level. 
+
+2.2 Generative Data Augmentation 
+
+Generative data augmentation employs pretrained generative models, particularly diffusion models, to generate diverse images for downstream model training. Depending on whether feedback from the downstream model is incorporated into the augmentation process, existing methods can be further categorized into static GDA and dynamic GDA. 
+
+2.2.1 Static GDA. 
+
+Static GDA (Fig. 2(b)) utilizes a generation model to generate samples before classifier training by perturbing latent features [18, 19, 20, 21, 22], optimizing prompts to guide generation [23, 24, 25], or editing image regions [26]. Although effective, these methods are independent of downstream training and consequently may fail to generate samples that are fully beneficial to the downstream model. To tackle this issue, dynamic generative data augmentation has been proposed recently. 
+
+2.2.2 Dynamic GDA. 
+
+Dynamic GDA (Fig. 2(c)) addresses this limitation by using feedback from the downstream model to control the augmentation process during training. It adapts the generation process by optimizing the hyperparameters of an image-to-image (I2I) generative model during training according to downstream model feedback. The feedback includes classification results [27, 4], sample uncertainty [28, 29, 5, 30], sample utility [31], classification loss [32, 33]. Although effective, these methods mainly use prediction-based feedback for sample selection and cannot determine sample-specific augmentation strengths. They also apply uniform augmentation, overlooking region-specific needs. LSADA (Fig. 2(d)) instead estimates each sample’s learning state from its current loss and loss-decrease rate and maps it to an augmentation strength. It further introduces decoupled DA and diffusion fusion to separately augment class-relevant and class-irrelevant regions, improving diversity while preserving class semantics. 
+
+# 3 Problem Formulation 
+
+We first briefly introduce the dynamic GDA problem. We are given a small labeled dataset Do = {(xi, y i)}ni=1 and a generative model G. Each image xi ∈ X ⊆ RD is associated with a label yi ∈ Y = {1, . . . , c }, where D is the input dimensionality and c is the number of classes. Unlike static GDA, dynamic GDA adapts image generation according to the feedback from the downstream classifier. Let fθt : X → Rc denote the classifier at epoch t. The generated data are updated every k epochs. Specifically, the 3Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets generation epochs are defined as Tg = {k, 2k, . . . , Rk }, where R = ⌊T /k ⌋ denotes the number of generation rounds and T is the total augmentation training epochs. At each generation epoch t ∈ T g , the feedback from fθt determines the augmentation strength ati for each sample xi. The generative model G then generates mt samples for each original sample: 
+
+Dtgi =   ˆxti,j , y i
+
+ | ˆxti,j = G  xi, y i; ati
+
+ mt 
+
+> j=1
+
+, (1) where mt is specified by the generation ratio. The generated set at epoch t is Dtg = Sni=1 Dtgi . It is combined with the original data and the previously generated sets to update the classifier. After all generation epochs, the complete generated dataset is Dg = S 
+
+> t∈T g
+
+Dtg . The overall generation ratio is m = P 
+
+> t∈T g
+
+mt, which indicates the total number of generated samples for each original sample. Finally, the downstream classifier is trained by minimizing the empirical loss on both original and generated data: 
+
+θ = arg min 
+
+> θ
+
+X
+
+> (x,y )∈D o∪D g
+
+L (fθ (x), y ) , (2) where L denotes the classification loss, such as cross-entropy. 
+
+# 4 Method 
+
+We propose learning-state-aware dynamic generative data augmentation (LSADA), which consists of two components: sample learning state estimation, and decoupled data augmentation and diffusion fusion generation. First, LSADA estimates the learning state of each sample using its current loss and loss-decrease rate (Fig. 3(a)). The estimated learning state is then mapped to a sample-specific augmentation strength, which controls rule-based transformations applied to the class-relevant region. For the class-irrelevant region, we use a large language model to generate diverse prompts. Finally, LSADA progressively fuses the transformed class-relevant region with the generated class-irrelevant region during the diffusion reversion process, generating diverse training images for the downstream classifier (Fig. 3(b)). The overall algorithm is summarized in Appendix A. 
+
+4.1 Sample Learning State Estimation 
+
+Existing dynamic GDA methods typically use downstream model predictions as feedback to select original samples for further augmentation. However, such feedback only determines which samples should be augmented, but cannot Classification model Original Images 
+
+# 
+
+ncurrent loss til
+
+> loss-decrease rate
+> ti
+
+## δ    
+
+> Learning State:
+> Class names
+> samoyed
+> tttiiiL
+
+βδ = −
+
+> Rule-based Transform
+
+tia
+
+> Generated Prompts
+> A samoyed dog on snowy ground A samoyed dog in a spring forest Diffusion Fusion Generation
+
+(a) Sample Learning State Estimation (b) Decoupled DA and Diffusion Fusion Generation   
+
+> Generated Images Class-Relevant Extraction
+> tg
+> tgFrozen Trainable
+> Strength Learning State Mapping to Strength
+
+Figure 3: The framework of LSADA. LSADA consists of two stages: (a) sample learning state estimation, using current loss and loss-decrease rate, (b) decoupled data augmentation and diffusion fusion generation. The diffusion fusion generation pipeline is detailed in Fig. 4. 4Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets assign sample-specific augmentation strengths. To construct a sample-specific augmentation strength, we characterize each sample’s learning state using its current loss and loss-decrease rate, which reflect its current learning difficulty and recent learning progress, respectively [34, 35]. Specifically, we estimate the learning state of each sample every k epochs. At epoch t, we first compute the current loss of sample (xi, y i) as 
+
+ℓti = L (fθt (xi), y i) , (3) where fθt denotes the classifier at epoch t, and L denotes the classification loss, such as cross-entropy loss. To measure how much each sample has been learned during the past k epochs, we define the loss-decrease rate as 
+
+δti = ( ℓt−ki − ℓti)/(ℓt−ki + ϵ1), (4) where ϵ1 is a small constant for numerical stability. Then we combine the current loss and the loss-decrease rate to define the learning state: 
+
+Lti = ℓti − βδ ti , (5) where β > 0 balances the current learning difficulty and recent learning progress. A larger Lti indicates that the sample is harder to learn, characterized by a higher loss and slower improvement, while a smaller value suggests easier to learn. 
+
+4.2 Learning-State-Aware Image Generation 
+
+Given the estimated learning state of each sample, we further map it to an augmentation strength to guide image generation. A straightforward solution is to use the augmentation strength to control the entire image generation process, such as adjusting the guidance scale to regulate the degree of image modification. However, applying a unified strength to the entire image may cause class-semantic distortion or insufficient diversity. To address this issue, we propose a decoupled data augmentation and diffusion fusion generation strategy, which decouples the augmentation of class-relevant and class-irrelevant regions, then fuses these components through diffusion fusion generation. 
+
+4.2.1 Decoupled data augmentation. 
+
+We first identify the class-relevant region in each image. Given a class-relevant mask Mi ∈ [0 , 1] H×W , the class-relevant region of the original image xi is defined as 
+
+xri = Mi ⊙ xi, (6) where H and W denote the image height and width, respectively, and ⊙ denotes element-wise multiplication. For datasets with clearly defined class-relevant regions, we obtain Mi using an off-the-shelf segmentation model. For datasets without clearly defined class-relevant regions, we instead derive Mi from class activation maps that highlight class-discriminative visual cues. Then, we apply rule-based augmentations ( e.g. , Rotation, Cutout, Resize) to the class-relevant region xri , and control their strengths using the learning state Lti. At epoch t, we first normalize the learning states {Lt
+
+> 1
+
+, L t
+
+> 2
+
+, . . . , L tn} using normalization: 
+
+eLti = Lti − min j Ltj
+
+max j Ltj − min j Ltj + ϵ2
+
+, (7) where ϵ2 is a small constant for numerical stability. The normalized learning state is subsequently mapped to an augmentation strength: 
+
+ati = amin + ( amax − amin )(1 − eLti), (8) where amin and amax denote the minimum and maximum augmentation strengths, respectively. Accordingly, a larger 
+
+eLti leads to weaker augmentation, while a smaller eLti leads to stronger augmentation. Based on the resulting strength, we apply the same rule-based transformation to both the class-relevant region xri and its mask Mi:
+
+ˆxri = T( xri ; ati), ˆMi = T( Mi; ati), (9) where T( ·; ati) denotes a rule-based transformation parameterized by the augmentation strength ati.To further enhance image diversity, rather than explicitly extracting class-irrelevant regions from the original image, we use a large language model (LLM) to generate a set of diverse background prompts {pji }mt
+
+> j=1
+
+, which guide the generation of class-irrelevant regions. 5Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets prompt: A samoyed dog in a spring forest ... ... 
+
+> Encoder Decoder ...  ...
+
+DDIM Inverse DDIM Reverse 
+
+# ... Multi Step 
+
+## ˆrix
+
+## ˆ jix
+
+> i
+
+M 
+
+> i
+
+M
+
+(1 )iM− (1 )iM−
+
+> 1
+
+,
+
+riz
+
+τ2, 1
+
+riz
+
+τ − 
+
+> 2
+
+,
+
+riz
+
+τ 2, 1iz
+
+τ − 1,iz
+
+τ
+
+Figure 4: Diffusion fusion generation pipeline. 
+
+4.2.2 Diffusion fusion generation. 
+
+Given the augmented class-relevant region ˆxri , the transformed mask ˆMi, and a background prompt pji , we fuse them to generate the image ˆxti,j .A straightforward way is to first generate a background image conditioned on the prompt using a Stable Diffusion model and then directly paste ˆxri onto it. However, this approach may generate images that deviate from the real data distribution. Moreover, the class-relevant region may not blend well with the generated background, which can degrade downstream classification performance. To address these issues, we introduce a diffusion fusion generation process (Fig. 4). To be specific, we first encode the augmented class-relevant region ˆxri into the latent space: 
+
+zri, 0 = Enc(ˆ xri ), (10) where Enc( ·) denotes the VAE encoder. Since diffusion fusion is performed in the latent space, we resize the transformed mask ˆMi to match the spatial dimensions of the latent feature map using nearest-neighbor interpolation: 
+
+fMi = Resize Hz × Wz ( ˆMi), fMi ∈ [0 , 1] Hz ×Wz , (11) where Resize Hz × Wz (·) denotes nearest-neighbor resizing to the spatial resolution Hz × Wz of the latent feature map. To preserve the semantic structure of the class-relevant region, we first apply DDIM inversion [36] to the encoded latent 
+
+zri, 0. We record the inverted latent trajectory over the fusion interval [τ1, τ 2]:
+
+{zri,τ }τ2  
+
+> τ=τ1
+
+= Inv( zri, 0), (12) where Inv( ·) denotes the DDIM inversion process. Then we initialize the reversion process with the inverted latent at timestep τ2:
+
+zi,τ 2 = zri,τ 2 . (13) Starting from zi,τ 2 , we perform reverse denoising conditioned on the background prompt pji . For each timestep 
+
+τ ∈ [τ1, τ 2], the latent is first updated by one reverse denoising step: 
+
+zi,τ −1 = Rτ (zi,τ , p ji ), (14) where Rτ (·, p ji ) denotes the reverse denoising operation at timestep τ conditioned on prompt pji .After each denoising step, we inject the inverted class-relevant latent into the corresponding masked region: 
+
+zi,τ −1 = fMi ⊙ zri,τ −1 + (1 − fMi) ⊙ zi,τ −1, (15) 6Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets where ⊙ denotes element-wise multiplication. The first term preserves the class semantics structure, while the second term allows the class-irrelevant region to be generated according to the background prompt. We continue the reverse denoising process from τ1 to 0 without masked injection: 
+
+zi,τ −1 = Rτ (zi,τ , p ji ), τ ∈ [1 , τ 1]. (16) Finally, the latent at timestep 0 is decoded to obtain the generated image: 
+
+ˆxti,j = Dec( zi, 0), (17) where Dec( ·) denotes the VAE decoder. 
+
+# 5 Experiments 
+
+5.1 Experimental Settings 5.1.1 Datasets. 
+
+We evaluate the effectiveness and efficiency of LSADA on nine public small-scale image classification datasets, covering both natural and medical images. The natural image datasets include Caltech-101 [37] and CIFAR100-Subset [38] for coarse-grained classification; Cars [39], Flowers [40], and Pets [41] for fine-grained classification; and DTD [42] for texture classification. The medical image datasets are drawn from MedMNIST [43] and include PathMNIST [44] for colon pathology, BreastMNIST [45] for breast ultrasound, and OrganSMNIST [46] for abdominal CT classification. Detailed dataset statistics are provided in Appendix B. 
+
+5.1.2 Baselines. 
+
+To evaluate the effectiveness of our proposed method, we compare LSADA with representative and state-of-the-art (SOTA) data augmentation methods from different categories, including rule-based augmentation methods ( i.e. ,CutOut [6], RandAugment [11], TrivialAugment [47], TeachAugment [48], MADAug [15] and EntAugment [16]), SOTA static generative augmentation methods (GIF [21]), and SOTA dynamic generative augmentation meth-ods (DisCL [5] and ActGen [4]). 
+
+5.1.3 Implementation details. 
+
+We use ResNet-50 as the downstream classifier for all datasets and train it for 200 epochs. Image generation is performed only during the first (T=100) training epochs, with the generated data updated every 5 epochs. Following the GDA baselines, we use Stable Diffusion v.2.1 (SD 2.1) for image generation and expand each dataset with a generation ratio 
+
+m = 5 . To extract class-relevant regions, we employ SAM3 [49] for Caltech-101, Cars, Flowers, CIFAR100-S, and Pets, and CAM [50] for the remaining datasets. For class-relevant region transformation, we apply Rotation with angles in [5 ◦, 20 ◦], Cutout with ratios in [5% , 20%] and Resize with scaling ratios in [60% , 100%] . For class-irrelevant regions, we use the GPT-5.5 API to generate diverse background prompts. More details are provided in Appendix C.                                                                                                                                                 
+
+> Dataset Natural image datasets Medical image datasets
+> Caltech 101 Cars Flowers DTD CIFAR100-S Pets Avg. PathMNIST BreastMNIST OrganSMNIST Avg.
+> original 26.3 19.8 74.1 23.1 35.0 6.8 30.9 72.4 55.8 76.3 68.2 CutOut 51.5 25.8 77.8 24.2 44.3 38.7 43.7 78.8 66.7 78.3 74.6 RandAugment 57.8 43.2 83.8 28.7 46.7 48.0 51.4 79.2 68.7 79.6 75.8 TrivialAugment 49.9 21.1 81.8 28.0 37.3 5.9 37.3 83.2 61.0 78.2 74.1 TeachAugment 70.5 25.9 58.7 51.5 31.3 68.7 51.1 79.6 74.3 77.2 77.0 MADAug 65.5 55.3 84.7 44.4 38.2 67.8 59.3 75.6 73.1 75.9 74.9 EntAugment 70.7 69.0 75.9 40.8 52.4 67.8 62.8 86.2 74.4 77.7 79.4 SD 2.1 55.7 64.5 80.7 32.4 55.9 42.4 55.3 76.3 73.7 51.6 67.2 GIF 54.4 60.6 82.1 33.9 61.1 52.9 57.5 86.9 77.4 80.7 81.7 DisCL 45.8 26.8 82.2 30.6 30.3 45.8 43.6 83.7 76.9 79.2 79.9 ActGen 78.2 90.9 97.5 60.2 50.7 86.2 77.3 90.3 78.8 80.8 83.3 Ours 86.1
+> (+7.9) 91.4
+> (+0.5) 98.3
+> (+0.8) 63.4
+> (+3.2) 61.7
+> (+11.0) 89.7
+> (+3.5) 81.8
+> (+4.5) 90.9
+> (+0.6) 84.6
+> (+5.8) 81.8
+> (+1.0) 85.8
+> (+2.5)
+
+Table 1: Accuracy (in %) of a ResNet-50 trained from scratch on original and generated images by different methods. 7Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets Accuracy +5x +10x +3x +1x +5x +10x +3x +1x +5x +10x +3x +1x 020 Oxford-IIIT Pets DTD Caltech 101 40 60 80 20 40 50 60 SD 2.1 ActGen LSADA 30 40 60 80 84.4 88.2 89.7 90.4 84.2 85.8 86.2 87.8 6.9 36.0 42.4 48.7 61.5 62.1 63.4 63.7 58.1 59.7 60.2 58.4 23.1 28.8 32.4 32.9 82.0 85.4 86.1 87.0 76.1 77.6 78.2 80.1 44.9 51.6 55.7 56.7 
+
+Figure 5: Accuracy (in %) of a ResNet-50 trained from scratch on the original and generated datasets by LSADA, SD 2.1 and ActGen with different generation ratios. Method ResNeXt-50 WideResNet-50 MobileNet-V2 Original 18.4 32.0 26.2 ActGen 84.6 86.5 79.5 LSADA 89.9 90.4 85.1 
+
+Table 2: Accuracy of various architectures trained on 5×-generated Pets. 
+
+5.2 Overall Performance 5.2.1 DA effectiveness. 
+
+As shown in Table 1, our method consistently outperforms rule-based data augmentation methods and the SOTA static GDA method by a large margin. It also achieves higher classification accuracy than existing dynamic GDA methods. In particular, LSADA surpasses ActGen, the SOTA dynamic GDA method, by an average of 4.5% on natural image datasets and 2.5% on medical image datasets. These results suggest that selecting samples solely based on model predictions may provide insufficient guidance in small-scale data scenarios. In contrast, LSADA characterizes each sample using its learning state, maps it to a sample-specific augmentation strength, and employs a generation strategy adapted to that strength, making it well suited to small-scale data scenarios. 
+
+5.2.2 DA efficiency. 
+
+We further compare LSADA with ActGen and SD 2.1 under different generation ratios. As shown in Fig. 5, LSADA consistently achieves competitive or higher accuracy using fewer generated images than ActGen. In particular, on DTD and Caltech-101, LSADA with a 1× generation ratio achieves higher accuracy than ActGen with a 10 × ratio. Thus, LSADA requires only one-tenth as many generated images on these datasets, demonstrating at least a 10 × improvement in data augmentation efficiency. 
+
+5.2.3 Generalization to various architectures. 
+
+In practical applications, generated images may be used to train downstream models with various architectures. To evaluate the architectural generalizability of LSADA, we use the 5×-generated images obtained with feedback from ResNet-50 to train ResNeXt-50, WideResNet-50, and MobileNet-V2 from scratch. As shown in Table 2, LSADA consistently improves the classification accuracy of all evaluated architectures. These results show that, although model feedback is used during data generation, the resulting images are not specific to the guiding architecture and can effectively transfer to other downstream models. 8Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets Feedback Current Loss Loss-Decrease Acc No Feedback × × 88.9 Prediction Feedback × × 89.2 Loss Only ✓ × 89.1 Decrease Only × ✓ 89.0 Learning State (Ours) ✓ ✓ 89.7 
+
+Table 3: Accuracy (in %) comparison of different learning state signals on Pets. Mapping strategies Ours Reversed Acc 89.7 88.6 Table 4: Accuracy (in %) comparison under different mapping strategies on Pets. Generation strategies Ours I2I Paste Acc 89.7 86.2 88.7 Table 5: Accuracy (in %) comparison under different generation strategies on Pets. 
+
+5.3 Ablation Study 
+
+To further evaluate the effectiveness of LSADA, we conduct ablation studies on key components, including the learning state feedback, the mapping from learning state to augmentation strength, and the decoupled data augmentation and diffusion fusion generation strategy. 
+
+5.3.1 Learning state feedback. 
+
+To evaluate the effectiveness of the proposed feedback, we keep all other components fixed and vary only the feedback signal. The compared variants include no feedback, the prediction-based feedback used in ActGen, current loss only, and loss-decrease rate only. As shown in Table 3, combining the current loss and loss-decrease rate achieves the highest accuracy, validating the effectiveness of the proposed learning state. 
+
+5.3.2 Mapping strategy. 
+
+To evaluate the effectiveness of mapping the learning state Lti to the augmentation strength ati, we compare the proposed strategy with a reversed mapping. The proposed strategy assigns weaker augmentation to samples with larger learning state values and stronger augmentation to those with smaller values, while the reversed strategy follows the opposite assignment. As shown in Table 4, the proposed mapping consistently achieves higher accuracy, demonstrating the effectiveness of adapting augmentation strength to the learning state of each sample. 
+
+5.3.3 Decoupled data augmentation and diffusion fusion generation. 
+
+To evaluate the effectiveness of the proposed generation strategy, we compare it with global image-to-image diffusion generation (I2I) and decoupled augmentation followed by direct pasting (Paste). As shown in Table 5, our strategy achieves the highest accuracy when all other components are kept unchanged. These results demonstrate that decoupled data augmentation and diffusion fusion better balance image diversity and class-semantic preservation than global editing or direct pasting. We further compare image quality across generation strategies. As shown in Table 6, I2I has a much higher FID, indicating a larger distribution gap from the original images. Paste achieves the lowest FID, likely because it directly preserves the foreground. Overall, the results suggest that an appropriate distribution gap may benefit downstream performance. The samples of natural datasets generated by the three strategies are visualized in Fig. 6. Although the I2I strategy produces diverse images, it often alters class-relevant regions, leading to semantic distortion. The Paste strategy better preserves class semantics, but directly pasting the class-relevant region onto the background makes the images look unnatural, which may cause them to deviate from the data manifold. In contrast, our strategy preserves semantic 9Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets Generation strategies FID ↓ IS ↑ LPIPS ↓
+
+I2I 107.8 10.33 0.71 Paste 40.10 17.58 0.74 Ours 46.61 14.75 0.73 Table 6: Image quality comparison under different generation strategies on Pets. Original images I2I Paste Ours 
+
+Figure 6: Natural image visualization under different generation strategies. consistency while achieving more natural fusion between the class-relevant region and the background. Similar observations on the medical image datasets are provided in Appendix D. 
+
+# 6 Conclusion 
+
+This paper addresses two key limitations of existing dynamic GDA methods: the difficulty of determining sample-specific augmentation strengths and the lack of region-specific generation strategies for balancing image diversity and class semantics. To address these limitations, we propose LSADA, which characterizes the learning state of each sample using its current loss and loss-decrease rate and adaptively determines its augmentation strength. Furthermore, LSADA introduces a decoupled augmentation and diffusion fusion generation strategy to achieve region-specific augmentation, improving diversity while preserving class semantics. Extensive experiments demonstrate the effectiveness of LSADA on both natural and medical image classification tasks. There are several directions for future research. For instance, extending LSADA to other computer vision tasks, such as object detection and semantic segmentation, would be valuable. Additionally, exploring how learning-state guidance can be integrated with other generative models and data modalities is an interesting avenue for future investigation. 10 Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets 
+
+# References 
+
+[1] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition , pages 248–255, Miami, Florida, USA, 2009. Ieee, IEEE Computer Society. [2] Guo-Jun Qi and Jiebo Luo. Small data challenges in big data era: A survey of recent progress on unsupervised and semi-supervised methods. IEEE Transactions on Pattern Analysis and Machine Intelligence , 44(4):2168–2187, 2020. [3] Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Björn Ommer. High-resolution image synthesis with latent diffusion models. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 10684–10695, New Orleans, LA, USA, 2022. IEEE. [4] Tao Huang, Jiaqi Liu, Shan You, and Chang Xu. Active generation for image classification. In European Conference on Computer Vision , pages 270–286. Springer, 2024. [5] Yijun Liang, Shweta Bhardwaj, and Tianyi Zhou. Diffusion curriculum: Synthetic-to-real data curriculum via image-guided diffusion. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 1697–1707, 2025. [6] Terrance DeVries and Graham W Taylor. Improved regularization of convolutional neural networks with cutout. 
+
+arXiv preprint arXiv:1708.04552 , 2017. [7] Dan Hendrycks, Norman Mu, Ekin D Cubuk, Barret Zoph, Justin Gilmer, and Balaji Lakshminarayanan. Augmix: A simple data processing method to improve robustness and uncertainty. arXiv preprint arXiv:1912.02781 , 2019. [8] Linjun Zhang, Zhun Deng, Kenji Kawaguchi, Amirata Ghorbani, and James Zou. How does mixup help with robustness and generalization? arXiv preprint arXiv:2010.04819 , 2020. [9] Sangdoo Yun, Dongyoon Han, Seong Joon Oh, Sanghyuk Chun, Junsuk Choe, and Youngjoon Yoo. Cutmix: Regularization strategy to train strong classifiers with localizable features. In Proceedings of the IEEE/CVF international conference on computer vision , pages 6023–6032, 2019. [10] Ekin D Cubuk, Barret Zoph, Dandelion Mane, Vijay Vasudevan, and Quoc V Le. Autoaugment: Learning augmentation policies from data. arXiv preprint arXiv:1805.09501 , 2018. [11] Ekin D Cubuk, Barret Zoph, Jonathon Shlens, and Quoc V Le. Randaugment: Practical automated data augmentation with a reduced search space. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition workshops , pages 702–703, 2020. [12] Chen Lin, Minghao Guo, Chuming Li, Xin Yuan, Wei Wu, Junjie Yan, Dahua Lin, and Wanli Ouyang. Online hyper-parameter learning for auto-augmentation strategy. In Proceedings of the IEEE/CVF international conference on computer vision , pages 6579–6588, 2019. [13] Tsz-Him Cheung and Dit-Yan Yeung. Adaaug: Learning class-and instance-adaptive data augmentation policies. In International conference on learning representations , 2021. [14] Ning Miao, Tom Rainforth, Emile Mathieu, Yann Dubois, Yee Whye Teh, Adam Foster, and Hyunjik Kim. Learning instance-specific augmentations by capturing local invariances. arXiv preprint arXiv:2206.00051 , 2022. [15] Chengkai Hou, Jieyu Zhang, and Tianyi Zhou. When to learn what: Model-adaptive data augmentation curriculum. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 1717–1728, 2023. [16] Suorong Yang, Furao Shen, and Jian Zhao. Entaugment: Entropy-driven adaptive data augmentation framework for image classification. In European conference on computer vision , pages 197–214. Springer, 2024. [17] Suorong Yang, Peijia Li, Xin Xiong, Furao Shen, and Jian Zhao. Adaaugment: A tuning-free and adaptive approach to enhance data augmentation. IEEE Transactions on Image Processing , 2025. [18] Antreas Antoniou, Amos Storkey, and Harrison Edwards. Data augmentation generative adversarial networks. 
+
+arXiv preprint arXiv:1711.04340 , 2017. [19] Khawar Islam, Muhammad Zaigham Zaheer, Arif Mahmood, and Karthik Nandakumar. Diffusemix: Label-preserving data augmentation with diffusion models. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 27621–27630, 2024. [20] Dvir Samuel, Rami Ben-Ari, Simon Raviv, Nir Darshan, and Gal Chechik. Generating images of rare concepts using pre-trained diffusion models. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 38, pages 4695–4703, 2024. 11 Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets [21] Yifan Zhang, Daquan Zhou, Bryan Hooi, Kai Wang, and Jiashi Feng. Expanding small-scale datasets with guided imagination. Advances in neural information processing systems , 36:76558–76618, 2023. [22] Haowei Zhu, Ling Yang, Jun-Hai Yong, Hongzhi Yin, Jiawei Jiang, Meng Xiao, Wentao Zhang, and Bin Wang. Distribution-aware data expansion with diffusion models. Advances in Neural Information Processing Systems ,37:102768–102795, 2024. [23] Ruifei He, Shuyang Sun, Xin Yu, Chuhui Xue, Wenqing Zhang, Philip Torr, Song Bai, and Xiaojuan Qi. Is synthetic data from generative models ready for image recognition? arXiv preprint arXiv:2210.07574 , 2022. [24] Bohan Li, Xiao Xu, Xinghao Wang, Yutai Hou, Yunlong Feng, Feng Wang, Xuanliang Zhang, Qingfu Zhu, and Wanxiang Che. Semantic-guided generative image augmentation method with diffusion models for image classification. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 38, pages 3018–3027, 2024. [25] Brandon Trabucco, Kyle Doherty, Max Gurinas, and Ruslan Salakhutdinov. Effective data augmentation with diffusion models. In International Conference on Learning Representations , volume 2024, pages 14590–14612, 2024. [26] Khawar Islam, Arif Mahmood, Xin Jin, and Naveed Akhtar. Instructmixup: Instruction-guided salient patch editing for robust data augmentation. arXiv preprint arXiv:2607.19324 , 2026. [27] Soroush Abbasi Koohpayegani, Anuj Singh, KL Navaneet, Hamed Pirsiavash, and Hadi Jamali-Rad. Genie: Generative hard negative images through diffusion. arXiv preprint arXiv:2312.02548 , 2023. [28] Kyuheon Jung, Yongdeuk Seo, Seongwoo Cho, Jaeyoung Kim, Hyun-seok Min, and Sungchul Choi. Dalda: Data augmentation leveraging diffusion model and llm with adaptive guidance scaling. In European Conference on Computer Vision , pages 182–200. Springer, 2024. [29] Zerun Wang, Jiafeng Mao, Xueting Wang, and Toshihiko Yamasaki. Difficulty controlled diffusion model for synthesizing effective training data. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 40, pages 10367–10375, 2026. [30] Reyhane Askari-Hemmat, Mohammad Pezeshki, Elvis Dohmatob, Florian Bordes, Pietro Astolfi, Melissa Hall, Jakob Verbeek, Michal Drozdzal, and Adriana Romero-Soriano. Improving the scaling laws of synthetic data with deliberate practice. arXiv preprint arXiv:2502.15588 , 2025. [31] Jiyu Guo, Shuo Yang, Yiming Huang, Yancheng Long, Xiaobo Xia, Xiu Su, Bo Zhao, Zeke Xie, and Liqiang Nie. Utilgen: Utility-centric generative data augmentation with dual-level task adaptation. Advances in Neural Information Processing Systems , 38:32474–32500, 2026. [32] Dang Nguyen, Jiping Li, Jinghao Zheng, and Baharan Mirzasoleiman. Do we need all the synthetic data? targeted image augmentation via diffusion models. In The Fourteenth International Conference on Learning Representations , 2025. [33] Shuhan Li, Yi Lin, Hao Chen, and Kwang-Ting Cheng. Iterative online image synthesis via diffusion model for imbalanced classification. In International Conference on Medical Image Computing and Computer-Assisted Intervention , pages 371–381. Springer, 2024. [34] Mariya Toneva, Alessandro Sordoni, Remi Tachet des Combes, Adam Trischler, Yoshua Bengio, and Geoffrey J. Gordon. An empirical study of example forgetting during deep neural network learning. In International Conference on Learning Representations , 2019. [35] Mansheej Paul, Surya Ganguli, and Gintare Karolina Dziugaite. Deep learning on a data diet: Finding important examples early in training. Advances in neural information processing systems , 34:20596–20607, 2021. [36] Jiaming Song, Chenlin Meng, and Stefano Ermon. Denoising diffusion implicit models. arXiv preprint arXiv:2010.02502 , 2020. [37] Li Fei-Fei, Rob Fergus, and Pietro Perona. Learning generative visual models from few training examples: An incremental bayesian approach tested on 101 object categories. In 2004 conference on computer vision and pattern recognition workshop , pages 178–178. IEEE, 2004. [38] Alex Krizhevsky, Geoffrey Hinton, et al. Learning multiple layers of features from tiny images. 2009. [39] Jonathan Krause, Jia Deng, Michael Stark, and Li Fei-Fei. Collecting a large-scale dataset of fine-grained cars. 2013. [40] Maria-Elena Nilsback and Andrew Zisserman. Automated flower classification over a large number of classes. In 
+
+2008 Sixth Indian conference on computer vision, graphics & image processing , pages 722–729. IEEE, 2008. [41] Omkar M Parkhi, Andrea Vedaldi, Andrew Zisserman, and CV Jawahar. Cats and dogs. In 2012 IEEE conference on computer vision and pattern recognition , pages 3498–3505. IEEE, 2012. 12 Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets [42] Mircea Cimpoi, Subhransu Maji, Iasonas Kokkinos, Sammy Mohamed, and Andrea Vedaldi. Describing textures in the wild. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 3606–3613, 2014. [43] Jiancheng Yang, Rui Shi, and Bingbing Ni. Medmnist classification decathlon: A lightweight automl benchmark for medical image analysis. In 2021 IEEE 18th international symposium on biomedical imaging (ISBI) , pages 191–195. IEEE, 2021. [44] Jakob Nikolas Kather, Johannes Krisam, Pornpimol Charoentong, Tom Luedde, Esther Herpel, Cleo-Aron Weis, Timo Gaiser, Alexander Marx, Nektarios A Valous, Dyke Ferber, et al. Predicting survival from colorectal cancer histology slides using deep learning: A retrospective multicenter study. PLoS medicine , 16(1):e1002730, 2019. [45] Walid Al-Dhabyani, Mohammed Gomaa, Hussien Khaled, and Aly Fahmy. Dataset of breast ultrasound images. 
+
+Data in brief , 28:104863, 2020. [46] Xuanang Xu, Fugen Zhou, Bo Liu, Dongshan Fu, and Xiangzhi Bai. Efficient multiple organ localization in ct image using 3d region proposal network. IEEE transactions on medical imaging , 38(8):1885–1898, 2019. [47] Samuel G Müller and Frank Hutter. Trivialaugment: Tuning-free yet state-of-the-art data augmentation. In 
+
+Proceedings of the IEEE/CVF international conference on computer vision , pages 774–782, 2021. [48] Teppei Suzuki. Teachaugment: Data augmentation optimization using teacher knowledge. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 10904–10914, New Orleans, LA, USA, 2022. IEEE. [49] Nicolas Carion, Laura Gustafson, Yuan-Ting Hu, Shoubhik Debnath, Ronghang Hu, Didac Suris, Chaitanya Ryali, Kalyan Vasudev Alwala, Haitham Khedr, Andrew Huang, et al. Sam 3: Segment anything with concepts. arXiv preprint arXiv:2511.16719 , 2025. [50] Bolei Zhou, Aditya Khosla, Agata Lapedriza, Aude Oliva, and Antonio Torralba. Learning deep features for discriminative localization. In Proceedings of the IEEE conference on computer vision and pattern recognition ,pages 2921–2929, 2016. 13 Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets 
+
+# A Algorithm 
+
+The complete algorithm is summarized in Algorithm 1. LSADA alternates between downstream classifier optimization and learning-state-aware image generation. At each epoch, the classifier is updated using the union of the original and previously generated data. Every k epochs, LSADA computes the current loss and loss-decrease rate of each original sample and combines them to estimate its learning state. The learning states are then normalized and mapped to sample-specific augmentation strengths. For each sample, LSADA extracts the class-relevant region and applies a strength-controlled rule-based transformation to both the region and its mask. Meanwhile, we use an LLM to generate diverse background prompts, which guide the diffusion fusion process in Eqs. (10)–(17) to progressively integrate the transformed class-relevant region with a generated class-irrelevant region (background prompt). The resulting images are added to Dg and used in subsequent classifier updates. After T augmentation epochs, the final classifier is trained on Do ∪ D g .
+
+Algorithm 1 The LSADA Framework 
+
+Input : Original dataset Do = {(xi, y i)}ni=1 ; generative model G, classification model f ; maximum augmentation epochs T ; update interval k; generation number mt for each sample at epoch t, rule-based augmentation T.
+
+Output : Generated dataset Dg and final classification model fθ parameterized by 
+
+θ. 
+
+> 1:
+
+Dg ← ∅  
+
+> 2:
+
+for t = 1 , . . . , T do  
+
+> 3:
+
+Update the classification model to obtain fθt using Do ∪ D g 
+
+> 4:
+
+if t mod k = 0 then  
+
+> 5:
+
+for i = 1 , . . . , n do  
+
+> 6:
+
+Compute current loss: ℓti ← L (fθt (xi), y i) 
+
+> 7:
+
+Compute loss-decrease rate: δti ← (ℓt−ki − ℓti)/(ℓt−ki + ϵ); 
+
+> 8:
+
+Compute learning state value: Lti ← ℓti − βδ ti 
+
+> 9:
+
+end for  
+
+> 10:
+
+Normalize {Lti}ni=1 to obtain {eLti}ni=1  
+
+> 11:
+
+for i = 1 , . . . , n do  
+
+> 12:
+
+Compute augmentation strength: ati ← amin + ( amax − amin )(1 − eLti) 
+
+> 13:
+
+Extract class-relevant region: mask Mi ← Segment( xi); xri ← Mi ⊙ xi 
+
+> 14:
+
+Rule-based Transform on class-relevant region: (ˆ xri , ˆMi) ← T( xri , M i; ati) 
+
+> 15:
+
+Generate prompts: {pji }mt 
+
+> j=1
+
+← LLM( xi, y i, m t) 
+
+> 16:
+
+for j = 1 , . . . , m t do  
+
+> 17:
+
+Generate image using Eqs. (10)–(17) 
+
+ˆxti,j ← DiffusionFusion( G, ˆxri , ˆMi, p ji ) 
+
+> 18:
+
+Dg ← D g ∪ { (ˆ xti,j , y i)} 
+
+> 19:
+
+end for  
+
+> 20:
+
+end for  
+
+> 21:
+
+end if  
+
+> 22:
+
+end for  
+
+> 23:
+
+θ ← TrainClassifier( Do ∪ D g ) 
+
+> 24:
+
+return Dg and fθ
+
+# B Datasets 
+
+We evaluate our method on nine publicly available image classification datasets, including six natural image datasets and three medical image datasets. A detailed summary of their statistics is provided in Table 7. The natural image datasets include Caltech 101 [37], CIFAR100-Subset (CIFAR100-S) [38], Stanford Cars [39], Oxford 102 Flowers (Flowers) [40], Oxford-IIIT Pets (Pets) [41], and DTD [42]. CIFAR100-Subset is constructed from CIFAR100 by randomly sampling 100 images from each class, resulting in 10,000 images across 100 categories. This controlled subset provides a representative small-scale setting for evaluating the effectiveness of our method. Collectively, these datasets cover multiple image recognition scenarios, including coarse-grained object classification (i.e. , Caltech 101 and CIFAR100-Subset), fine-grained object classification ( i.e. , Stanford Cars, Flowers, and Pets), and texture classification ( i.e. , DTD). 14 Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets 
+
+Dataset Type Classes Samples Average samples per class 
+
+Caltech 101 Natural 102 3,060 30 CIFAR100-Subset Natural 100 10,000 100 Stanford Cars Natural 196 8,144 42 Flowers Natural 102 6,552 64 Pets Natural 37 3,842 104 DTD Natural 47 3,760 80 BreastMNIST Medical 2 78 39 PathMNIST Medical 9 10,004 1,112 OrganSMNIST Medical 11 13,940 1,267 Table 7: Statistics of both natural and medical image datasets. The medical image datasets are obtained from the MedMNIST benchmark [43], including BreastMNIST [45], PathM-NIST [44], and OrganSMNIST [46]. These datasets contain breast ultrasound, colon pathology, and abdominal CT images, respectively. To construct small-scale training scenarios, we use the official validation splits of BreastMNIST and PathMNIST as their training sets. For OrganSMNIST, we retain the original training split because its available training set is already relatively limited. 
+
+# C Implementation Details 
+
+Training and generation schedule. The downstream classifier is trained for 200 epochs, while image generation is performed only during the first T = 100 augmentation training epochs. With k = 5 , the number of generation rounds is 
+
+R = ⌊T /k ⌋ = 20 , and the generation epochs are Tg = {5, 10 , . . . , 100 } under one-based epoch indexing. We set the overall generation ratio to m = 5 , yielding a target per-round generation ratio of m/R = 0 .25 .This fractional ratio is realized at the dataset level. At each generation epoch, approximately n/ 4 original samples are randomly selected without replacement from Do, and one image is generated for each selected sample. The 20 generation rounds therefore yield approximately 5n generated images in total, although no individual original sample is required to be selected exactly five times. For each selected sample, its learning state determines the augmentation strength ati. The generated samples are accumulated in Dg and used together with Do in subsequent training epochs. After epoch 100, no additional images are generated, and training continues on Do ∪ D g until epoch 200. 
+
+Computing environment. All experiments are conducted using four NVIDIA RTX 4090 GPUs, each with 24 GB of memory, with PyTorch 2.1.2 and CUDA 12.1. 
+
+Diffusion configuration. Let N denote the total number of DDIM inference steps. We set N = 10 , τ1 = ⌊0.5N ⌋ = 5 ,and τ2 = ⌊0.7N ⌋ = 7 . In each cycle, noise is injected from τ1 to τ2, followed by reverse denoising with masked injection from τ2 to τ1. Under the implementation’s inference-step indexing, masked injection is applied at timesteps 
+
+{7, 6, 5}. This cycle is repeated 10 times. During the final reverse denoising stage from τ1 to 0, we additionally perform masked injection at a dataset-specific set of late-stage timesteps, denoted by Tinj . We set Tinj = {4, 3} for Caltech-101, Cars, Flowers, Pets, and DTD, and 
+
+Tinj = {4} for CIFAR100-Subset, PathMNIST, BreastMNIST, and OrganSMNIST. At each τ ∈ T inj , the corresponding inverted class-relevant latent is injected into the class-relevant region. Apart from these additional timesteps, the remaining reverse denoising steps follow Eq. (16) in the main paper without masked injection. 
+
+# D Visualization on Medical Datasets 
+
+The samples generated by the three strategies on the medical image datasets are visualized in Fig. 7. Compared with the original images, I2I generally preserves the main medical structures but introduces noticeable changes in global appearance and texture, which may cause semantic distortion. Paste and our method both use the same CAM maps to preserve class-related regions. However, Paste directly blends the preserved regions with generated backgrounds in pixel space, which may lead to inconsistent structures and textures and produce unnatural visual patterns. In contrast, our diffusion fusion process integrates the preserved and generated regions more smoothly, producing visually coherent images while retaining discriminative medical structures. Overall, our method achieves a better balance between semantic preservation and visual quality. 15 Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets Original images  I2I  Paste  Ours 
+
+Figure 7: Medical image visualization under different generation strategies. 16

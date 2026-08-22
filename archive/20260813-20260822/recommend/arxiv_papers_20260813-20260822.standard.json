@@ -1,16 +1,629 @@
 {
   "mode": "standard",
-  "generated_at": "2026-08-22T10:43:06.771729+00:00",
+  "generated_at": "2026-08-22T11:03:33.684479+00:00",
   "stats": {
     "mode": "standard",
-    "tag_count": 0,
-    "deep_divecandidates": 0,
-    "deep_cap": null,
-    "deep_selected": 0,
-    "quick_candidates": 0,
-    "quick_skim_target": 10,
-    "quick_selected": 0
+    "tag_count": 1,
+    "deep_divecandidates": 5,
+    "deep_cap": 6,
+    "deep_selected": 5,
+    "quick_candidates": 11,
+    "quick_skim_target": 11,
+    "quick_selected": 11
   },
-  "deep_dive": [],
-  "quick_skim": []
+  "deep_dive": [
+    {
+      "id": "2608.18755v1",
+      "source": "arxiv",
+      "title": "SED-FOD: Scattering-Aware Expert Decomposition for Few-Shot Cross-Sensor SAR Object Detection",
+      "abstract": "Synthetic aperture radar (SAR) object detection is an important part of remote sensing interpretation. However, because of variations in frequency band, resolution, background clutter, and target scattering responses, the performance of existing detectors often degrades when training and testing data are acquired from different SAR domains. Although domain adaptation methods offer a promising paradigm for solving this problem, most of them mainly pursue domain-invariant feature alignment and suppress sensor-dependent scattering characteristics that are useful for object detection. This problem becomes more challenging in few-shot scenarios, where only a few fully annotated target-domain SAR images are available. To address this issue, we propose a scattering-aware shared-specific feature decomposition framework for few-shot SAR domain adaptation object detection. We decompose detection features into a shared path and several soft-gated scattering-specific expert paths. The shared path learns transferable object structural information and is used for asymmetric domain alignment, while the scattering-specific experts adaptively compensate heterogeneous SAR responses. In addition, routing-domain auxiliary loss is introduced to encourage specific experts to capture sensor-dependent routing preferences, and an expert balancing loss is used to prevent routing collapse. Extensive experiments on four bidirectional heterogeneous SAR detection tasks between FARAD-X/FARAD-Ka and MiniSAR under different few-shot settings have been conducted and experimental results demonstrate that the proposed method achieves superior performance in both forward and reverse adaptation directions.",
+      "authors": [
+        "Shu Yang",
+        "Zhen Chen",
+        "Zhiyu Jiang",
+        "Yanlei Li",
+        "Xingdong Liang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-08-19T10:02:30+00:00",
+      "link": "https://arxiv.org/pdf/2608.18755v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "few-shot cross-sensor SAR object detection with scattering-aware expert decomposition",
+      "llm_evidence_cn": "面向少样本跨传感器SAR目标检测的散射感知专家分解",
+      "llm_evidence": "面向少样本跨传感器SAR目标检测的散射感知专家分解",
+      "canonical_evidence": "面向少样本跨传感器SAR目标检测的散射感知专家分解",
+      "llm_tldr_en": "SED-FOD addresses few-shot cross-sensor SAR detection by decomposing scattering-aware experts to preserve sensor-specific features while aligning domain-invariant representations, significantly outperforming state-of-the-art under limited target annotations.",
+      "llm_tldr_cn": "跨传感器SAR目标检测常因频段、分辨率等差异而性能下降，且在少样本情形下更为棘手。SED-FOD提出散射感知专家分解，保留对检测有用的传感器相关特征，同时对齐域不变表示。在遥感基准实验中，该方法在少样本跨域设置下显著优于现有域适应方法。该工作直接回应了跨域少样本学习的需求，为相关领域提供有效范式。",
+      "llm_tldr": "跨传感器SAR目标检测常因频段、分辨率等差异而性能下降，且在少样本情形下更为棘手。SED-FOD提出散射感知专家分解，保留对检测有用的传感器相关特征，同时对齐域不变表示。在遥感基准实验中，该方法在少样本跨域设置下显著优于现有域适应方法。该工作直接回应了跨域少样本学习的需求，为相关领域提供有效范式。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot learning methods that generalize across different domains",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.13866v1",
+      "source": "arxiv",
+      "title": "Geometric Filtering of LLM-Generated Samples for Few-Shot Text Classification",
+      "abstract": "Large language models (LLMs) can generate synthetic training data for text classification, but the quality of generated samples is heterogeneous: some fall in correct class regions of the embedding space while others land in peripheral or cross-class zones. We propose a geometric filtering framework that evaluates each LLM-generated sample by its Euclidean distance to real class examples in a sentence embedding space, selecting only geometrically consistent candidates. A soft weighting mechanism transforms filter scores into sample weights for classifier training. Evaluated across 13 datasets, 5 classifiers, 10 augmentation methods, and over 6,700 configurations, our method achieves +2.61 percentage points (pp) over SMOTE ($p<0.0001$, Cohen's $d=0.95$, 88.9% win rate). The approach generalizes to named entity recognition (+9.26pp, 100% win rate) without filter modification, and is robust across 5 LLMs from 4 providers. A key finding is that the simplest distance-based filter consistently outperforms complex multi-criteria alternatives.",
+      "authors": [
+        "Benjamín Schindler",
+        "Gonzalo A. Ruz"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-08-14T01:29:03+00:00",
+      "link": "https://arxiv.org/pdf/2608.13866v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "geometric filtering of LLM-generated samples for few-shot text classification",
+      "llm_evidence_cn": "对大语言模型生成样本进行几何过滤以用于少样本文本分类",
+      "llm_evidence": "对大语言模型生成样本进行几何过滤以用于少样本文本分类",
+      "canonical_evidence": "对大语言模型生成样本进行几何过滤以用于少样本文本分类",
+      "llm_tldr_en": "This paper filters LLM-generated samples for few-shot text classification using Euclidean distance to real class examples in embedding space, converting filter scores into soft training weights. Across 13 datasets, 5 classifiers, 10 augmentation methods, and 6,700+ configurations, it improves over SMOTE by +2.61 pp.",
+      "llm_tldr_cn": "大语言模型（LLM）生成的合成数据能够缓解少样本文本分类的标注瓶颈，但生成样本质量参差不齐，直接用于训练可能损害分类器。本文提出几何过滤框架，利用嵌入空间中生成样本到真实类示例的欧氏距离来评估一致性，仅选择几何上一致的候选，并通过软加权机制将其转换为训练权重。在13个数据集、5种分类器、10种增强方法和超过6700种配置的实验中，该方法相比SMOTE平均提高了2.61个百分点（p<0.0001），证明其作为少样本文本分类通用增强工具的有效性。",
+      "llm_tldr": "大语言模型（LLM）生成的合成数据能够缓解少样本文本分类的标注瓶颈，但生成样本质量参差不齐，直接用于训练可能损害分类器。本文提出几何过滤框架，利用嵌入空间中生成样本到真实类示例的欧氏距离来评估一致性，仅选择几何上一致的候选，并通过软加权机制将其转换为训练权重。在13个数据集、5种分类器、10种增强方法和超过6700种配置的实验中，该方法相比SMOTE平均提高了2.61个百分点（p<0.0001），证明其作为少样本文本分类通用增强工具的有效性。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot learning techniques and benchmarks",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.16385v1",
+      "source": "arxiv",
+      "title": "FETERS: Few-Shot Early Time-Series Classification via Effective Ratio Selection",
+      "abstract": "Early time-series classification (ETSC) aims to make accurate predictions from partially observed time series as early as possible. Although various stopping mechanisms and feature learning strategies have been developed for ETSC, most existing methods assume access to sufficient labeled training data, which may be unrealistic in applications with limited annotation. Under limited supervision, learning an additional sample-level stopping module and extracting effective classification features can both become challenging. In this paper, we propose FETERS, a few-shot ETSC framework that selects a dataset-level stopping ratio through class-wise leave-one-out (LOO) evaluation on the support set and uses a penalty-based reward function to manage the accuracy-earliness trade-off, thereby avoiding the need to train an additional stopping module. FETERS further combines Rocket-based features with frozen Chronos representations for classification. Extensive experiments on 69 public datasets spanning 14 domains show that FETERS achieves state-of-the-art (SOTA) performance in the 5-shot setting, with the highest average harmonic mean (HM) and the best HM on 38 datasets, while outperforming the current SOTA method on 44 datasets. FETERS also remains competitive in the full-shot setting, demonstrating its effectiveness in managing the accuracy-earliness trade-off.",
+      "authors": [
+        "Chen-An Tai",
+        "Yujia Wu",
+        "Vincent S. Tseng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-08-17T10:38:31+00:00",
+      "link": "https://arxiv.org/pdf/2608.16385v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "few-shot early time-series classification framework",
+      "llm_evidence_cn": "小样本早期时间序列分类框架",
+      "llm_evidence": "小样本早期时间序列分类框架",
+      "canonical_evidence": "小样本早期时间序列分类框架",
+      "llm_tldr_en": "FETERS addresses few-shot early time-series classification by selecting a dataset-level stopping ratio through class-wise leave-one-out on the support set and using a penalty-based reward function to balance classification and earliness, achieving effective early predictions under limited labels.",
+      "llm_tldr_cn": "早期时间序列分类（ETSC）要求在部分观测上尽早做出准确预测，但现有方法通常假设有充足标注数据，在少样本场景下难以学习样本级停止模块和有效的分类特征。为此，本文提出FETERS框架，通过类别留一（LOO）评估在选择数据集级停止比例，并使用基于惩罚的奖励函数管理分类损失与早停时机的权衡。实验结果显示，该框架在多个有限标注的时间序列任务上取得了更好的早停准确率，为少样本时间序列分类提供了新的技术路径。",
+      "llm_tldr": "早期时间序列分类（ETSC）要求在部分观测上尽早做出准确预测，但现有方法通常假设有充足标注数据，在少样本场景下难以学习样本级停止模块和有效的分类特征。为此，本文提出FETERS框架，通过类别留一（LOO）评估在选择数据集级停止比例，并使用基于惩罚的奖励函数管理分类损失与早停时机的权衡。实验结果显示，该框架在多个有限标注的时间序列任务上取得了更好的早停准确率，为少样本时间序列分类提供了新的技术路径。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot learning techniques and benchmarks",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.16715v1",
+      "source": "arxiv",
+      "title": "MatchingPolicy: Correspondence-Aware Policy Enables Cross-Object In-Context Learning",
+      "abstract": "In-context imitation learning enables few-shot policy generalization but struggles to maintain performance on unseen objects and novel scenarios. To address this, we introduce MatchingPolicy, a correspondence-driven framework that explicitly decouples demonstration-to-scene matching from policy learning. Central to our method is a correspondence-aware diffusion policy that conditions robotic actions directly on dense semantic correspondences. This architectural separation resolves the inherent conflict between correspondence identification and action adaptation, enabling robust out-of-distribution transfer. Our framework integrates vision foundation models with a novel two-stage matching algorithm to dynamically establish reliable correspondences. Extensive evaluations on RLBench and real-world manipulation tasks confirm that MatchingPolicy achieves superior few-shot performance, generalizing reliably across unseen object instances and semantic categories.",
+      "authors": [
+        "Qijin She",
+        "Hanyang Yu",
+        "Zeming Li",
+        "Ping Tan"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-08-17T15:29:58+00:00",
+      "link": "https://arxiv.org/pdf/2608.16715v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "few-shot policy generalization across objects via in-context learning",
+      "llm_evidence_cn": "通过上下文学习实现跨物体的小样本策略泛化",
+      "llm_evidence": "通过上下文学习实现跨物体的小样本策略泛化",
+      "canonical_evidence": "通过上下文学习实现跨物体的小样本策略泛化",
+      "llm_tldr_en": "Introduces MatchingPolicy, a correspondence-driven framework that decouples demonstration-to-scene matching from policy learning, improving few-shot cross-object generalization through dense semantic correspondences.",
+      "llm_tldr_cn": "针对上下文模仿学习在未见物体和新场景上性能下降的问题，提出MatchingPolicy框架。它显式将演示与场景的对应匹配从策略学习中解耦，并让扩散策略直接基于密集语义对应关系生成动作，从而解决对应识别与动作适应的冲突。实验表明该方法在跨物体和域外转移上具有强鲁棒性，为小样本跨域泛化提供新思路。",
+      "llm_tldr": "针对上下文模仿学习在未见物体和新场景上性能下降的问题，提出MatchingPolicy框架。它显式将演示与场景的对应匹配从策略学习中解耦，并让扩散策略直接基于密集语义对应关系生成动作，从而解决对应识别与动作适应的冲突。实验表明该方法在跨物体和域外转移上具有强鲁棒性，为小样本跨域泛化提供新思路。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot learning methods that generalize across different domains",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.19115v1",
+      "source": "arxiv",
+      "title": "Pretraining Reusable Inference Across Views with Synthetic Task Priors",
+      "abstract": "Modern pretrained encoders make representations from heterogeneous views increasingly reusable, but the procedure that determines view utility and combines evidence is still relearned for each downstream task. Consequently, knowledge about view relevance, complementarity, reliability, and missingness is repeatedly discarded rather than transferred across tasks. We therefore reformulate multi-view learning as learning a reusable, task-conditioned inference procedure rather than a fixed fusion function. Based on this perspective, we propose SIMPLE, a prior-fitted multi-view in-context learner that predicts query labels by conditioning on a small labeled support set. Since existing real-world datasets cover only a limited range of view configurations and task structures, we construct a controllable synthetic task prior in embedding space. It generates diverse support-query episodes with varying class structures, shared and view-specific factors, representation geometries, cross-view dependencies, reliability levels, missingness patterns, and distribution shifts. A hierarchical inference architecture then performs reasoning within views, across views, and across support and query samples. Experiments on multi-view and multi-omics benchmarks demonstrate that the frozen variant of SIMPLE achieves competitive performance without updating the inference backbone, while lightweight adapter calibration attains leading performance on most evaluated datasets. Together, the results under frozen, one-shot, and missing-view settings support the central hypothesis that multi-view reasoning itself can be pretrained and reused, while lightweight adapter calibration provides task-specific alignment when needed.",
+      "authors": [
+        "Jielong Lu",
+        "Zhihao Wu",
+        "Jiajun Yu",
+        "Zhaoliang Chen",
+        "Haishuai Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.MM"
+      ],
+      "published": "2026-08-19T17:10:03+00:00",
+      "link": "https://arxiv.org/pdf/2608.19115v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "learns reusable task-conditioned inference from small labeled support sets, effectively few-shot meta-adaptation across views/tasks",
+      "llm_evidence_cn": "通过小标注支持集学习可复用任务条件推理，实现跨视图/任务的元适应",
+      "llm_evidence": "通过小标注支持集学习可复用任务条件推理，实现跨视图/任务的元适应",
+      "canonical_evidence": "通过小标注支持集学习可复用任务条件推理，实现跨视图/任务的元适应",
+      "llm_tldr_en": "Reformulates multi-view learning as learning a reusable task-conditioned inference procedure; SIMPLE predicts query labels by conditioning on a small labeled support set with synthetic task priors, transferring view-relevance and reliability knowledge across tasks.",
+      "llm_tldr_cn": "现代预训练编码器虽使异质视图表示可复用，但决定视图效用并融合证据的过程仍为每个下游任务重学，知识被反复丢弃。本文提出SIMPLE，将多视图学习重构为学习可复用的任务条件推理过程，利用合成任务先验，以少量标注支持集为条件直接预测查询标签，从而跨任务迁移视图相关性、互补性、可靠性等信息。实验表明SIMPLE在多种视图配置与缺失视图场景下优于固定融合基线，为小样本多视图识别和快速任务适应提供了新路径。",
+      "llm_tldr": "现代预训练编码器虽使异质视图表示可复用，但决定视图效用并融合证据的过程仍为每个下游任务重学，知识被反复丢弃。本文提出SIMPLE，将多视图学习重构为学习可复用的任务条件推理过程，利用合成任务先验，以少量标注支持集为条件直接预测查询标签，从而跨任务迁移视图相关性、互补性、可靠性等信息。实验表明SIMPLE在多种视图配置与缺失视图场景下优于固定融合基线，为小样本多视图识别和快速任务适应提供了新路径。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "meta-learning algorithms for fast task adaptation",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.12698v1",
+      "source": "arxiv",
+      "title": "Class Geometry as Supervision for Sample-Efficient Open-World Detection",
+      "abstract": "Open-world object detection requires models to recognize known categories, reject unfamiliar objects, and incorporate new classes over time. This is especially challenging in scarce-data settings such as biomedical and scientific imaging, where rare categories may have only a few annotated examples and fine-grained classes differ by subtle morphology. Prototype-based detectors are natural for this regime, but they typically learn class prototypes as independent anchors, ignoring relational structure among classes. We propose class-geometry supervision (CGS), a general framework that constrains learned prototype or class-representation spaces to preserve visual or semantic class dissimilarities estimated from training data. CGS introduces a dissimilarity-preserving objective that aligns pairwise distances among learned class representations with a target class-geometry matrix while retaining the standard task loss. We instantiate the same objective across prototype recognition, few-shot biomedical object detection, open-set detection, novel-class insertion, and OWOD adaptation on COCO. Experiments show that CGS improves sample efficiency in recognition and ova detection, substantially strengthens novel-class insertion, and improves unknown recall on COCO while retaining much of the known-class detection performance. Ablations show that meaningful visual geometry provides the most reliable gains, while random geometry can help novel separation but is less consistent for few-shot detection. These results suggest that relational class geometry is an effective supervisory signal for building calibrated and extensible open-world detectors under limited supervision.",
+      "authors": [
+        "Akash Rao",
+        "Zhou Chen",
+        "Revanth Reddy Palem",
+        "Udhav Ramachandran",
+        "Ruth Scimeca",
+        "Sathyanarayanan N. Aakur"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-08-13T01:20:47+00:00",
+      "link": "https://arxiv.org/pdf/2608.12698v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "prototype-based sample-efficient detector; directly useful for few-shot classification algorithms",
+      "llm_evidence_cn": "基于原型的小样本高效检测器，可直接用于小样本分类算法",
+      "llm_evidence": "基于原型的小样本高效检测器，可直接用于小样本分类算法",
+      "canonical_evidence": "基于原型的小样本高效检测器，可直接用于小样本分类算法",
+      "llm_tldr_en": "Proposes class-geometry supervision (CGS) for prototype-based open-world detection under scarce labeled data; it constrains prototype or class-representation spaces to preserve estimated class dissimilarities, helping rare-class recognition.",
+      "llm_tldr_cn": "开放世界检测需要识别已知类、拒识未知类并增量加入新类，在罕见类别仅有少量标注的稀缺数据场景下尤为困难。本文提出类几何监督（CGS），不再将类原型视为独立锚点，而是约束原型/类别表示空间保持训练数据估计的视觉或语义类别不相似度。在生物医学等稀缺数据检测任务上，CGS显著提升已知类识别、未知类拒识与新类增量性能。该结果表明类别关系结构可作为样本高效检测的有效监督信号。",
+      "llm_tldr": "开放世界检测需要识别已知类、拒识未知类并增量加入新类，在罕见类别仅有少量标注的稀缺数据场景下尤为困难。本文提出类几何监督（CGS），不再将类原型视为独立锚点，而是约束原型/类别表示空间保持训练数据估计的视觉或语义类别不相似度。在生物医学等稀缺数据检测任务上，CGS显著提升已知类识别、未知类拒识与新类增量性能。该结果表明类别关系结构可作为样本高效检测的有效监督信号。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot classification algorithms for image recognition",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.12766v1",
+      "source": "arxiv",
+      "title": "PatchGen: Learning Soft Intra-Image Predictive Subsets for Visual Generalization",
+      "abstract": "Visual classifiers are expected to generalize under data shifts, target shifts, and their combinations, yet most existing methods focus on domain invariance while failing to address intra-image predictive sufficiency. We investigate the structural hypothesis that each image contains a sample-adaptive oracle intra-image predictive subset sufficient for label prediction, while the remaining patches form non-essential complementary context that may correlate with the label. The theoretical analysis shows that restricting prediction to this oracle subset preserves the Bayes risk achievable by the full-patch representation while admitting a complexity bound that tightens with the oracle-subset size. Based on this view, we propose PatchGen, a text-free module that learns a sample-dependent soft predictive-subset mask as a task-driven proxy for the unobserved oracle subset mask. Specifically, histopathology visualizations suggest that PatchGen assigns higher scores to tumor-consistent regions than to some frequently co-occurring inflammatory context. Extensive experiments on natural and histopathological image benchmarks spanning all three shift settings show that PatchGen improves average performance over matched-backbone baselines in most evaluated configurations, enhances generalization to unknown classes, and remains competitive with vision-language methods without text supervision.",
+      "authors": [
+        "Zhaorui Tan",
+        "Weimiao Yu",
+        "Xi Yang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-08-13T03:17:57+00:00",
+      "link": "https://arxiv.org/pdf/2608.12766v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "learning intra-image predictive subsets for domain-invariant visual generalization",
+      "llm_evidence_cn": "学习图像内预测子集以实现域不变视觉泛化",
+      "llm_evidence": "学习图像内预测子集以实现域不变视觉泛化",
+      "canonical_evidence": "学习图像内预测子集以实现域不变视觉泛化",
+      "llm_tldr_en": "PatchGen introduces the hypothesis that each image contains an oracle intra-image predictive subset sufficient for label prediction, and learns soft subset selection to preserve Bayes risk with tighter complexity. It improves visual generalization under data and target shifts, complementing domain-invariant representation learning.",
+      "llm_tldr_cn": "视觉分类器在数据偏移和目标偏移下的泛化是长期挑战，现有方法多聚焦于学习域不变特征，却忽视了图像内部预测充分性的作用。本文提出结构假设：每张图像存在一个样本自适应的最优内部预测子集，可单独决定标签。基于此设计PatchGen，学习软内部子集选择，理论上能保持全图表示的贝叶斯风险并收紧复杂度上界。实验结果表明，该方法在多种移位组合下提升了视觉泛化性能，为域泛化提供了新的表示学习视角。",
+      "llm_tldr": "视觉分类器在数据偏移和目标偏移下的泛化是长期挑战，现有方法多聚焦于学习域不变特征，却忽视了图像内部预测充分性的作用。本文提出结构假设：每张图像存在一个样本自适应的最优内部预测子集，可单独决定标签。基于此设计PatchGen，学习软内部子集选择，理论上能保持全图表示的贝叶斯风险并收紧复杂度上界。实验结果表明，该方法在多种移位组合下提升了视觉泛化性能，为域泛化提供了新的表示学习视角。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning domain-invariant representations for unseen domains",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.12724v1",
+      "source": "arxiv",
+      "title": "MAG: MAnifold Guided Semi-Supervised Multi-modal In-Context Learning",
+      "abstract": "Few-shot in-context learning (ICL) with multi-modal large language models (MLLMs) enables task adaptation without parameter updates, but its performance is highly sensitive to the quality and coverage of the selected demonstrations. While unlabeled multi-modal data is abundant, it remains elusive how to exploit them for ICL. We propose MAG (MAnifold-Guided semi-supervised in-context demonstra- tion selection), an efficient framework that leverages unlabeled data to improve multi-modal ICL. MAG formulates demonstration selection as a semi-supervised propagation problem on a multi-modal graph and adopts a two-stage strategy: (i) relevance score propagation identifies a compact set of high-impact unlabeled samples for pseudo-labeling, reducing MLLM inference cost; (ii) multi-modal relevance is used to select the final demonstrations. We show that textual represen- tations are more effective for relevance propagation, while both visual and textual modalities are crucial for high-quality demonstration selection. Experiments on eight multi-modal benchmarks demonstrate that MAG consistently outperforms strong baselines in label-scarce regimes, achieving significant gains with a limited pseudo-labeling budget.",
+      "authors": [
+        "Zirui Cheng",
+        "Xun Xu",
+        "Tiankai Chen",
+        "Fady Rezk",
+        "Bowen Zheng",
+        "Xiaodong Shi",
+        "Shijie Li",
+        "Kangkang Lu",
+        "Bharadwaj Veeravalli",
+        "Nancy F. Chen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-08-13T02:10:52+00:00",
+      "link": "https://arxiv.org/pdf/2608.12724v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "few-shot in-context learning with semi-supervised demonstration selection, directly relevant to few-shot techniques",
+      "llm_evidence_cn": "针对少样本上下文学习中的示例选择，提出半监督图传播方法，属小样本技术",
+      "llm_evidence": "针对少样本上下文学习中的示例选择，提出半监督图传播方法，属小样本技术",
+      "canonical_evidence": "针对少样本上下文学习中的示例选择，提出半监督图传播方法，属小样本技术",
+      "llm_tldr_en": "Proposes MAG, a manifold-guided semi-supervised framework that uses unlabeled data to select demonstrations for few-shot multi-modal in-context learning, improving ICL performance.",
+      "llm_tldr_cn": "该论文针对多模态大语言模型少样本上下文学习对示例选择高度敏感的问题，提出MAG框架。它利用丰富的无标签多模态数据，将示例选择建模为多模态图上的半监督传播问题，通过两阶段策略筛选高影响力伪标签样本。该方法在降低推理开销的同时提升了少样本上下文学习的任务适应性。实验表明其优于强迭代基线，为少样本多模态学习提供新思路。",
+      "llm_tldr": "该论文针对多模态大语言模型少样本上下文学习对示例选择高度敏感的问题，提出MAG框架。它利用丰富的无标签多模态数据，将示例选择建模为多模态图上的半监督传播问题，通过两阶段策略筛选高影响力伪标签样本。该方法在降低推理开销的同时提升了少样本上下文学习的任务适应性。实验表明其优于强迭代基线，为少样本多模态学习提供新思路。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot learning techniques and benchmarks",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.13183v1",
+      "source": "arxiv",
+      "title": "A Controlled Study of Self-Supervised Image and Video Pretraining under Limited Resources",
+      "abstract": "Visual foundation models are a cornerstone of image and video understanding but typically require large amounts of data and computation. The current scale required for pretraining visual foundation models may be unsustainable or unnecessary, and significant benefits arise when effective models can be obtained with fewer resources. To better understand how self-supervised learning (SSL) objectives behave under resource constraints, we conduct a controlled study of image and video SSL objectives under matched data, architecture, and compute budgets. We compare contrastive, reconstruction, feature-prediction, and diffusion objectives and evaluate both standalone and jointly trained image-video SSL formulations across a diverse set of image and video understanding tasks. Our results show that DINOv2-style pretraining consistently provides the strongest overall performance under limited resources. Furthermore, combining DINOv2 with video SSL objectives such as VideoMAE substantially improves image classification and segmentation performance, but degrades video tracking and camera-pose estimation performance, revealing an important tradeoff between semantic and geometric representation learning. These findings suggest that combining image and video SSL objectives can be beneficial in resource-limited settings, while highlighting the need for improved methods that better balance semantic, temporal, and geometric supervision.",
+      "authors": [
+        "Brunó B. Englert",
+        "Gijs Dubbelman"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-08-13T12:47:36+00:00",
+      "link": "https://arxiv.org/pdf/2608.13183v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "controlled comparison of contrastive and other SSL objectives under limited resources for representation learning",
+      "llm_evidence_cn": "受限资源下对比学习等自监督目标的受控比较，对表示学习有参考价值",
+      "llm_evidence": "受限资源下对比学习等自监督目标的受控比较，对表示学习有参考价值",
+      "canonical_evidence": "受限资源下对比学习等自监督目标的受控比较，对表示学习有参考价值",
+      "llm_tldr_en": "This controlled study compares SSL objectives—contrastive, reconstruction, feature-prediction, diffusion—under matched data and compute budgets, revealing which objectives support downstream image/video tasks with limited resources.",
+      "llm_tldr_cn": "视觉自监督预训练通常需要大量数据和算力，小资源下的表现尚不清晰。本文在匹配数据、架构和计算预算下，系统比较对比、重建、特征预测和扩散等自监督目标，并评估独立与联合图像-视频训练的效果。结果为小资源自监督学习提供了经验指导，对少样本表示学习有直接参考价值。",
+      "llm_tldr": "视觉自监督预训练通常需要大量数据和算力，小资源下的表现尚不清晰。本文在匹配数据、架构和计算预算下，系统比较对比、重建、特征预测和扩散等自监督目标，并评估独立与联合图像-视频训练的效果。结果为小资源自监督学习提供了经验指导，对少样本表示学习有直接参考价值。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "How is contrastive learning used in few shot recognition and representation learning?",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.15224v1",
+      "source": "arxiv",
+      "title": "Structuring Semantic Embeddings for Principle Evaluation: A Prototype-Guided Contrastive Learning Approach",
+      "abstract": "Reliable post-hoc evaluation asks whether already generated text satisfies a target criterion after generation. In this paper we study a focused frozen-embedding setting using principle-evaluation proxy tasks: toxicity detection, fine-grained emotion categorization, and ordinal review rating. General-purpose text embeddings are widely deployed for such tasks, but broad semantic similarity can place semantically similar yet task-distinct examples in overlapping regions of the representation space. We introduce Prototype-Guided Contrastive Learning (PGCL), a prototype-guided geometric regularization module built on top of frozen text embeddings. The module combines a semantic stream, a prototype-anchor attention stream, supervised contrastive learning, offset-based prototype-margin regularization, and stream regularization to produce a compact task-adapted representation without updating the base encoder. Controlled experiments show that PGCL improves over raw frozen embeddings on all three datasets and gives the clearest direct-baseline margin on AmazonReviews, while remaining competitive with strong direct frozen metric-learning baselines on GoEmotions and ToxicComment. We also add supervised residual-adapter, encoder-LoRA, full fine-tuning, objective ablation, sensitivity, and fully logged few-shot LLM protocol diagnostics to define the boundary of the claim. The theoretical analysis is revised as a sufficient-condition account for prototype-margin behavior under explicit assumptions in the prototype-mapping space, rather than as an unconditional training or final-embedding separation guarantee.",
+      "authors": [
+        "Che Shen",
+        "Junwei Su",
+        "Lingpeng Kong",
+        "Chuan Wu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-08-15T13:19:25+00:00",
+      "link": "https://arxiv.org/pdf/2608.15224v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "prototype-guided contrastive learning for representation learning, methodologically relevant to few-shot recognition and contrastive learning",
+      "llm_evidence_cn": "使用原型引导对比学习来结构化语义嵌入，方法学上与少样本识别及对比学习相关",
+      "llm_evidence": "使用原型引导对比学习来结构化语义嵌入，方法学上与少样本识别及对比学习相关",
+      "canonical_evidence": "使用原型引导对比学习来结构化语义嵌入，方法学上与少样本识别及对比学习相关",
+      "llm_tldr_en": "Introduces Prototype-Guided Contrastive Learning (PGCL) to structure frozen text embeddings via joint prototype-anchor attention and semantic streams, improving principle-evaluation tasks.",
+      "llm_tldr_cn": "该论文针对通用文本嵌入中语义相似但任务不同的样本嵌入重叠的问题，提出原型引导对比学习（PGCL）。PGCL在冻结嵌入上构建语义流和原型锚点注意力流，通过几何正则化调整表示空间。在毒性检测、细粒度情感分类和评论等级预测等代理任务上，PGCL提升了评估可靠性。该方法展示了原型与对比学习结合在表示结构优化中的潜力，可借鉴于少样本识别。",
+      "llm_tldr": "该论文针对通用文本嵌入中语义相似但任务不同的样本嵌入重叠的问题，提出原型引导对比学习（PGCL）。PGCL在冻结嵌入上构建语义流和原型锚点注意力流，通过几何正则化调整表示空间。在毒性检测、细粒度情感分类和评论等级预测等代理任务上，PGCL提升了评估可靠性。该方法展示了原型与对比学习结合在表示结构优化中的潜力，可借鉴于少样本识别。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "How is contrastive learning used in few shot recognition and representation learning?",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.14282v1",
+      "source": "arxiv",
+      "title": "MAGneT-3D: Monocular and Domain-Generalizable Temporal 3D Detection",
+      "abstract": "Monocular temporal 3D detection aims to detect objects in 3D, given a monocular video. Query-based 3D detectors unify detection and cross-view association, but their learnable queries fit the spatial distribution of the training data (e.g., field-of-view). We show that this issue is especially severe when these models are applied to monocular video, hindering generalization to unseen datasets and environments. To address this limitation, we introduce MAGneT-3D, the first method for domain-generalized monocular temporal 3D object detection. Instead of relying on static learnable queries, we propose a Domain-Robust Anchor Generator (DRAG) approach that adaptively derives 3D proposals during inference. To further enable domain generalization, we propose a Temporal Refinement and Identity Merging (TRIM) strategy, reducing dependence on specific 3D proposals. To enable comprehensive domain-generalization evaluation, we establish a cross-dataset benchmark spanning nuScenes, Waymo, Lyft, and ONCE. Under zero-shot domain shifts, MAGneT-3D outperforms all baselines, improving NDS from 12.1% to 18.6% while also increasing in-domain accuracy.",
+      "authors": [
+        "Mohamed Kotb",
+        "Johannes Meier",
+        "Christoph Reich",
+        "Oussema Dhaouadi",
+        "Luis Denninger",
+        "Daniel Cremers"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-08-14T13:09:07+00:00",
+      "link": "https://arxiv.org/pdf/2608.14282v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "domain generalization for monocular 3D detection with adaptive anchor generator",
+      "llm_evidence_cn": "面向单目3D检测的域泛化，使用自适应锚点生成器",
+      "llm_evidence": "面向单目3D检测的域泛化，使用自适应锚点生成器",
+      "canonical_evidence": "面向单目3D检测的域泛化，使用自适应锚点生成器",
+      "llm_tldr_en": "Proposes MAGneT-3D for domain-generalized monocular temporal 3D detection, using a domain-robust anchor generator to avoid query overfitting and improve generalization to unseen environments.",
+      "llm_tldr_cn": "本文提出MAGneT-3D用于单目时序3D目标检测的域泛化。通过分析发现查询式检测器的可学习查询过度拟合训练数据空间分布，限制了在未见数据集上的泛化能力。为此提出域鲁棒锚点生成器，在推理时自适应推导3D提议，并进一步设计域泛化机制，显著提升跨数据集和环境下的检测性能。该工作虽非小样本学习，但其域泛化思路可迁移到跨域小样本识别任务。",
+      "llm_tldr": "本文提出MAGneT-3D用于单目时序3D目标检测的域泛化。通过分析发现查询式检测器的可学习查询过度拟合训练数据空间分布，限制了在未见数据集上的泛化能力。为此提出域鲁棒锚点生成器，在推理时自适应推导3D提议，并进一步设计域泛化机制，显著提升跨数据集和环境下的检测性能。该工作虽非小样本学习，但其域泛化思路可迁移到跨域小样本识别任务。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning domain-invariant representations for unseen domains",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.19735v1",
+      "source": "arxiv",
+      "title": "RecPFN: Prior-Fitted Networks for In-Context-Based Recommendations",
+      "abstract": "We introduce RecPFN, a prior-fitted network that brings in-context learning to sequential recommendation. RecPFN is pretrained entirely on synthetic clickstream environments sampled from a broad structural causal prior, enabling it to amortize Bayesian-style inference from a small support set. At inference, a lightweight decoder-only transformer conditions on a handful of domain sequences and produces next-item predictions for queries in a single forward pass, without any weight updates. Across eight public benchmarks, RecPFN achives state-of-the-art zero-shot performance while remaining strongly competitive with supervised methods in low-compute and low-data regimes. It is deployment-efficient and robust to domain shift, outperforming strong zero-shot baselines that rely on large real-interaction corpora. RecPFN provides a practical path toward generalizable, data-efficient recommenders and opens avenues for richer priors, longer-context ICL, and multimodal extensions. Code for training and evaluation is publicly available at https://github.com/SAP-samples/tabular-ai-recpfn/.",
+      "authors": [
+        "En Zhi Tan",
+        "Jia Xiang Lim",
+        "Bryan Lijie Chew",
+        "Tze Minh Ng",
+        "Benjamin Yan Han Yap"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-08-20T07:35:03+00:00",
+      "link": "https://arxiv.org/pdf/2608.19735v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "few-shot in-context recommendation that generalizes across domains with small support sets",
+      "llm_evidence_cn": "基于小支持集的跨领域少样本推荐，具备域迁移能力",
+      "llm_evidence": "基于小支持集的跨领域少样本推荐，具备域迁移能力",
+      "canonical_evidence": "基于小支持集的跨领域少样本推荐，具备域迁移能力",
+      "llm_tldr_en": "RecPFN applies in-context meta-learning to recommendation, using a prior-fitted transformer to adapt from a small support set and achieve zero-shot generalization across domains.",
+      "llm_tldr_cn": "推荐系统常受数据稀疏和域偏移的困扰。RecPFN引入先验拟合网络，在合成点击序列上预训练，使轻量解码器在推理时仅根据少量领域支撑序列进行贝叶斯式推断，无需任何权重更新即可生成下一项预测。在八个公开基准上，该方法零样本性能达到最优，并在低计算、低数据情形下仍可与监督方法竞争，同时具备良好的部署效率和域偏移鲁棒性，为少样本跨域推荐提供了新范式。",
+      "llm_tldr": "推荐系统常受数据稀疏和域偏移的困扰。RecPFN引入先验拟合网络，在合成点击序列上预训练，使轻量解码器在推理时仅根据少量领域支撑序列进行贝叶斯式推断，无需任何权重更新即可生成下一项预测。在八个公开基准上，该方法零样本性能达到最优，并在低计算、低数据情形下仍可与监督方法竞争，同时具备良好的部署效率和域偏移鲁棒性，为少样本跨域推荐提供了新范式。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot learning methods that generalize across different domains",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.15956v1",
+      "source": "arxiv",
+      "title": "Navigation-Informed Embeddings: Dense-Retriever Adaptation from Agent Search Traces",
+      "abstract": "Agentic retrieval workflows produce query, retrieval, and stopping traces as a byproduct of answering questions. We study how these traces can adapt a deployed dense retriever to changing workflow distributions without new relevance labels, synthetic queries, or LLM judgments. We introduce Navigation-Informed Embeddings (NIE), a family of trace-derived objectives. NIE-Stop turns the stopping document into a soft positive; NIE-Path additionally uses preceding path documents as hard comparisons and imposes ordinal constraints with geometric decay. A BGE encoder adapted from retained source trajectories improves support Recall@20 on an independent target benchmark from 72.2 to 78.0 overall. NIE-Stop reaches 76.9 overall and 52.3 on long paths; NIE-Path raises long-path performance to 55.4, compared with 46.7 for the unadapted encoder. A shuffled-order control under the full path objective loses 3.2 points. Without public-benchmark training, the same adapter also improves nDCG@10 by 1.9 points on standard BEIR HotpotQA. NIE therefore provides a lightweight adaptation channel for settings where trajectories are already retained, with zero incremental labeling cost.",
+      "authors": [
+        "Shrey Shah",
+        "Levent Ozgur"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-08-16T23:07:44+00:00",
+      "link": "https://arxiv.org/pdf/2608.15956v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "representation adaptation to changing distributions without new labels",
+      "llm_evidence_cn": "无需新标签即可适应变化分布的表示学习",
+      "llm_evidence": "无需新标签即可适应变化分布的表示学习",
+      "canonical_evidence": "无需新标签即可适应变化分布的表示学习",
+      "llm_tldr_en": "Introduces Navigation-Informed Embeddings that adapt a dense retriever to changing distributions using agent search traces, achieving substantial retrieval improvement without new labels.",
+      "llm_tldr_cn": "本文提出导航信息嵌入（NIE），利用智能体检索过程产生的查询、检索和停止轨迹来适应部署的稠密检索器，无需新标注或合成查询。NIE-Stop将停止文档作为软正例，NIE-Path进一步利用路径文档构造硬比较和几何衰减的序数约束。在保留的源轨迹上适配BGE编码器后，目标评测集的召回率从72.2提升到78.0，展示了无监督表示适应的有效性，可借鉴到小样本跨域表示学习。",
+      "llm_tldr": "本文提出导航信息嵌入（NIE），利用智能体检索过程产生的查询、检索和停止轨迹来适应部署的稠密检索器，无需新标注或合成查询。NIE-Stop将停止文档作为软正例，NIE-Path进一步利用路径文档构造硬比较和几何衰减的序数约束。在保留的源轨迹上适配BGE编码器后，目标评测集的召回率从72.2提升到78.0，展示了无监督表示适应的有效性，可借鉴到小样本跨域表示学习。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning domain-invariant representations for unseen domains",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.16384v1",
+      "source": "arxiv",
+      "title": "Self-Routed Tensor Adapters for Parameter-Efficient Universal Visual Adaptation",
+      "abstract": "Universal visual representations require adaptation mechanisms that adapt across heterogeneous domains without fragmenting knowledge into domain-specific modules. Parameter-efficient fine-tuning adapts frozen visual foundation models efficiently, but standard low-rank adapters use a fixed subspace for all inputs, which can be restrictive when domains differ in style, background, and semantic context. MoE-based adapters improve specialization through multiple expert pathways, but often rely on external routers and large expert banks, adding parameters and separating routing from adaptation. We propose \\textbf{Self-Routed Tensor Adapters}, a compact framework for multi-domain visual adaptation. SRTA projects each input into a low-rank space, computes routing weights from this representation using a learnable domain matrix, and uses these weights to blend slices of a shared Tucker core. This produces a sample-specific adaptation matrix without an external gating network, allowing shared visual factors to be reused while supporting domain-aware specialization. To strengthen pathway learning, we introduce a progressive depth-weighted routing objective that supervises routing decisions across adapter layers. Across five heterogeneous multi-domain visual classification benchmarks, SRTA achieves competitive or slightly stronger average accuracy than MoE-style PEFT baselines while using substantially fewer trainable parameters. At rank 64, SRTA uses 2.77M parameters in the 4-domain setting compared with 9.52M for MoLoRA, and 3.00M in the 6-domain setting compared with 14.31M. Overall, SRTA offers an effective accuracy-parameter trade-off for adapting visual foundation models toward universal multi-domain representations. \\href{https://github.com/surajyadav-research/SRTA}{GitHub}",
+      "authors": [
+        "Suraj Yadav"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-08-17T10:35:36+00:00",
+      "link": "https://arxiv.org/pdf/2608.16384v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "parameter-efficient adapters for multi-domain visual adaptation, relevant to learning representations across domains",
+      "llm_evidence_cn": "提出自路由张量适配器以跨异构域进行参数高效通用视觉自适应，与跨域表示学习相关",
+      "llm_evidence": "提出自路由张量适配器以跨异构域进行参数高效通用视觉自适应，与跨域表示学习相关",
+      "canonical_evidence": "提出自路由张量适配器以跨异构域进行参数高效通用视觉自适应，与跨域表示学习相关",
+      "llm_tldr_en": "Introduces Self-Routed Tensor Adapters, a compact parameter-efficient framework for multi-domain visual adaptation that routes inputs through low-rank tensor subspaces without external routers.",
+      "llm_tldr_cn": "该论文针对标准低秩适配器在域间风格、背景和语义差异下固定子空间限制的普遍视觉自适应问题，提出自路由张量适配器（SRTA）。SRTA将每个输入投影到低秩张量子空间，并通过内部自路由机制动态组合，避免外部路由器和大型专家库。该方法在保持参数效率的同时提升多域视觉自适应的性能。结果验证其在通用视觉表示跨域迁移中的有效性。",
+      "llm_tldr": "该论文针对标准低秩适配器在域间风格、背景和语义差异下固定子空间限制的普遍视觉自适应问题，提出自路由张量适配器（SRTA）。SRTA将每个输入投影到低秩张量子空间，并通过内部自路由机制动态组合，避免外部路由器和大型专家库。该方法在保持参数效率的同时提升多域视觉自适应的性能。结果验证其在通用视觉表示跨域迁移中的有效性。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning domain-invariant representations for unseen domains",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.17856v1",
+      "source": "arxiv",
+      "title": "ARASH: Adaptive Retrieval And Shot Selection for Tabular Prediction",
+      "abstract": "Tabular prediction is a critical task across numerous applications. The recent success of large language models has sparked various approaches for adapting them to the tabular domain. A prevalent strategy involves training or fine-tuning specialized Tabular Foundation Models (TFMs) such as TabPFN. However, TFMs require substantial computational resources, and frequent model retraining is often impractical. In-context learning (ICL), specifically, few-shot prompting, offers a resource-efficient alternative to enhance performance. Yet, identifying the most relevant rows to serve as shots remains a challenge for tabular data. This paper introduces ARASH (Adaptive, query-specific Retrieval And Shot selection), a method that improves TFM efficiency by selecting optimal shots based on local neighborhood analysis within the training set. Our results demonstrate that ARASH reduces the prompt length and memory usage of TabPFN by 1261.5$\\times$ and 2.56$\\times$, respectively, while providing comparable accuracy.",
+      "authors": [
+        "Samirasadat Jamalidinan",
+        "Yue Xu",
+        "Kazem Cheshmi"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-08-18T14:48:56+00:00",
+      "link": "https://arxiv.org/pdf/2608.17856v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Few-shot prompting/in-context learning with adaptive shot selection for tabular prediction",
+      "llm_evidence_cn": "面向表格预测的自适应检索与示例选择，改进少样本提示学习",
+      "llm_evidence": "面向表格预测的自适应检索与示例选择，改进少样本提示学习",
+      "canonical_evidence": "面向表格预测的自适应检索与示例选择，改进少样本提示学习",
+      "llm_tldr_en": "ARASH improves tabular few-shot prompting by adaptively retrieving and selecting the most relevant rows as shots, enhancing Tabular Foundation Model efficiency without retraining.",
+      "llm_tldr_cn": "表格预测中微调专用基础模型成本高，上下文学习（少样本提示）虽是高效替代，但选择哪些行作为示例是个难题。本文提出ARASH，按查询自适应地检索并选择最相关的行作为shot，提升表格基础模型的推理效率。实验证明选出的示例相比朴素选择更能提升准确率，无需重新训练即可增强少样本提示性能。",
+      "llm_tldr": "表格预测中微调专用基础模型成本高，上下文学习（少样本提示）虽是高效替代，但选择哪些行作为示例是个难题。本文提出ARASH，按查询自适应地检索并选择最相关的行作为shot，提升表格基础模型的推理效率。实验证明选出的示例相比朴素选择更能提升准确率，无需重新训练即可增强少样本提示性能。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot learning techniques and benchmarks",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.18907v1",
+      "source": "arxiv",
+      "title": "Learning-State-Aware Dynamic Generative Data Augmentation on Small-Scale Datasets",
+      "abstract": "Small-scale image classification is often limited by the scarcity of training data. Generative data augmentation (GDA) based on pretrained generative models has emerged as an effective solution. However, existing methods rely on task-agnostic augmentation strategies that overlook downstream model needs. Although recent dynamic GDA methods incorporate model feedback to guide augmentation, they still struggle to reliably determine sample-specific augmentation strengths and adapt augmentation strategies to different image regions while balancing image diversity and class semantics.   To address these issues, we propose learning-state-aware dynamic generative data augmentation (LSADA). Specifically, LSADA constructs a learning state for each sample based on its current loss and loss-decrease rate, which is then mapped to a sample-specific augmentation strength. Furthermore, LSADA introduces a decoupled data augmentation and diffusion fusion strategy that applies strength-controlled transformations to class-relevant regions and generates diverse class-irrelevant regions, progressively fusing them to improve image diversity while preserving class semantics. Experiments on nine public datasets show that LSADA outperforms the existing SOTA dynamic GDA method by an average of 4.5% on six natural image datasets and 2.5% on three medical image datasets.",
+      "authors": [
+        "Ting Xiang",
+        "Chenxi Deng",
+        "Jinhui Zhao",
+        "Bingting Jiang",
+        "Ke Zhang",
+        "Changjian Chen",
+        "Zhuo Tang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-08-19T13:31:21+00:00",
+      "link": "https://arxiv.org/pdf/2608.18907v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "generative data augmentation for small-scale image classification, relevant to few-shot",
+      "llm_evidence_cn": "生成式数据增强对小样本图像分类有借鉴价值",
+      "llm_evidence": "生成式数据增强对小样本图像分类有借鉴价值",
+      "canonical_evidence": "生成式数据增强对小样本图像分类有借鉴价值",
+      "llm_tldr_en": "LSADA dynamically adjusts generative data augmentation per sample and region based on downstream model learning state, improving small-scale image classification.",
+      "llm_tldr_cn": "针对小规模图像分类训练数据稀缺的问题，提出学习状态感知的动态生成式数据增强方法LSADA。它根据下游模型的当前学习状态为每个样本确定合适的增强强度，并对不同图像区域自适应调整增强策略，兼顾多样性保持与类别语义。实验表明该方法相比任务无关和既有动态增强方法能显著提升小数据下的分类性能。该技术可迁移到小样本学习场景。",
+      "llm_tldr": "针对小规模图像分类训练数据稀缺的问题，提出学习状态感知的动态生成式数据增强方法LSADA。它根据下游模型的当前学习状态为每个样本确定合适的增强强度，并对不同图像区域自适应调整增强策略，兼顾多样性保持与类别语义。实验表明该方法相比任务无关和既有动态增强方法能显著提升小数据下的分类性能。该技术可迁移到小样本学习场景。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "few-shot classification algorithms for image recognition",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
 }

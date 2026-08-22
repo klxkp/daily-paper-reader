@@ -1,0 +1,580 @@
+Title: MAGneT-3D: Monocular and Domain-Generalizable Temporal 3D Detection
+
+URL Source: https://arxiv.org/pdf/2608.14282v1
+
+Published Time: Mon, 17 Aug 2026 00:57:41 GMT
+
+Number of Pages: 20
+
+Markdown Content:
+# MAGneT-3D: Monocular and Domain-Generalizable Temporal 3D Detection 
+
+Mohamed Kotb 1,† , Johannes Meier 1,3,5,† , Christoph Reich 1,2,5,6 ,Oussema Dhaouadi 1,3,4,5,7 , Luis Denninger 1,5,7 , and Daniel Cremers 1,5,6 
+
+> 1
+
+TU Munich 2 TU Darmstadt 3 ETH Zurich 4 University of Cambridge  
+
+> 5
+
+MCML 6 ELIZA 7 DeepScenario † Equal contribution 
+
+{mohamed.kotb, j.meier}@tum.de https://mo-sameh.github.io/MAGneT-3D-Project-Page/ 
+
+Abstract. Monocular temporal 3D detection aims to detect objects in 3D, given a monocular video. Query-based 3D detectors unify detection and cross-view association, but their learnable queries fit the spatial dis-tribution of the training data ( e.g ., field-of-view). We show that this issue is especially severe when these models are applied to monocular video, hindering generalization to unseen datasets and environments. To address this limitation, we introduce MAGneT-3D, the first method for domain-generalized monocular temporal 3D object detection. Instead of relying on static learnable queries, we propose a Domain-Robust An-chor Generator (DRAG) approach that adaptively derives 3D proposals during inference. To further enable domain generalization, we propose a Temporal Refinement and Identity Merging (TRIM) strategy, reducing dependence on specific 3D proposals. To enable comprehensive domain-generalization evaluation, we establish a cross-dataset benchmark span-ning nuScenes, Waymo, Lyft, and ONCE. Under zero-shot domain shifts, MAGneT-3D outperforms all baselines, improving NDS from 12 .1 % to 
+
+18 .6 % while also increasing in-domain accuracy. 
+
+Keywords: Monocular 3D Detection · Domain Generalization · Video 
+
+## 1 Introduction 
+
+Accurate 3D perception forms a cornerstone for autonomous driving [24, 34, 43], robotics [54, 57], and intelligent surveillance [41, 44, 69]. Monocular 3D detec-tion aims to detect and classify objects in 3D from a single image. While the monocular setting enables cost-efficient deployment of such detectors, monocu-lar approaches struggle with depth ambiguities [43, 63], limiting their accuracy and generalization. LiDAR-based detectors can overcome these limitations but require specialized hardware, which significantly constrains applicability [66–68]. Instead, we leverage multi-frame monocular cues for 3D detection to overcome the limitations of single-frame detectors, maximizing applicability. While recent work has proposed various monocular 3D detectors [18, 43, 50, 71, 72], these typically do not take advantage of multi-frame cues. Some monoc-ular detectors use heuristic post-processing or simple recurrent architectures arXiv:2608.14282v1 [cs.CV] 14 Aug 2026 2 M. Kotb, J. Meier et al. 
+
+Monocular Temporal Domain Generalization  
+
+> MonoCD [63] FCOS3D [61] LeAD-M3D [43] SMOKE [37] StreamPETR [59] Sparse4D-V3 [32] BEVFormer V2 [64] 3D-VField [22] DG-BEV [60] LSF [39] MonoTDF [6] MonoGDG [49] TSMA-BEV [21]
+> MAGneT-3D (Ours)
+
+⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆⋆
+
+Source-nuScenes Target ONCE Target-Lyft Target Waymo   
+
+> StreamPETR [59] (Baseline) Far3D [19] MAGneT-3D (Ours) Sparse4D v3 [32] BEVFormer v2 [64]
+
+10 20 30 7 15 22 715 22 715 22 
+
+Fig. 1: MAGneT-3D overview. MAGneT-3D bridges monocular, temporal model-ing and domain generalization (left) for strong cross-dataset 3D detection (right) . Prior detectors instead treat these settings as distinct or paired, leaving the intersection un-explored (left) . On our new cross-dataset benchmark (right) , MAGneT-3D trained on nuScenes outperforms on both in-domain (source) and all unseen (target) datasets. We report the nuScenes Detection Score (NDS, in %, ↑). 
+
+to encode multi-frame information, but do not leverage current transformer-based architectures. Other approaches exploit synchronization multi-view data for 3D detection [19, 32, 59]. These approaches utilize current transformer-based detectors with query-based decoders to model multi-view context and enhance detection accuracy [19, 32, 59]. However, as we show, query-based decoders en-tail significant biases introduced by the training data. While learnable, queries are static during inference and fit to the spatial distribution ( e.g ., field-of-view) of the training data. This is especially prominent when multi-view models are trained using monocular video, and significantly hampers domain generalization. In this work, we approach monocular temporal 3D detection under domain shifts ( cf . Fig. 1 (left) ). In particular, we propose Monocular And Domain-
+
+Gene ralizable Temporal 3D Detection ( MAGneT-3D ). To the best of our knowledge, MAGneT-3D is the first approach to explicitly address domain shifts for temporal monocular 3D detection. We overcome the limitations of static, learnable queries by introducing a Domain-Robust Anchor Generator (DRAG). This approach adaptively generates 3D proposals during inference based on im-age features. Additionally, we present a Temporal Refinement and Identity Merg-ing (TRIM) strategy. This strategy pairs dense soft assignment with supervised contrastive learning to enhance detection diversity during training. For inference, TRIM uses a clustering approach to deduplicate predictions, improving preci-sion. To enable a thorough and comprehensive domain generalization evaluation, we propose a novel cross-dataset benchmark, including four existing datasets. While the accuracy of existing approaches significantly suffers under domain shift, MAGneT-3D outperforms in domain generalization and also improves for in-domain data ( cf . Fig. 1 (right) ). Monocular & Domain-Generalizable Temporal 3D Detection 3
+
+In particular, we make the following contributions: (i) Domain-Robust Anchor Generator (DRAG) : We replace static, learnable detection queries with a dynamic anchor generator. By generating queries on the fly from im-age features in high-confidence 3D regions, we eliminate source spatial bias and naturally adapt to varying camera configurations. (ii) Temporal Refinement and Identity Merging (TRIM) : During training, the proximity of our dy-namic queries to the targets causes the refinement head to only learn minor, trivial adjustments. We address this by replacing the strict 1-to-1 Hungarian matching with a dense soft assignment strategy. To consolidate the resulting redundant predictions at inference, we introduce a clustering-based deduplica-tion step. (iii) Temporal Domain Generalization Benchmark : We propose a novel domain-generalization benchmark spanning four temporal 3D detection datasets: nuScenes [4], Waymo [53], Lyft [13], and ONCE [40]. MAGneT-3D scores 18 .6 % in NDS average cross-dataset accuracy outperforming existing ap-proaches under domain shifts, including our baseline StreamPETR [59] ( 12 .1 % 
+
+in NDS). In-domain, MAGneT-3D achieves an NDS of 32 .9 % on nuScenes [4], surpassing existing approaches ( cf . Fig. 1 (right) ). 
+
+## 2 Related Work 
+
+3D Object Detection. Sensing modality strongly shapes both the robustness and cost of a 3D detector. LiDAR-based approaches achieve exceptional geomet-ric accuracy by operating directly on point clouds [7, 9, 56, 66–68]. Alternatively, radar sensors provide complementary Doppler measurements with high resilience to adverse weather conditions [33, 45, 46], while production-grade pipelines fre-quently fuse multiple modalities to maximize redundancy [1, 23, 28]. Due to the high cost of active sensors, camera-only perception is an effective alternative. To mitigate the depth ambiguity of monocular RGB images, multi-camera systems leverage synchronized, overlapping viewpoints. These approaches fall into two families. BEV-based methods transform perspective-view features into a bird’s-eye-view grid via discretized pooling [52] or learned depth distribu-tions [16, 48]. Query-based methods [30–32, 35, 58, 62] instead let learnable ob-ject queries attend directly to multi-view features, often using 3D positional encodings [35, 58, 59]. Temporal pipelines further stabilize predictions through BEV warping [15, 27], spatiotemporal query attention [30–32, 36], or memory banks [59]. While effective, these approaches rely on calibrated multi-camera rigs; we instead focus on the more easily deployable single-camera setting. 
+
+Monocular 3D Detection. Monocular systems are cheap and straightforward to deploy, but must recover 3D structure from a single image without addi-tional geometric cues ( e.g ., LiDAR or multi-view). To handle this ill-posed depth problem, one category of methods leverages LiDAR measurements for auxiliary training supervision to guide representation learning [34, 47]. Another family of frameworks enforces explicit geometric priors relating object size, depth, and the ground plane [49, 63, 71]. However, these handcrafted assumptions are often 4 M. Kotb, J. Meier et al. 
+
+Table 1: Cross-dataset benchmark overview. Our cross-dataset domain general-ization benchmark comprises four 3D monocular detection datasets, differing markedly in their field-of-view (FOV), intrinsics, resolution & geographic coverage.                                                   
+
+> Property nuScenes [4] Waymo [53] Lyft L5 [13] ONCE [40] Annotated frames (train / val) 28 130 /6019 53 000 /13 280 15 498 /3150 5000 /3000
+> Front camera resolution (in px) 1600 ×900 1920 ×1280 1224 ×1024 1920 ×1020 Front focal length fx(in px) 1266 2059 844 960 Front horizontal FOV (in °) 70.0 50.0 70.0 90.0 Number of object categories 10 495Country USA & Singapore USA USA China
+
+restricted to flat ground scenarios and specific environments. Other architec-tures rely solely on direct 3D bounding box supervision [17, 37, 43, 61, 70]. Our framework follows this unconstrained setting, bypassing restrictive assumptions to maximize flexibility while exploiting monocular temporal cues to enhance detection accuracy. Existing temporal approaches [3, 6, 14], however, assume a fixed deployment domain, leaving their behavior under zero-shot domain shift unexamined. Instead, we explicitly aim for strong domain generalization. 
+
+Domain Generalization in 3D Perception. Domain generalization (DG) targets stability under unseen domain shifts such as different cameras and visual conditions. In 2D tasks, this is often addressed via augmentations or invariant representation learning [11, 55]. Similarly, LiDAR-based 3D detectors counter sensor-induced domain shifts by learning sparsity-invariant features [39] or ap-plying adversarial augmentations [10, 22]. For multi-view camera systems, ap-proaches such as DG-BEV [60] counteract camera-induced shifts by decoupling depth prediction from pixel size and applying perspective augmentations. Other methods ensure robustness by enforcing consistency across either spatially over-lapping cameras [5] or temporal sequences [21]. However, as these approaches require multi-view data, they cannot be applied directly to our monocular setup. In the monocular setting, many approaches rely on unsupervised domain or test-time adaptation, requiring target data during training [25,26,42] or inference [29]. In contrast, we focus on strict zero-shot domain generalization without access to target data. To the best of our knowledge, MonoGDG [65] is the only monocular domain generalization method. While accounting for variations in appearance and camera configurations, MonoGDG is restricted to single frames and does not use multi-frame cues. We instead use monocular multi-frame cues. 
+
+## 3 A Cross-Domain Benchmark for Monocular Temporal 3D Detection 
+
+Existing monocular domain generalization benchmarks focus strictly on single-frame 3D detection [26, 42, 65]. To evaluate monocular temporal 3D detection under domain shifts, we present a new cross-dataset benchmark ( cf . Tab. 1), Monocular & Domain-Generalizable Temporal 3D Detection 5         
+
+> -40 -20 020 40 020 40 60 80 100 y (in m) Waymo
+> LH
+> -40 -20 020 40 nuScenes
+> LH
+> -40 -20 020 40 Lyft
+> LH
+> -40 -20 020 40 ONCE
+> LHx (in m)
+> Fig. 2: Object locations across datasets. Top-view heatmaps of annotated object locations for Waymo [53], nuScenes [4], Lyft L5 [13], and ONCE [40]. A larger saturation corresponds to a higher density. Object locations differ significantly between datasets.
+
+adapting four autonomous driving datasets. In particular, we employ nuScenes [4], Waymo [53], Lyft [13], and ONCE [40]. 
+
+Training and Validation Protocol. We train separate models independently on the training splits of nuScenes [4], Waymo [53], and Lyft [13]. We evaluate each model on the validation splits of all four datasets. Note, ONCE [40] serves only as an unseen validation dataset. This allows us to measure both in-domain accuracy and, more importantly, cross-domain generalization over three different datasets. As depicted in Fig. 2, the spatial distribution of objects varies significantly across the different datasets, providing a significant challenge for generalization. 
+
+Additional Details. As Waymo is recorded using a high frame rate, we follow existing work [43,51] and subsample frames. In particular, we sample every third frame. As all datasets use different object-category taxonomies ( cf . Tab. 1), we adopt a shared taxonomy comprising “vehicle”, “pedestrian”, and “bicycle”. Note that we focus on generalizable 3D detections; considering an open-vocabulary setting for object categories is left to future work. 
+
+Evaluation Metrics. We employ the standard nuScenes protocol [4], report-ing mean Average Precision (mAP) alongside the composite nuScenes Detec-tion Score (NDS). NDS serves as our primary metric, combining ground-plane distance-based mAP with true-positive error attributes covering translation, scale, and orientation. To measure overall cross-domain generalization, we aver-age mAP and NDS over all datasets, excluding the training domain. 
+
+## 4 Method: MAGneT-3D 
+
+Problem Definition. We approach monocular and temporal monocular 3D ob-ject detection under single-domain generalization . At each timestep t ∈ { 1, . . . , T },6 M. Kotb, J. Meier et al. 
+
+Current frame 
+
+Backbone Spatial interaction Propagation transformer Detections 
+
+Tracking queries 
+
+Learnable queries Legend          
+
+> Model Ref. point Ego vehicle Source FOV Target FOV FOV gap -40 -20 020 40 020 40 x (in m) y (in m) Initialization
+> -40 -20 020 40 020 40 x (in m) y (in m) Trained on source data
+
+Training 
+
+Fig. 3: Query-based 3D detectors [30–32, 59]. The current image is fed into a backbone. The resulting image features interact with the learnable queries (bottom) .A propagation transformer takes in query features and historically tracked queries, producing refined 3D detections. Queries (bottom) are learned during training but static during inference and introduce training dataset dependent biases, introducing issues under domain shifts, e.g ., when the field-of-view (FOV) is changing. 
+
+given an RGB image xt ∈ RH×W×3 and camera intrinsics Kt ∈ R3×3, the goal is to predict a set of oriented 3D bounding boxes yt = {bm}Mm=1 , each param-eterized as b = ( k, c, d, θ ), where k is the class label, c = ( cx, c y , c z )⊤ the 3D center in camera coordinates, d = ( dx, d y , d z )⊤ the box dimensions, and θ the yaw angle. In the temporal setting, inputs arrive as a sequence of T frames 
+
+S = {(xt, Kt, Et)}Tt=1 , where Et ∈ SE(3) is the camera ego-pose at timestep 
+
+t. A causal detector produces per-frame predictions ˆyt from past and present observations. Under single-domain generalization, we train exclusively on a sin-gle labeled source domain DS = {(xi, Ki, yi)}NS 
+
+> i=1
+
+and aim to learn a monocular temporal 3D detector that generalizes to a completely unseen target domain 
+
+DT = {(xj , Kj )}NT 
+
+> j=1
+
+at test-time. 
+
+4.1 Preliminaries: Limitations of Query-Based Detection 
+
+Our method builds upon query-based 3D object detectors [30–32, 35, 59]. These represent potential objects as a fixed set of 3D queries. These queries are learn-able during training but fixed during inference. Each query encodes a candidate position in 3D space ( i.e ., a bird’s-eye-view reference point) together with a feature vector. As shown in Fig. 3, image features are extracted by a 2D back-bone. Since queries reside in 3D and image features in 2D, a spatial interaction module brings them into a common space: either by enriching image features with 3D positional encodings so queries attend to them directly [35, 59], or by projecting each query’s reference point into the image plane and sampling fea-tures there [30, 32]. A transformer decoder then uses the resulting query-feature Monocular & Domain-Generalizable Temporal 3D Detection 7              
+
+> 045 90 135 180 00.5 11.5 Density nuScenes 045 90 135 180 Lyft 045 90 135 180 ONCE 045 90 135 180 Waymo BEV Angle (in degree) StreamPETR [59] Ground truth
+> Fig. 4: Learnable, static queries bias analysis. We visualize the angle distribu-tions of ground truth object detections vs. StreamPETR [59] predictions trained on nuScenes [4]. Dashed lines indicate the 1 st and 99 th percentiles of both distributions. StreamPETR predictions are biased to the nuScenes FOV across all target datasets.
+
+correspondences to refine each query’s 3D position, dimensions, and class score. For temporal modeling, past query states are stored in a memory bank and fused with the current queries. While these models achieve strong in-domain performance, their domain generalization is limited, as we discuss next. 
+
+Limitations of Query-Based Detectors. Prior work attributes cross-dataset drops to domain shifts in camera configurations, annotations, or image appear-ance [25,42,65]. Beyond these, we identify a failure mode rooted in the query ini-tialization itself, caused by underlying spatial distribution shifts across datasets. Training biases query reference points toward source-domain ground-truth loca-tions ( cf . Fig. 2). We observe this phenomenon, for example, in the field-of-view (FOV), where queries migrate away from peripheral regions and cluster within the source viewing boundaries ( cf . Fig. 3). Although the decoder refinement head can adjust these positions, it typically performs only minor, incremental refine-ments. Because the underlying initialization queries are biased and remain static during inference, they cannot adapt to cover regions outside the source-domain range. Consequently, predictions in the target domain remain largely constrained to the source angular distribution despite the domain shift ( cf . Fig. 4). This lim-itation significantly hinders domain generalization by preventing the model from adapting its spatial representation to unseen target-domain configurations. 
+
+4.2 Overview of MAGneT-3D 
+
+To overcome the limitations associated with static, learned queries, we present MAGneT-3D. By introducing a dynamic initialization routine, MAGneT-3D moves beyond static queries, avoiding target dataset biases and providing a strong domain generalization. On a high level, MAGneT-3D builds on Stream-PETR [59] and consists of two novel components: (i) Our Domain-Robust An-chor Generator (DRAG) extracts image features to construct per-frame 3D pro-posals that naturally adapt to different camera setups, and (ii) our Temporal Refinement and Identity Merging (TRIM) refines these proposals via soft assign-ment and dense supervision during training, paired with contrastive clustering-based deduplication at inference. An overview of MAGneT-3D is in Fig. 5. 8 M. Kotb, J. Meier et al. 
+
+Current frame 
+
+Backbone Domain-Robust Anchor Generator DRAG (cf . Sec. 4.3) 
+
+Detections TRIM (cf . Sec. 4.4)        
+
+> Training Inference
+> Soft assigner Deduplication
+> 1. Compute similarity 2. Clustering 3. Remove duplicates
+
+Spatial interaction Temporal prediction refiner Tracking queries Box head Cls. head Re-ID head 
+
+> GT boxes Scale-invariant feature assign.
+
+ft     
+
+> st/f t∈¯Rℓℓ1
+> ℓ2
+> ℓn
+> FPN Regression
+> ˜z= ˆ z/f t
+> Centerness
+> -20 020 020 40 x (in m) y (in m) Dynamic queries
+
+Legend 
+
+> Discarded predictions
+> GT detections
+> Lead predictions
+> Soft matched preds.
+> Hungarian matched preds.
+> General preds.
+
+Fig. 5: MAGneT-3D. Instead of static, learnable queries, we generate dynamic pro-posals (left top) based on image features (DRAG; cf . Sec. 4.3), eliminating source domain biases. The proposals interact spatially with the image features and are fed, alongside historic queries, into the temporal prediction refiner. During training, our soft assigner matches each target to multiple proposals for dense supervision. During inference, duplicate objects are merged via clustering (TRIM; cf . Sec. 4.4). 
+
+4.3 Domain-Robust Anchor Generator (DRAG) 
+
+We introduce Domain-Robust Anchor Generator (DRAG). Instead of static, learned queries that are prone to biases, DRAG dynamically generates per-frame 3D anchors that adapt to any target camera configuration ( cf . Fig. 5). DRAG achieves this by extracting high-confidence regions directly from the feature map to derive initial 3D position estimates. Implemented as a lightweight convo-lutional network, DRAG provides robust generalization across varying image resolutions and is trained using intermediate supervision. Crucially, this setup allows us to decompose the 3D position priors into projected 2D centers and a corresponding depth estimate, which are then backprojected to form the final 3D anchors. Specifically, we append an FCOS3D head [61] as a plug-and-play module directly onto our backbone and use its standard losses and heads. In particular, given a predicted projected center ˆpt = (ˆ ut, ˆvt, 1) ⊤ and its predicted depth ˆzt at timestep t, we recover the initial 3D center estimate ˆct
+
+via backprojection using the current camera intrinsics Kt by ˆct = [ˆ xt, ˆyt, ˆzt]⊤ =ˆzt K−1 
+
+> t
+
+ˆpt. The estimated center ˆct serves as the input spatial prior for the sub-sequent temporal prediction refiner. To maximize the out-of-domain robustness, we introduce two structural adjustments targeting scale and intrinsic variations. Monocular & Domain-Generalizable Temporal 3D Detection 9
+
+Virtual Depth Estimation While subsequent layers of the temporal pre-diction refiner directly receive the camera intrinsics Kt to handle geometric shifts, the backbone does not. Consequently, forcing the network to regress met-ric depth directly creates a significant sensitivity to focal-length shifts. To debias the visual representation from these intrinsic variations, we predict a normalized virtual depth [2] ˜zt = ˆ zt / f t instead of absolute metric depth. Here, ft ∈ R rep-resents the current focal length. Metric depth required for 3D box construction is recovered at inference-time via ˆzt = ft ˜zt.
+
+Scale-Invariant Feature Assignment. A standard feature pyramid network (FPN) produces a pyramid of L feature maps at multiple resolutions. During training, objects are assigned to a specific level ℓ ∈ { 1, . . . , L } (i.e ., resolution stage) of the feature pyramid dependent on the 2D object size. However, 2D object size depends both on its 3D size and the camera configuration (foremost the focal length). To improve domain generalization and ensure cross-camera consistency, we seek to make this assignment independent of the focal length. In particular, instead of using 2D object size for level-assignment, we propose to perform level-assignment in a focal-normalized space. We divide the standard pixel boundaries for level-assignment by a fixed reference focal length fref (set to the nuScenes focal length, 1266 px ), yielding the normalized interval ¯Rℓ =[rmin  
+
+> ℓ
+
+/f ref , r max  
+
+> ℓ
+
+/f ref ]. For a proposal observed under mean focal length ft =(fx,t + fy,t ) / 2, we rescale this interval back to pixel units by ft and assign the proposal to level ℓ only if its pixel scale st satisfies st ∈ ft ¯Rℓ. Equivalently, the focal-normalized scale st/f t must fall within ¯Rℓ. The center-sampling radius ρℓ
+
+is rescaled by ft/f ref analogously. Because st/f t is independent of the camera focal length, this guarantees that an instance always routes to the same feature layer regardless of camera intrinsics and other resizing transforms. This enables the network to obtain a holistic understanding of the scene rather than local pixel sizes, significantly boosting domain generalization. 
+
+4.4 Temporal Refinement and Identity Merging (TRIM) 
+
+To map dense proposals to temporal object instances across environments, we introduce Temporal Refinement and Identity Merging (TRIM). The dynami-cally generated 3D anchors from DRAG serve as explicit spatial priors, shifting the role of the refiner from coarse localization to fine residual refinement. To fully exploit these high-quality proposals, we replace one-to-one assignments with a dense supervision strategy during training ( cf . Fig. 5), paired with an inference-time deduplication stage to filter redundant predictions. 
+
+Soft Assignment for Dense Supervision. During training, DRAG can still entail biases from the training domain, i.e ., producing proposals that lie excep-tionally close to ground-truth objects. Consequently, standard one-to-one Hun-garian matching used by StreamPETR [59] maps each ground-truth object to only the single most confident anchor. Because this anchor is already accurate, 10 M. Kotb, J. Meier et al. 
+
+the decoder refinement head receives immediate confirmation from the loss to perform only minor adjustments. This creates a severe mismatch between train-ing and inference. During inference on an unseen target domain, the generated anchors are inherently of lower quality due to distribution shifts, yet the refine-ment head was trained exclusively on anchors that require minimal correction. To encourage the decoder to learn robust, large corrections, we introduce a soft assignment strategy during training. We map up to Massign queries to each ground-truth object based on matching quality, while enforcing a radial constraint rmax to exclude distant proposals. Supervising a wider distribution of nearby queries provides a more diverse learning signal, teaching the decoder to generalize its refinement capabilities beyond near-perfect inputs. Figure 5 (top right) contrasts this with standard one-to-one assignment. 
+
+Clustering-Based Deduplication. While dense anchor generation paired with soft assignment improves robustness, it yields multiple high-confidence duplicate predictions per object at inference, which significantly hampers precision. We address this by coupling a contrastive learning objective during training with a clustering pipeline at test time. During training, we project each prediction into an object identity space and supervise the resulting object identity vectors ( i.e ., embeddings in latent space) using a supervised contrastive loss LTRIM . Let It = {1, . . . , M t} be the set of indices for all predictions in ˆyt at timestep t. We define At(i) ≡ { j ∈ It \{ i}| oj =
+
+oi} as the index set of all other predictions mapping to the same ground-truth object identity oi as prediction i. Following SupCon [20], the clustering loss is: 
+
+LTRIM = − X
+
+> i∈It
+
+1
+
+|At(i)|
+
+X
+
+> j∈At(i)
+
+log exp( vi · vj /τ )
+
+P 
+
+> m∈It\{ i}
+
+exp( vi · vm/τ ) , (1) where v· denotes the normalized identity vector. τ > 0 is the temperature param-eter. This objective pulls embeddings of the same object together while pushing different objects apart. At test time, predictions with similar identity vectors are grouped into spatial clusters using these learned embeddings. To eliminate redundant detections without sacrificing recall, we retain only the single ( i.e ., 
+
+Nkeep = 1 ) highest-confidence prediction per cluster ( cf . Fig. 5 (top right) ). 
+
+Discussion. Both DRAG and TRIM act in synergy. DRAG substitutes over-fit static queries with dense, scene-adaptive anchors. The soft assignment in TRIM leverages this density to construct a more demanding, robust training signal, and clustering-based deduplication eliminates redundant predictions at inference. Together, they enable robust detection across severe distribution shifts without compromising precision. 
+
+Full Training Objective. We adopt a two-stage training strategy to maximize robustness. We first warm up the network by training the anchor generator via Monocular & Domain-Generalizable Temporal 3D Detection 11 
+
+Table 2: Comparison against the state of the art. Each model is trained on a single source dataset (vertical) and evaluated on all target datasets (horizontal) .Avg. Cross is the mean over the three unseen datasets. The best result per training dataset is highlighted in green ■■; the second best in yellow ■■; in-domain results in gray ■■. mAP & NDS are both in % ( ↑). nuScenes is abbreviated by nuSCN.                                                                                                                                                                
+
+> Method Val −→mAP ↑NDS ↑
+> Train ↓nuSCN Waymo Lyft ONCE Avg. Cross nuSCN Waymo Lyft ONCE Avg. Cross
+> StreamPETR [59] nuSCN 26 .54.85.08.26.028 .513 .110 .612 .712 .1
+> Waymo 4.234 .50.85.43.49.338 .08.910 .29.5
+> Lyft 1.00.027 .85.42.15.44.432 .611 .27.0
+> Sparse4D v3 [32] nuSCN 24 .84.48.611 .18.027 .09.513 .114 .712 .4
+> Waymo 4.932 .82.04.83.98.938 .97.89.18.6
+> Lyft 2.21.532 .03.82.56.26.137 .97.46.6
+> Far3D [19] nuSCN 28 .32.35.69.35.729 .810 .812 .813 .212 .3
+> Waymo 1.936 .90.32.61.67.739 .67.17.77.5
+> Lyft 1.31.131 .06.83.07.38.433 .010 .78.8
+> BEVFormer v2 [64] nuSCN 21 .86.22.510 .66.422 .211 .29.114 .511 .6
+> Waymo 2.111 .51.85.23.06.415 .88.310 .78.4
+> Lyft 1.43.819 .45.53.64.210 .726 .011 .88.9
+> MAGneT-3D (Ours) nuSCN 28 .510 .114 .312 .412 .332 .917 .219 .519 .118 .6
+> Waymo 13 .434 .513 .89.212 .218 .839 .319 .514 .017 .4
+> Lyft 4.05.232 .56.05.07.711 .634 .511 .910 .4
+
+LFCOS3D , and then optimize the entire framework end-to-end. This provides stable 3D spatial priors to the refinement head from the start of joint training. The total optimization objective L sums the individual multitask components: 
+
+L = LFCOS3D + LStreamPETR + LTRIM , where LFCOS3D is the standard FCOS3D loss [61] computed on our virtual depth and using scale-invariant assignment. 
+
+LStreamPETR is the standard StreamPETR loss [59] under our soft assignment, and LTRIM is the supervised contrastive loss ( cf . Eq. (1)). 
+
+## 5 Experiments 
+
+We first compare MAGneT-3D against state-of-the-art multi-view approaches adapted to monocular data. Next, we ablate the core components of MAGneT-3D. Finally, we conduct a spatial distribution analysis providing further insights. 
+
+Implementation Details & Baselines. All models use a ResNet-50 back-bone [12] pre-trained on ImageNet [8]. To establish monocular baselines, we employ state-of-the-art multi-view detectors [32, 59, 64] and retrained them in the monocular video setting. All models are trained using an identical budget of 675 120 iterations (about 24 nuScenes epochs) to ensure a fair comparison across datasets. We use a batch size of 16 , a maximum temporal history of 20 
+
+frames, and AdamW [38] with a learning rate of η = 4 × 10 −4 and weight decay of λ = 10 −2. For the soft assignment strategy, we set Massign to 5 and rmax to 
+
+5 m , while the temperature τ is set to 0.15 .
+
+5.1 Comparison with State of the Art 
+
+Table 2 reports results on our proposed cross-dataset domain generalization benchmark. To cover the major families of camera-based (temporal) 3D detec-12 M. Kotb, J. Meier et al. 
+
+Table 3: Main ablation. We start with the StreamPETR baseline ablate both DRAG and TRIM. We train on nuScenes [4] (nuSCN). mAP & NDS are both in % ( ↑). The best result is highlighted in ■■; the second best in ■■; in-domain results in ■■.                                                 
+
+> Configuration DRAG TRIM mAP ↑NDS ↑
+> nuSCN Waymo Lyft ONCE Avg. Cross nuSCN Waymo Lyft ONCE Avg. Cross
+> 1. StreamPETR 26 .54.85.08.26.028 .513 .110 .612 .712 .1
+> 2. ✓20 .07.98.68.88.425 .616 .313 .913 .914 .7
+> 3. ✓27 .16.98.611 .99.127 .011 .713 .616 .413 .9
+> 4. MAGneT-3D ✓✓28 .510 .114 .312 .412 .332 .917 .219 .519 .118 .6
+
+tors, we compare against one state-of-the-art representative from each: Stream-PETR [59] (dense query-based with temporal modeling), Sparse4D v3 [32] (sparse query-based), BEVFormer v2 [64] (BEV-based), and Far3D [19] (long-range query-based). Despite their architectural differences, all four baselines share the same fundamental weakness: strong in-domain accuracy that degrades signifi-cantly under domain shifts. Across all training datasets, MAGneT-3D achieves the best average cross-dataset NDS and mAP by a significant margin. Specifi-cally, our model improves average cross-dataset NDS by 50 % on nuScenes [4], 
+
+83 % on Waymo [53], and 16 % on Lyft [13] relative to the best baseline. While some architectures achieve a higher in-domain accuracy on Waymo (Far3D) and Lyft (Sparse4D v3), they suffer severely outside of their source domain. For ex-ample, Far3D trained on Waymo achieves an NDS of only 7.1 % on Lyft. For reference, in the very same setting, MAGneT-3D attains 19 .5 % .
+
+5.2 Ablation Study 
+
+We conduct ablations to isolate the contribution of MAGneT-3D’s core compo-nents. Specifically, we ablate/analyze (i) the overall model configuration relative to the baseline ( i.e ., StreamPETR [59]), (ii) the design choices within DRAG, and (iii) TRIM. In all ablations, we train on the nuScenes training set [4] and report detection accuracy on all four validation sets. 
+
+Main Ablation. Table 3 isolates the impact of each MAGneT-3D component over the baseline (config. 1). Integrating DRAG alone (config. 2) improves the average cross-dataset accuracy from 12 .1 to 14 .7 % in NDS, but reduces source performance from 28 .5 % to 25 .6 % in NDS. This drop occurs because matching ground-truth objects to a single anchor limits target diversity, which dilutes the training signal needed to refine boxes. Conversely, deploying TRIM alone (config. 3) leverages multi-hypothesis supervision and increases the average cross-dataset NDS to 13 .9 % , though slightly reducing source accuracy on nuScenes to 27 .0 % .Combining both components in our full MAGneT-3D configuration (config. 4) yields the optimal trade-off, maximizing out-of-domain robustness to an average cross-dataset NDS of 18 .6 % , while simultaneously increasing source accuracy to 
+
+32 .9 % . This demonstrates that the synergy between both DRAG and TRIM is required for strong generalization. Monocular & Domain-Generalizable Temporal 3D Detection 13 
+
+Table 4: DRAG ablation. We ablate the core components of DRAG. Each row removes one component from the full model, trained on nuScenes [4] (nuSCN). mAP & NDS are both in % ( ↑). The best result is highlighted in ■■; the second best in ■■;in-domain results in ■■.                                            
+
+> Setting mAP ↑NDS ↑
+> nuSCN Waymo Lyft ONCE Avg. Cross nuSCN Waymo Lyft ONCE Avg. Cross
+> MAGneT-3D (Full) 28.5 10.1 14.3 12.4 12.3 32.9 17.2 19.5 19.1 18.6 w/o Two-phase training 26.9 8.2 12.2 12.0 10.8 30.7 16.2 18.3 18.9 17.8 w/o Virtual depth 27.5 6.2 11.6 8.9 8.9 31.2 13.9 17.4 13.0 14.8 w/o Scale invariant feat. assn. 17.6 6.5 5.3 7.1 6.3 23.7 14.5 12.5 11.2 12.7
+
+Table 5: TRIM analysis. We analyze the assigner setting and the inference-time clustering of TRIM, trained on nuScenes [4] (nuSCN). mAP & NDS are both in % ( ↑). The best result is highlighted in ■■; the second best in ■■; in-domain results in ■■.                                                         
+
+> Setting mAP ↑NDS ↑
+> nuSCN Waymo Lyft ONCE Avg. Cross nuSCN Waymo Lyft ONCE Avg. Cross
+> MAGneT-3D (Full, Nkeep = 1 )28 .510 .114 .312 .412 .332 .917 .219 .519 .118 .6
+> w/ Top-Nkeep clust. ( Nkeep = 3 )26 .28.913 .211 .011 .030 .616 .818 .516 .317 .2
+> w/ Top-Nkeep clust. ( Nkeep = 5 )25 .78.513 .110 .510 .729 .916 .518 .415 .616 .8
+> w/o Clustering 25 .68.413 .110 .210 .629 .416 .318 .415 .016 .6
+> w/ Hungarian assigner 20 .07.98.68.88.425 .616 .313 .913 .914 .7
+
+DRAG Ablation. Table 4 analyzes the structural choices within DRAG. Switch-ing to single-stage end-to-end training reduces the average cross-dataset NDS from 18 .6 % to 17 .8 % . This showcases the benefit of a dedicated anchor warmup training phase. Omitting virtual depth estimation degrades domain generaliza-tion from 18 .6 % to 14 .8 % in NDS. Accuracy on datasets with severe intrinsic shifts, such as Waymo and ONCE, degrades more significantly in this setting. Finally, removing the scale-invariant feature assignment collapses the average cross-dataset score from 18 .6 % to just 12 .7 % in NDS. Source accuracy also reduces from 32 .9 % to 23 .7 % in NDS. This demonstrates that scale-invariant assignments are vital to enforce cross-camera consistency. 
+
+TRIM Analysis. Table 5 evaluates the impact of our dense training super-vision and inference-time deduplication approach. Using a standard Hungarian assigner instead of our soft assigner reduces the average cross-dataset accuracy from 16 .6 % to 14 .7 % in NDS. This demonstrates that multi-hypothesis target supervision provides a richer, less brittle supervisory training signal for out-of-domain refinement. At inference time, our clustering step removes redundant 3D detections, improving average cross-dataset accuracy from 16 .6 % to 18 .6 % in NDS. Restricting each cluster to a tight threshold of Nkeep = 1 yields the best accuracy. In particular, for Nkeep = 5 average cross-dataset accuracy drops from 
+
+18 .6 % (Nkeep = 1 ) to 16 .8 % in NDS. This demonstrates that retaining addi-tional predictions ( Nkeep > 1) reintroduces near-duplicate 3D boxes that com-pete during evaluation, consistently reducing accuracy across the source dataset and all target datasets. 14 M. Kotb, J. Meier et al. 
+
+nuScenes (source) Lyft 
+
+> 74.5 ◦
+
+-20 0 20 020 40 y (in m) Ground truth 
+
+> 75.7 ◦
+
+-20 0 20 x (in m) MAGneT-3D 
+
+> 71.7 ◦
+
+-20 0 20 StreamPETR 
+
+> 73.9 ◦
+
+-20 0 20 Ground truth 
+
+> 76.9 ◦
+
+-20 0 20 x (in m) MAGneT-3D 
+
+> 70.0 ◦
+
+-20 0 20 StreamPETR 
+
+Waymo ONCE 
+
+> 53.5 ◦
+
+-20 0 20 020 40 y (in m) Ground truth 
+
+> 56.1 ◦
+
+-20 0 20 x (in m) MAGneT-3D 
+
+> 72.6 ◦
+
+-20 0 20 StreamPETR 
+
+> 92.3 ◦
+
+-20 0 20 Ground truth 
+
+> 99.2 ◦
+
+-20 0 20 x (in m) MAGneT-3D 
+
+> 72.6 ◦
+
+-20 0 20 StreamPETR 
+
+Fig. 6: Spatial distribution results. Top-view distribution of 3D detections from MAGneT-3D and our baseline StreamPETR [59]. Both are trained on nuScenes [4] (source dataset). The angles represent the prediction range (max-min azimuth). MAGneT-3D adapts to different angles of the target datasets, while StreamPETR fails to adapt to the angle of the target datasets. More saturated colors indicate a higher density. Color coding: ground truth ■■ (low density) −→ ■■ (high density); MAGneT-3D 
+
+■■ −→ ■■; StreamPETR ■■ −→ ■■. Best viewed in color; zoom in for details. 
+
+5.3 Prediction Distribution Analysis 
+
+Figure 6 visualizes the spatial distribution of predicted 3D bounding box cen-ters for StreamPETR [59] and MAGneT-3D when trained on nuScenes [4]. Due to its static queries, StreamPETR’s predictions remain strictly confined within the source training distribution ( i.e ., nuScenes) across all target datasets. This creates severe local blind spots when encountering target spatial distribution shifts, failing to expand on wider settings ( e.g ., on ONCE [40]), and remains overextended on smaller settings ( e.g ., on Waymo [53]). Conversely, MAGneT-3D generalizes and adapts to the spatial distribution of the target datasets and closely mirrors the true ground-truth distribution. In particular, while trained on nuScenes ( 74 .5◦), MAGneT-3D expresses an angle of 99 .2◦ on ONCE with a ground-truth angle of 92 .3◦, while StreamPETR only captures an angle of 72 .6◦.This demonstrates that our dynamically derived queries do not suffer from source dataset biases and generalize to different target spatial distributions. 
+
+5.4 Qualitative Results 
+
+Figure 7 provides qualitative detection results of our MAGneT-3D and Stream-PETR [59]. MAGneT-3D predicts more accurate box positions across diverse conditions and illumination levels. MAGneT-3D dramatically reduces false-posi-tive detections across all domains, demonstrating the practical effectiveness of Monocular & Domain-Generalizable Temporal 3D Detection 15 
+
+nuScenes Lyft Waymo nuScenes-failure 
+
+-20 0 20 020 40 x (in m) y (in m) 
+
+-20 0 20 020 40 x (in m) 
+
+-20 0 20 020 40 x (in m) 
+
+-20 0 20 020 40 x (in m) 
+
+Fig. 7: Qualitative results. MAGneT-3D yields fewer false positives and more ac-curate predictions than StreamPETR [59]. All models are trained on nuScenes [4] and evaluated across nuScenes, Lyft [13], and Waymo [53]. Best viewed in color; zoom in for details. BEV color coding: Ground truth ■■, StreamPETR ■■, and MAGneT-3D ■■.
+
+our inference-time clustering step. The rightmost column of Fig. 7 shows an in-domain failure case, where our model generates a low-quality bounding box for a partially occluded vehicle and underestimates the depth of a far-range target. 
+
+## 6 Conclusion 
+
+We showed that state-of-the-art query-based 3D object detectors suffer from source-dataset biases. Predicted 3D detections are trapped within the source dataset’s spatial distribution. To overcome this, we proposed MAGneT-3D, a temporal monocular 3D detector composed of two novel components. First ,DRAG constructs adaptive and dynamic per-frame detection proposals from image features. Second , TRIM provides dense and rich supervision during train-ing and effectively filters duplicate 3D detection predictions during inference. We introduced a new cross-dataset benchmark to enable evaluation of monocu-lar temporal 3D detectors under zero-shot domain shifts. On this cross-dataset benchmark, MAGneT-3D establishes a new state of the art for domain general-ization by a significant margin, while also improving in-domain accuracy. 
+
+Acknowledgments. This work was supported by the ERC Advanced Grant SIM-ULACRON, the Georg Nemetschek Institute project AI4TWINNING, and the DFG project 4D-YouTube CR 250/26-1. Christoph Reich is supported by the Konrad Zuse School of Excellence in Learning and Intelligent Systems (ELIZA) through the DAAD programme Konrad Zuse Schools of Excellence in Artificial Intelligence, sponsored by the Federal Ministry of Education and Research. Finally, we also acknowledge the support of the European Laboratory for Learning and Intelligent Systems (ELLIS). 16 M. Kotb, J. Meier et al. 
+
+## References 
+
+1. Bai, X., Hu, Z., Zhu, X., Huang, Q., Chen, Y., Fu, H., Tai, C.L.: TransFusion: Ro-bust LiDAR-camera fusion for 3D object detection with transformers. In: CVPR. pp. 1090–1099 (2022). https://doi.org/10.1109/CVPR52688.2022.00116 
+
+2. Brazil, G., Kumar, A., Straub, J., Ravi, N., Johnson, J., Gkioxari, G.: Omni3D: A large benchmark and model for 3D object detection in the wild. In: CVPR. pp. 13154–13164 (2023). https://doi.org/10.1109/CVPR52729.2023.01264 
+
+3. Brazil, G., Pons-Moll, G., Liu, X., Schiele, B.: Kinematic 3D object detection in monocular video. In: ECCV. vol. 12368, pp. 135–152 (2020). https://doi.org/ 10.1007/978-3-030-58592-1_9 
+
+4. Caesar, H., Bankiti, V., Lang, A.H., Vora, S., Liong, V.E., Xu, Q., Krishnan, A., Pan, Y., Baldan, G., Beijbom, O.: nuScenes: A multimodal dataset for au-tonomous driving. In: CVPR. pp. 11621–11631 (2020). https://doi.org/10.1109/ CVPR42600.2020.01164 
+
+5. Chang, G., Lee, J., Kim, D., Kim, J., Lee, D., Ji, D., Jang, S., Kim, S.: Uni-fied domain generalization and adaptation for multi-view 3D object detection. In: NeurIPS. vol. 37, pp. 58498–58524 (2024), https://proceedings.neurips.cc/ paper _ files / paper / 2024 / file / 6b7e1e96243c9edc378f85e7d232e415 - Paper -Conference.pdf 
+
+6. Chen, X.Z., Chiu, Y.K., Huang, C.S., Chen, Y.L.: MonoTDF: Temporal deep fea-ture learning for generalizable monocular 3D object detection. Pattern Recognit. 
+
+176 , 113184 (2026). https://doi.org/10.1016/j.patcog.2026.113184 
+
+7. Chen, Y., Liu, J., Zhang, X., Qi, X., Jia, J.: VoxelNeXt: Fully sparse VoxelNet for 3D object detection and tracking. In: CVPR. pp. 21674–21683 (2023). https: //doi.org/10.1109/CVPR52729.2023.02076 
+
+8. Deng, J., Dong, W., Socher, R., Li, L.J., Li, K., Fei-Fei, L.: ImageNet: A large-scale hierarchical image database. In: CVPR. pp. 248–255 (2009). https://doi. org/10.1109/CVPR.2009.5206848 
+
+9. Dong, S., Ding, L., Wang, H., Xu, T., Xu, X., Wang, J., Bian, Z., Wang, Y., Li, J.: MsSVT: Mixed-scale sparse voxel transformer for 3D object detection on point clouds. In: NeurIPS. vol. 35, pp. 11615–11628 (2022), https : / / proceedings. neurips.cc/ paper_files/ paper/2022/ file/ 4bad7c27534efca029ca0d366c47c0e3-Paper-Conference.pdf 
+
+10. Eskandar, G.: An empirical study of the generalization ability of Lidar 3D object detectors to unseen domains. In: CVPR. pp. 23815–23825 (2024). https://doi. org/10.1109/CVPR52733.2024.02248 
+
+11. Gulrajani, I., Lopez-Paz, D.: In search of lost domain generalization. In: ICLR (2021), https://openreview.net/pdf?id=lQdXeXDoWtI 
+
+12. He, K., Zhang, X., Ren, S., Sun, J.: Deep residual learning for image recognition. In: CVPR. pp. 770–778 (2016). https://doi.org/10.1109/CVPR.2016.90 
+
+13. Houston, J., Zuidhof, G., Bergamini, L., Ye, Y., Chen, L., Jain, A., Omari, S., Iglovikov, V., Ondruska, P.: One thousand and one hours: Self-driving motion prediction dataset. In: CoRL. vol. 155, pp. 409–418 (2021), https://proceedings. mlr.press/v155/houston21a/houston21a.pdf 
+
+14. Hu, H.N., Yang, Y.H., Fischer, T., Darrell, T., Yu, F., Sun, M.: Monocular quasi-dense 3D object tracking. IEEE Trans. Pattern Anal. Mach. Intell. 45 (2), 1992– 2008 (2022). https://doi.org/10.1109/TPAMI.2022.3168781 
+
+15. Huang, J., Huang, G.: BEVDet4D: Exploit temporal cues in multi-camera 3D object detection. arXiv:2203.17054 [cs.CV] (2022). https://doi.org/10.48550/ arXiv.2203.17054 Monocular & Domain-Generalizable Temporal 3D Detection 17 16. Huang, J., Huang, G., Zhu, Z., Ye, Y., Du, D.: BEVDet: High-performance multi-camera 3D object detection in bird-eye-view. arXiv:2112.11790 [cs.CV] (2021). 
+
+https://doi.org/10.48550/arXiv.2112.11790 
+
+17. Im, E., Jee, C., Lee, J.K.: GATE3D: Generalized attention-based task-synergized estimation in 3D. arXiv:2504.11014 [cs.CV] (2025). https://doi.org/10.48550/ arXiv.2504.11014 
+
+18. Jia, J., Li, Z., Shi, Y.: MonoUNI: A unified vehicle and infrastructure-side monoc-ular 3D object detection network with sufficient depth clues. In: NeurIPS. vol. 36, pp. 11703–11715 (2023), https://proceedings.neurips.cc/paper_files/paper/ 2023/file/2703a0e3c2b33506295a77762338cf24-Paper-Conference.pdf 
+
+19. Jiang, X., Li, S., Liu, Y., Wang, S., Jia, F., Wang, T., Han, L., Zhang, X.: Far3D: Expanding the horizon for surround-view 3D object detection. In: AAAI. vol. 38, pp. 2561–2569 (2024). https://doi.org/10.1609/aaai.v38i3.28033 
+
+20. Khosla, P., Teterwak, P., Wang, C., Sarna, A., Tian, Y., Isola, P., Maschinot, A., Liu, C., Krishnan, D.: Supervised contrastive learning. In: NeurIPS. vol. 33, pp. 18661–18673 (2020), https://proceedings.neurips.cc/paper/2020/file/ d89a66c7c80a29b1bdbab0f2a1a94af8-Paper.pdf 
+
+21. Kong, L., Xie, S., Hu, H., Niu, Y., Ooi, W.T., Cottereau, B.R., Ng, L.X., Ma, Y., Zhang, W., Pan, L., et al.: The RoboDrive challenge: Drive anytime anywhere in any condition. arXiv:2405.08816 [cs.CV] (2024). https://doi.org/10.48550/ arXiv.2405.08816 
+
+22. Lehner, A., Gasperini, S., Marcos-Ramiro, A., Schmidt, M., Mahani, M.A.N., Navab, N., Busam, B., Tombari, F.: 3D-VField: Adversarial augmentation of point clouds for domain generalization in 3D object detection. In: CVPR. pp. 17295– 17304 (2022). https://doi.org/10.1109/CVPR52688.2022.01678 
+
+23. Li, Y., Yu, A.W., Meng, T., Caine, B., Ngiam, J., Peng, D., Shen, J., Lu, Y., Zhou, D., Le, Q.V., Yuille, A., Tan, M.: DeepFusion: Lidar-camera deep fusion for multi-modal 3D object detection. In: CVPR. pp. 17182–17191 (2022). https: //doi.org/10.1109/CVPR52688.2022.01667 
+
+24. Li, Z., Jia, J., Shi, Y.: MonoLSS: Learnable sample selection for monocular 3D detection. In: 3DV. pp. 1125–1135 (2024). https://doi.org/10.1109/3DV62453. 2024.00088 
+
+25. Li, Z., Chen, Z., Li, A., Fang, L., Jiang, Q., Liu, X., Jiang, J.: Towards model generalization for monocular 3D object detection. arXiv:2205.11664 [cs.CV] (2022). 
+
+https://doi.org/10.48550/arXiv.2205.11664 
+
+26. Li, Z., Chen, Z., Li, A., Fang, L., Jiang, Q., Liu, X., Jiang, J.: Unsupervised domain adaptation for monocular 3D object detection via self-training. In: ECCV. vol. 13669, pp. 245–262 (2022). https://doi.org/10.1007/978-3-031-20077-9_15 
+
+27. Li, Z., Wang, W., Li, H., Xie, E., Sima, C., Lu, T., Yu, Q., Dai, J.: BEVFormer: Learning bird’s-eye-view representation from LiDAR-camera via spatiotemporal transformers. IEEE Trans. Pattern Anal. Mach. Intell. 47 (3), 2020–2036 (2024). 
+
+https://doi.org/10.1109/TPAMI.2024.3515454 
+
+28. Liang, T., Xie, H., Yu, K., Xia, Z., Lin, Z., Wang, Y., Tang, T., Wang, B., Tang, Z.: BEVFusion: A simple and robust LiDAR-camera fusion framework. In: NeurIPS. vol. 35, pp. 10421–10434 (2022), https://proceedings.neurips.cc/ paper _ files / paper / 2022 / file / 43d2b7fbee8431f7cef0d0afed51c691 - Paper -Conference.pdf 
+
+29. Lin, H., Zhang, Y., Niu, S., Cui, S., Li, Z.: MonoTTA: Fully test-time adaptation for monocular 3D object detection. In: ECCV. vol. 15102, pp. 96–114 (2024). https: //doi.org/10.1007/978-3-031-72784-9_6 18 M. Kotb, J. Meier et al. 
+
+30. Lin, X., Lin, T., Pei, Z., Huang, L., Su, Z.: Sparse4D: Multi-view 3D object detection with sparse spatial-temporal fusion. arXiv:2211.10581 [cs.CV] (2022). 
+
+https://doi.org/10.48550/arXiv.2211.10581 
+
+31. Lin, X., Lin, T., Pei, Z., Huang, L., Su, Z.: Sparse4D v2: Recurrent temporal fusion with sparse model. arXiv:2305.14018 [cs.CV] (2023). https://doi.org/10.48550/ arXiv.2305.14018 
+
+32. Lin, X., Pei, Z., Lin, T., Huang, L., Su, Z.: Sparse4D v3: Advancing end-to-end 3D detection and tracking. arXiv:2311.11722 [cs.CV] (2023). https://doi.org/ 10.48550/arXiv.2311.11722 
+
+33. Lin, Z., Liu, Z., Xia, Z., Wang, X., Wang, Y., Qi, S., Dong, Y., Dong, N., Zhang, L., Zhu, C.: RCBEVDet: Radar-camera fusion in bird’s eye view for 3D object detec-tion. In: CVPR. pp. 14928–14937 (2024). https://doi.org/10.1109/CVPR52733. 2024.01414 
+
+34. Liu, H., Wu, C., Cheng, J., Chai, W., Wang, S., Liu, G., Latapie, H., Wu, J., Hwang, J., Shuai, H., Cheng, W.: MonoTAKD: Teaching assistant knowledge distillation for monocular 3D object detection. In: CVPR. pp. 22266–22275 (2025). https: //doi.org/10.1109/CVPR52734.2025.02074 
+
+35. Liu, Y., Wang, T., Zhang, X., Sun, J.: PETR: Position embedding transformation for multi-view 3D object detection. In: ECCV. vol. 13687, pp. 531–548 (2022). 
+
+https://doi.org/10.1007/978-3-031-19812-0_31 
+
+36. Liu, Y., Yan, J., Jia, F., Li, S., Gao, A., Wang, T., Zhang, X.: PETRv2: A unified framework for 3D perception from multi-camera images. In: ICCV. pp. 3262–3272 (2023). https://doi.org/10.1109/ICCV51070.2023.00302 
+
+37. Liu, Z., Wu, Z., Tóth, R.: SMOKE: Single-stage monocular 3D object detection via keypoint estimation. In: CVPRW. pp. 996–997 (2020). https://doi.org/10. 1109/CVPRW50498.2020.00506 
+
+38. Loshchilov, I., Hutter, F.: Decoupled weight decay regularization. In: ICLR (2019), 
+
+https://openreview.net/pdf?id=Bkg6RiCqY7 
+
+39. Lu, H.C., Lin, C.Y., Hsu, W.H.: Improving generalization ability for 3D object de-tection by learning sparsity-invariant features. In: ICRA. pp. 10892–10898 (2025). 
+
+https://doi.org/10.1109/ICRA55743.2025.11128274 
+
+40. Mao, J., Niu, M., Jiang, C., Liang, H., Chen, J., Liang, X., Li, Y., Ye, C., Zhang, W., Li, Z., Yu, J., Xu, H., Xu, C.: One million scenes for autonomous driving: ONCE dataset. In: NeurIPS D&B (2021), 
+
+https://datasets- benchmarks- proceedings.neurips.cc/paper/2021/file/ 67c6a1e7ce56d3d6fa748ab6d9af3fd7-Paper-round1.pdf 
+
+41. Meier, J., Günther, F., Marin, R., Dhaouadi, O., Kaiser, J., Cremers, D.: IDEAL-M3D: Instance diversity-enriched active learning for monocular 3D detection. In: WACV. pp. 181–191 (2026). https://doi.org/10.1109/WACV61042.2026.00026 
+
+42. Meier, J., Inchingolo, L., Dhaouadi, O., Xia, Y., Kaiser, J., Cremers, D.: MonoCT: Overcoming monocular 3D detection domain shift with consistent teacher mod-els. In: ICRA. pp. 351–358 (2025). https://doi.org/10.1109/ICRA55743.2025. 11127874 
+
+43. Meier, J., Michel, J., Dhaouadi, O., Yang, Y.H., Reich, C., Bauer, Z., Roth, S., Pollefeys, M., Kaiser, J., Cremers, D.: LeAD-M3D: Leveraging asymmetric dis-tillation for real-time monocular 3D detection. arXiv:2512.05663 [cs.CV] (2025). 
+
+https://doi.org/10.48550/arXiv.2512.05663 
+
+44. Meier, J., Scalerandi, L., Dhaouadi, O., Kaiser, J., Araslanov, N., Cremers, D.: CARLA Drone: Monocular 3D object detection from a different perspective. In: GCPR. vol. 15298, pp. 137–152 (2024). https://doi.org/10.1007/978-3-031-85187-2_9 Monocular & Domain-Generalizable Temporal 3D Detection 19 45. Nabati, R., Qi, H.: CenterFusion: Center-based radar and camera fusion for 3D object detection. In: WACV. pp. 1527–1536 (2021). https://doi.org/10.1109/ WACV48630.2021.00157 
+
+46. Pang, S., Morris, D., Radha, H.: TransCAR: Transformer-based camera-and-radar fusion for 3D object detection. In: IROS. pp. 10902–10909 (2023). https://doi. org/10.1109/IROS55552.2023.10341793 
+
+47. Peng, L., Xu, J., Cheng, H., Yang, Z., Wu, X., Qian, W., Wang, W., Wu, B., Cai, D.: Learning occupancy for monocular 3D object detection. In: CVPR. pp. 10281–10292 (2024). https://doi.org/10.1109/CVPR52733.2024.00979 
+
+48. Philion, J., Fidler, S.: Lift, Splat, Shoot: Encoding images from arbitrary camera rigs by implicitly unprojecting to 3D. In: ECCV. vol. 12359, pp. 194–210 (2020). 
+
+https://doi.org/10.1007/978-3-030-58568-6_12 
+
+49. Pu, F., Wang, Y., Deng, J., Yang, W.: MonoDGP: Monocular 3D object detection with decoupled-query and geometry-error priors. In: CVPR. pp. 6520–6530 (2025). 
+
+https://doi.org/10.1109/CVPR52734.2025.00611 
+
+50. Ranasinghe, Y., Hegde, D., Patel, V.M.: MonoDiff: Monocular 3D object detection and pose estimation with diffusion models. In: CVPR. pp. 10659–10670 (2024). 
+
+https://doi.org/10.1109/CVPR52733.2024.01014 
+
+51. Reading, C., Harakeh, A., Chae, J., Waslander, S.L.: Categorical depth distribution network for monocular 3D object detection. In: CVPR. pp. 8555–8564 (2021). 
+
+https://doi.org/10.1109/CVPR46437.2021.00845 
+
+52. Roddick, T., Kendall, A., Cipolla, R.: Orthographic feature transform for monoc-ular 3D object detection. In: BMVC (2019) 53. Sun, P., Kretzschmar, H., Dotiwalla, X., Chouard, A., Patnaik, V., Tsui, P., Guo, J., Zhou, Y., Chai, Y., Caine, B., et al.: Scalability in perception for autonomous driving: Waymo open dataset. In: CVPR. pp. 2446–2454 (2020). https://doi. org/10.1109/CVPR42600.2020.00252 
+
+54. Tanveer, M.H., Fatima, Z., Mariam, H., Rehman, T., Voicu, R.C.: Three-dimensional outdoor object detection in quadrupedal robots for surveillance navi-gations. Actuators 13 (10) (2024). https://doi.org/10.3390/act13100422 
+
+55. Vidit, V., Engilberge, M., Salzmann, M.: CLIP the gap: A single domain gener-alization approach for object detection. In: CVPR. pp. 3219–3229 (2023). https: //doi.org/10.1109/CVPR52729.2023.00314 
+
+56. Wang, H., Chen, Z., Cai, Y., Chen, L., Li, Y., Sotelo, M.A., Li, Z.: Voxel-RCNN-complex: An effective 3D point cloud object detector for complex traffic conditions. IEEE Trans. Instrum. Meas. 71 , 1–12 (2022). https://doi.org/10.1109/TIM. 2022.3165251 
+
+57. Wang, L., Li, R., Sun, J., Liu, X., Zhao, L., Seah, H.S., Quah, C.K., Tandianus, B.: Multi-view fusion-based 3D object detection for robot indoor scene perception. Sensors 19 (19), 4092 (2019). https://doi.org/10.3390/s19194092 
+
+58. Wang, S., Jiang, X., Li, Y.: Focal-PETR: Embracing foreground for efficient multi-camera 3D object detection. IEEE Trans. Intell. Veh. 9(1), 1481–1489 (2024). 
+
+https://doi.org/10.1109/TIV.2023.3332608 
+
+59. Wang, S., Liu, Y., Wang, T., Li, Y., Zhang, X.: Exploring object-centric temporal modeling for efficient multi-view 3D object detection. In: ICCV. pp. 3621–3631 (2023). https://doi.org/10.1109/ICCV51070.2023.00335 
+
+60. Wang, S., Zhao, X., Xu, H.M., Chen, Z., Yu, D., Chang, J., Yang, Z., Zhao, F.: Towards domain generalization for multi-view 3D object detection in bird-eye-view. In: CVPR. pp. 13333–13342 (2023). https://doi.org/10.1109/CVPR52729.2023. 01281 20 M. Kotb, J. Meier et al. 
+
+61. Wang, T., Zhu, X., Pang, J., Lin, D.: FCOS3D: Fully convolutional one-stage monocular 3D object detection. In: ICCV. pp. 913–922 (2021). https://doi.org/ 10.1109/ICCVW54120.2021.00107 
+
+62. Wang, Y., Guizilini, V.C., Zhang, T., Wang, Y., Zhao, H., Solomon, J.: DETR3D: 3D object detection from multi-view images via 3D-to-2D queries. In: CoRL. vol. 164, pp. 180–191 (2022), https://proceedings.mlr.press/v164/wang22b/ wang22b.pdf 
+
+63. Yan, L., Yan, P., Xiong, S., Xiang, X., Tan, Y.: MonoCD: Monocular 3D object detection with complementary depths. In: CVPR. pp. 10248–10257 (2024). https: //doi.org/10.1109/CVPR52733.2024.00976 
+
+64. Yang, C., Chen, Y., Tian, H., Tao, C., Zhu, X., Zhang, Z., Huang, G., Li, H., Qiao, Y., Lu, L., et al.: BEVFormer v2: Adapting modern image backbones to bird’s-eye-view recognition via perspective supervision. In: CVPR. pp. 17830–17839 (2023). 
+
+https://doi.org/10.1109/CVPR52729.2023.01710 
+
+65. Yang, F., Chen, H., He, Y., Zhao, S., Zhang, C., Ni, K., Ding, G.: Geometry-guided domain generalization for monocular 3D object detection. In: AAAI. vol. 38, pp. 6467–6476 (2024). https://doi.org/10.1609/aaai.v38i6.28467 
+
+66. Yang, J., Song, L., Liu, S., Mao, W., Li, Z., Li, X., Sun, H., Sun, J., Zheng, N.: DBQ-SSD: Dynamic ball query for efficient 3D object detection. In: ICLR (2023), 
+
+https://openreview.net/pdf?id=ZccFLU-Yk65 
+
+67. Yang, Z., Sun, Y., Liu, S., Jia, J.: 3DSSD: Point-based 3D single stage object detec-tor. In: CVPR. pp. 11040–11048 (2020). https://doi.org/10.1109/CVPR42600. 2020.01105 
+
+68. Yang, Z., Sun, Y., Liu, S., Shen, X., Jia, J.: STD: Sparse-to-dense 3D object detec-tor for point cloud. In: ICCV. pp. 1951–1960 (2019). https://doi.org/10.1109/ ICCV.2019.00204 
+
+69. Ye, X., Shu, M., Li, H., Shi, Y., Li, Y., Wang, G., Tan, X., Ding, E.: Rope3D: The roadside perception dataset for autonomous driving and monocular 3D object detection task. In: CVPR. pp. 21309–21318 (2022). https://doi.org/10.1109/ CVPR52688.2022.02065 
+
+70. Zhou, X., Wang, D., Krähenbühl, P.: Objects as points. arXiv:1904.07850 [cs.CV] (2019). https://doi.org/10.48550/arXiv.1904.07850 
+
+71. Zhou, Y., Liu, Q., Zhu, H., Li, Y., Chang, S., Guo, M.: MoGDE: Boosting mobile monocular 3D object detection with ground depth estimation. In: NeurIPS. vol. 35, pp. 2033–2045 (2022), https://papers.neurips.cc/paper_files/paper/2022/ file/0d81e6f2511fc78631ee0315fafeef9e-Paper-Conference.pdf 
+
+72. Zhou, Y., Zhu, H., Liu, Q., Chang, S., Guo, M.: MonoATT: Online monocular 3D object detection with adaptive token transformer. In: CVPR. pp. 17493–17503 (2023). https://doi.org/10.1109/CVPR52729.2023.01678

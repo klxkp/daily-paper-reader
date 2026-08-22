@@ -1,0 +1,187 @@
+Title: Geometric Filtering of LLM-Generated Samples for Few-Shot Text Classification
+
+URL Source: https://arxiv.org/pdf/2608.13866v1
+
+Published Time: Mon, 17 Aug 2026 00:18:37 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Geometric Filtering of LLM-Generated Samples for Few-Shot Text Classification 
+
+Benjam´ ın Schindler 
+
+Faculty of Engineering and Sciences Universidad Adolfo Ib´ a˜ nez Millennium Nucleus for Social Data Science (SODAS) 
+
+Santiago, Chile bschindler@alumnos.uai.cl 
+
+Gonzalo A. Ruz 
+
+Faculty of Engineering and Sciences Universidad Adolfo Ib´ a˜ nez Millennium Nucleus for Social Data Science (SODAS) Millennium Nucleus in Data Science for Plant Resilience (PhytoLearning) 
+
+Santiago, Chile gonzalo.ruz@uai.cl 
+
+Abstract —Large language models (LLMs) can generate syn-thetic training data for text classification, but the quality of generated samples is heterogeneous: some fall in correct class regions of the embedding space while others land in peripheral or cross-class zones. We propose a geometric filtering framework that evaluates each LLM-generated sample by its Euclidean distance to real class examples in a sentence embedding space, selecting only geometrically consistent candidates. A soft weight-ing mechanism transforms filter scores into sample weights for classifier training. Evaluated across 13 datasets, 5 classifiers, 10 augmentation methods, and over 6,700 configurations, our method achieves +2.61 percentage points (pp) over SMOTE (p < 0.0001 , Cohen’s d = 0 .95 , 88.9% win rate). The approach generalizes to named entity recognition (+9.26pp, 100% win rate) without filter modification, and is robust across 5 LLMs from 4 providers. A key finding is that the simplest distance-based filter consistently outperforms complex multi-criteria alternatives. 
+
+Index Terms —data augmentation, large language models, few-shot learning, text classification, geometric filtering, embedding space 
+
+I. I NTRODUCTION 
+
+Text classification in low-resource scenarios remains a cen-tral challenge in natural language processing. Many practical domains, such as hate speech detection, news classification, and spam filtering, require supervised models trained on labeled data, yet practitioners often have only 10 to 50 labeled examples per class. This scarcity is compounded in multi-class settings, where each category needs a critical mass of examples for the classifier to learn robust decision boundaries. The consequence is degraded macro F1 performance, particularly for underrepresented classes [1]. Two main paradigms address this data scarcity through augmentation. Classical oversampling methods such as SMOTE [2] and ADASYN [3] generate synthetic samples via interpolation in the embedding space. These methods provide explicit geometric guidance on sample placement but produce interpolated vectors that do not correspond to linguistically coherent text. LLM-based generation produces grammatically correct and semantically plausible text [4], [5], but lacks information about the geometric structure of the representation space where classifiers operate. A fundamental gap separates these paradigms: classical methods offer geometric control without linguistic validity, while LLMs provide linguistic quality without geometric awareness. This creates a quality heterogeneity problem: LLM-generated samples vary widely in their embedding space placement. Some land in regions faithful to the target class, while others fall in peripheral zones or even in regions asso-ciated with other classes. Incorporating all generated samples indiscriminately can degrade classifier performance [6], [7]. Springer et al. [8] further demonstrate that the influence of synthetic data on few-shot classifiers depends critically on sample quality, not just quantity. This observation motivates our central question: can LLM-based augmentation be im-proved through geometric filtering that selects only high-quality synthetic samples? 
+
+This paper proposes a post-generation geometric filtering system that evaluates each synthetic sample by its position in the embedding space. The framework bridges the two paradigms: LLMs generate linguistically valid text, and ge-ometric filters ensure that only samples consistent with the real data distribution are retained. Our contributions are: 1) A geometric filtering framework based on Euclidean distance in the embedding space that selects high-quality LLM-generated samples. The system is decoupled from the generative model and validated with 5 LLMs from 4 providers. 2) A soft weighting mechanism that transforms geometric filter scores into continuous sample weights for classifier training, going beyond binary accept/reject decisions. 3) Demonstration that these filters generalize across tasks, from text classification to named entity recognition (NER), without modification, achieving +9.26pp im-provement. 4) Comprehensive empirical evidence across 6,700+ con-figurations that the simplest distance-based filter con-sistently outperforms complex multi-criteria alternatives, with theoretical analysis explaining why. arXiv:2608.13866v1 [cs.LG] 14 Aug 2026 II. R ELATED WORK 
+
+A. Classical Oversampling 
+
+SMOTE [2] generates synthetic samples by interpolating between nearest neighbors in feature space. ADASYN [3] extends this with adaptive sampling density. EDA [9] applies surface-level text perturbations (synonym substitution, random insertion/deletion). While effective in certain settings, these methods either lack linguistic coherence (SMOTE in embed-ding space) or produce only superficial variations (EDA) [10], [11]. 
+
+B. LLM-Based Augmentation 
+
+GPT-3-generated reviews improve accuracy by +12.7% and macro F1 by +13pp in sentiment analysis [12]. Fine-tuned LLMs outperform SMOTE for multiclass imbalanced text, achieving F1 of 0.76 vs 0.60 [13]. AugGPT leverages Chat-GPT for augmentation across multiple tasks [14]. However, recent work shows that LLM benefits diminish when more than 20 examples per class are available [7], and that evaluation protocols significantly impact conclusions [15]. 
+
+C. Hybrid and Quality-Aware Approaches 
+
+Emerging methods combine geometric and generative ap-proaches. LLMOverTab uses SMOTE to identify underrep-resented regions and LLMs to fill them [16]. SMOTExT applies SMOTE interpolation followed by LLM decoding [17]. SentiGEN combines T5 with genetic algorithms and an XLNet validator [18]. AugmenToxic applies LLM augmentation for toxicity detection [19]. However, none of these methods imple-ment quantitative post-generation validation in the embedding space. Our work addresses this gap by introducing geometric filters that evaluate sample quality based on embedding space properties. III. M ETHODOLOGY 
+
+A. Problem Setup 
+
+We evaluate on 13 datasets spanning 9 textual domains: 7 text classification datasets (2–20 classes) including 20news-groups, sms spam, hate speech, ag news, emotion, dbpe-dia14, and 20newsgroups 20class; 3 scalability datasets (trec6, banking77, clinc150 with 6–150 classes); and 3 NER corpora (MultiNERD, WikiANN, Few-NERD). Few-shot scenarios are simulated by sampling 10, 25, or 50 examples per class from training sets, keeping full test sets intact. All texts are encoded using all-mpnet-base-v2 [20], [21], producing L2-normalized 768-dimensional embeddings. An ablation with 3 additional embedding models (bge-large, e5-large, bge-small) confirms robustness (90.5% cross-model agreement). 
+
+B. LLM Generation 
+
+We use Gemini 3 Flash as the primary generative model, with robustness validated across GPT-5-mini, Claude 4.5 Haiku, Kimi K2.5, and GLM-5 (5 models, 4 providers). For each class, real examples serve as in-context demonstrations and 3 × surplus candidates are generated (3 candidates per desired sample). No fine-tuning is applied; all specificity comes from in-context learning. Responses are cached via MD5 hashing for reproducibility. 
+
+C. Geometric Filters 
+
+We implement five filtering strategies with increasing com-plexity: 
+
+No filter (control): Random selection from candidates, isolating the contribution of geometric filtering. 
+
+LOF filter [22]: Evaluates local density of each synthetic sample relative to real class examples. Two variants: relaxed (permissive threshold) and strict. 
+
+Cascade filter: A hierarchical scoring system with up to 4 levels: (1) Euclidean distance to nearest real anchor, (2) cosine similarity, (3) KNN purity, (4) centroid distance. Scores are combined via geometric mean and top-N candidates are selected by ranking. Level 1 (distance only) produces the best results. Combined filter: Requires passing both LOF and cosine similarity thresholds simultaneously. This is the most restric-tive strategy, included as a case study of over-filtering. The key finding is that level-1 cascade (Euclidean dis-tance only) outperforms all multi-criteria alternatives. For L2-normalized vectors, ∥u−v∥22 = 2 (1 −cos( u, v )) , so Euclidean distance is a strictly monotonic function of cosine similarity and the latter adds no discriminative information [23]. Addi-tionally, LOF requires k = 20 neighbors but only 9 are avail-able at 10-shot, producing degenerate density estimates [24]. 
+
+D. Soft Weighting 
+
+Instead of binary accept/reject, geometric filter scores are transformed into continuous sample weights. The procedure has four steps: (1) compute cascade level-1 scores for all candidates; (2) select top-N candidates; (3) normalize scores to [0 , 1] via min-max; (4) apply temperature scaling: 
+
+w(x) = max 
+
+
+
+wmin , s norm (x)1/T 
+
+(1) where T = 0 .5 (i.e., an exponent of 1/T = 2 , which sharpens the weight distribution toward the highest-scoring candidates) and wmin = 0 , so that the max operator in (1) is inactive here and is retained only as a general safeguard against zero-weight samples. Real samples always receive weight 1.0. The weights are passed as sample_weight to the classifier, so geometrically consistent synthetic samples contribute more to training. 
+
+E. Baselines and Classifiers 
+
+We compare against 8 augmentation baselines: SMOTE [2], random oversampling, EDA [9], back-translation (via Gemini EN →ES →EN), no augmentation, embedding mixup, T5 para-phrasing, and BERT contextual augmentation [25]. Together with our two variants (binary filtering and soft weighting) these constitute the 10 methods of Table I, with SMOTE serving as the reference throughout. Five classifiers are evaluated: logistic regression, linear SVC, Ridge, random forest (100 trees), and MLP (100 hidden units). F. Statistical Protocol 
+
+Experiments use up to 5 random seeds 
+
+[42 , 123 , 456 , 789 , 1011] controlling few-shot sampling, under two protocols. The main comparison of 10 methods (Tables I and II) uses the 3 linear classifiers and the first 3 seeds (1,890 runs). A second protocol covers all 5 classifiers and all 5 seeds over 7 methods (3,675 runs) and supplies the MLP and random forest rows of Table III. The primary metric is macro F1 on the full test set. Significance is assessed via paired t-tests with Bonferroni correction; each table reports its number of paired observations N . Effect sizes are reported as Cohen’s d (0.2=small, 0.5=medium, 0.8=large). Confidence intervals are computed via bootstrap with 10,000 resamples. Win rate measures the fraction of configurations where the method exceeds SMOTE. IV. E XPERIMENTAL RESULTS 
+
+A. Main Comparison 
+
+Table I presents the comparison of 10 augmentation meth-ods against SMOTE across 1,890 configurations (21 dataset configurations × 3 classifiers × 3 seeds × 10 methods). The soft-weighted method achieves +2.61pp over SMOTE with a large effect size ( d = 0 .95 ) and 88.9% win rate. Binary filtering also reaches significance (+2.39pp, d = 0 .82 ). Crit-ically, all modern baselines, T5 paraphrasing, BERT contex-tual augmentation, and embedding mixup, fail to outperform SMOTE . This challenges the narrative that pretrained model-based techniques automatically surpass classical methods, con-sistent with [7]. The ablation between soft weighting and binary filtering shows a marginal difference of +0.22pp ( p = 0.053 ), in-dicating that the main contribution comes from geometric filtering itself. Binary filtering already achieves +1.75pp over no augmentation ( p < 0.0001 , d = 0 .63 ), confirming that geometric selection adds significant value over indiscriminate sample incorporation. 
+
+B. Effect of Training Set Size 
+
+Table II shows the pronounced diminishing returns pattern. At 10-shot, the effect size is very large ( d = 1.48 ) with absolute macro F1 improving from 67.23% (SMOTE) to 72.12%. At 25-shot, the win rate reaches 95.2%, indicating near-universal improvement. At 50-shot, benefits diminish as classifiers already have sufficient data for reasonable decision boundaries. This pattern has a direct interpretation: when real data is scarce, filtered synthetic samples provide genuinely new information that densifies class regions; as real data grows, the classifier already captures the main decision bound-aries and augmentation provides diminishing marginal value. Fig. 1 illustrates the filtering mechanism via t-SNE projec-tion of the emotion dataset (6 classes, 10-shot). The left panel shows all LLM candidates (crosses), many of which fall in cross-class or peripheral regions. The right panel shows only the geometrically filtered samples (triangles), which cluster tightly around the real examples (circles) of each class.                                                                                        
+
+> TABLE I COMPARISON OF 10 AUGMENTATION METHODS VS SMOTE BASELINE .
+> Method ∆(pp) 95% CI dWin% Soft-weighted +2.61 *** [+1.98, +3.25] 0.95 88.9
+> Binary filter +2.39*** [+1.75, +3.07] 0.82 79.4 No augmentation +0.64*** [+0.42, +0.89] 0.64 73.0 Back-translation −0.07 [−0.42, +0.26] −0.05 57.1 EDA −0.15 [−0.57, +0.27] −0.08 52.4 BERT contextual −0.26 [−0.58, +0.02] −0.21 46.0 Emb. mixup −0.01 [−0.13, +0.11] −0.02 44.4 Random oversample −0.16 [−0.35, +0.02] −0.21 39.7
+> SMOTE (base) ————T5 paraphrase −0.35 [−0.62, −0.11] −0.34 38.1
+> N= 63 paired comparisons. *** p < 0.001 (Bonferroni).
+> TABLE II PERFORMANCE BY NUMBER OF EXAMPLES PER CLASS (n-SHOT ).
+> Soft-weighted Binary filter
+> n∆dWin ∆dWin
+> 10 +4.89*** 1.48 90.5 +4.44*** 1.15 87.3 25 +2.17*** 1.57 95.2 +1.96*** 1.18 90.5 50 +0.76*** 0.80 74.6 +0.77*** 0.71 63.5 *** p < 0.001 (paired t-test). ∆in pp.
+
+C. Classifier Analysis 
+
+Table III presents the breakdown by classifier type. Linear classifiers benefit most from geometric filtering. Linear SVC achieves +2.98pp ( d = 1 .02 ) and Ridge +2.74pp (d = 1 .04 ), both with large effect sizes and over 92% win rates. The MLP shows a medium-to-large effect ( d = 0 .74 ), while random forest, although still significant, shows only a small effect ( d = 0.35 ), the weakest of the five. The geometric explanation is that linear classifiers establish hy-perplane decision boundaries that are directly reinforced by densifying nearby regions of the embedding space. Filtered synthetic samples land in class-consistent zones close to these boundaries, providing the classifier with additional support vectors. Tree-based methods partition along individual feature axes, a strategy that does not benefit equally from spatial densification, as synthetic samples may not align with the specific axis-parallel cuts that trees use. 
+
+D. Cross-Task Generalization: NER 
+
+Table IV presents the extension to named entity recognition. The adaptation requires no filter modification, only the defini-tion of “class” changes to dominant entity type per sentence. The cascade level-1 filter achieves +9.26pp over the unaug-mented baseline ( pBonf = 0 .002 , d = 2 .05 ), with 100% win rate across all 9 configurations and the best result on 5 of them. Relaxed LOF is statistically indistinguishable (+9.28pp, 
+
+d = 1 .91 ), so the two simplest filters tie at the top, mirroring the classification results. Most of this gain is attributable to the LLM data itself: unfiltered generation already yields +8.40pp, and geometric filtering adds a further +0.86pp that does not reach significance with only 9 configurations ( p = 0 .27 ). The pattern of diminishing returns by n-shot persists: +13.97pp at 10-shot, +8.67pp at 25-shot, +5.15pp at 50-shot. The combined filter produces catastrophic results with 0% acceptance rate in Fig. 1. t-SNE visualization of the embedding space for the emotion dataset (6 classes, 10-shot). Left: all LLM candidates (crosses) include samples in cross-class and peripheral regions. Right: after geometric filtering, only class-consistent samples (triangles) are retained near real examples (circles). Stars indicate class centroids. TABLE III PERFORMANCE BY CLASSIFIER TYPE (SOFT -WEIGHTED VS SMOTE). 
+
+Classifier ∆ (pp) Cohen’s d Win% N
+
+Linear SVC +2.98*** 1.02 92.1 63 Ridge +2.74*** 1.04 92.1 63 MLP +2.16*** 0.74 88.6 105 Logistic Reg. +2.09*** 0.82 76.2 63 Random Forest +1.42** 0.35 61.9 105         
+
+> ** p < 0.01 , *** p < 0.001 (Bonferroni-corrected).
+> N= 63 : 3-seed protocol; N= 105 : 5-seed protocol.
+
+6 of 9 configurations and is the only filter failing to reach significance ( p = 0.29 , d = 0.38 ), reinforcing the over-filtering conclusion. This cross-task generalization confirms that distance-based filtering captures task-agnostic geometric properties of the embedding space. Fig. 2 shows the diminishing returns pattern for text classi-fication, which the NER results above mirror. 
+
+E. Why Simple Filters Outperform Complex Ones 
+
+Three mechanisms explain this counterintuitive result: 
+
+Metric correlation: For L2-normalized vectors, Euclidean distance is a monotonic transformation of cosine similarity. Adding cosine as a separate criterion provides no new dis-criminative information. In 768 dimensions, cosine similarity suffers from concentration of measure [23], becoming quasi-uniform. 
+
+Diversity loss: The combined filter’s intersection of criteria eliminates diverse candidates, retaining only quasi-duplicates of existing data. Augmentation value lies in covering under-represented regions, which restrictive intersection destroys.    
+
+> TABLE IV NER EXTENSION RESULTS (ENTITY -LEVEL F1).
+
+Corpus n Baseline No filter Cascade LOF 
+
+MultiNERD 10 .247 .393 .407 .426 
+
+25 .315 .419 .438 .431 50 .415 .486 .455 .495 
+
+WikiANN 10 .162 .268 .303 .302 25 .253 .272 .299 .276 50 .244 .295 .287 .293 Few-NERD 10 .103 .234 .220 .217 25 .161 .240 .251 .235 50 .200 .248 .272 .261 
+
+Average .233 .317 .326 .326 
+
+∆ vs baseline — +8.40pp +9.26pp +9.28pp         
+
+> Cascade level-1: p= 0 .0003 (raw), pBonf = 0 .002 over the 7 filters evaluated, d= 2 .05 , 100% win rate vs baseline.
+
+LOF instability: With k = 20 neighbors but only 9real examples per class at 10-shot, LOF density estimates degenerate. Euclidean distance to the class centroid remains stable even with N = 10 points [24]. This is consistent with evidence that representation quality determines outcomes more than selection algorithm complexity [26]. V. D ISCUSSION 
+
+A. LLM Robustness 
+
+A critical question is whether the observed gains depend on the specific LLM used for generation. Evaluation with 5 generative models, Gemini 3 Flash, GPT-5-mini, Claude 4.5 Haiku, Kimi K2.5 (open-source), and GLM-5 (open-source), shows that all achieve statistically significant improvements Fig. 2. Improvement over SMOTE ( ∆ in pp) by number of training examples per class. The benefit of geometric filtering decreases as more real data becomes available, confirming that the method is most valuable in extremely low-resource scenarios. 
+
+after Bonferroni correction for 5 comparisons. The spread between the best model (+2.31pp, Gemini) and the worst (+1.49pp, Kimi) is only 0.82pp. The Friedman test detects no significant LLM effect ( χ2 = 8 .15 , p = 0 .086 ), and Kendall’s coefficient of concordance ( W = 0 .59 ) indicates substantial inter-model agreement on which dataset configurations benefit most from filtering. This confirms that the geometric filtering framework is truly decoupled from the generative model. 
+
+B. Per-Class Analysis 
+
+Individual class analysis reveals that difficult classes ben-efit disproportionately. Classes with baseline F1 below 30% gain +10.44pp on average, while easy classes (F1 > 80%) gain only +0.55pp (Spearman ρ = −0.269 , which does not reach significance with the 13 classes analyzed, p = 0 .37 ). For example, in the emotion dataset at 10-shot, the “anger” class improves by +16.9pp (from 27.8% to 44.6%), while “sadness” gains just +1.0pp. This concentration of benefits where classifiers have the largest margin for improvement has practical implications: geometric filtering is especially valuable for applications where performance on minority or difficult classes is critical, such as hate speech detection or medical triage. 
+
+C. Effect of Number of Classes 
+
+The number of classes influences filtering effectiveness. Datasets with 2–20 classes show consistent positive gains, with the sweet spot at 6 classes (+5.42pp, 100% win rate). However, with 77 classes (banking77) the result turns negative (−0.99 pp), and with 150 classes (clinc150) it is neutral (+0.01pp). The Spearman correlation between class count and gain is ρ = −0.260 (p = 0 .003 ). As classes multiply, each occupies a smaller embedding region, and distance-based filtering loses discriminative power when class boundaries become densely packed. 
+
+D. Curriculum Learning 
+
+An auxiliary experiment with curriculum-based inclusion of candidates ordered by geometric score reveals that the op-timal inclusion threshold is approximately 50% of candidates (+2.74pp vs SMOTE, 86.2% win rate), surpassing inclusion of all candidates (+2.22pp) by +0.52pp. This demonstrates that roughly half of LLM-generated candidates introduce noise that degrades classifier quality, even after top-N selection. The curriculum experiment provides practical guidance: generating a 3 × surplus and retaining the top 50% by geometric score maximizes augmentation value. 
+
+E. Geometric Space Analysis 
+
+Quantitative analysis of the embedding space confirms the filtering mechanism. Filtered samples produce more compact clusters (intra-class distance: 0.822 vs 0.850 unfiltered, p < 
+
+0.001 ) and better-separated classes (inter-class distance: 0.616 vs 0.571, p < 0.001 ). The silhouette score improves from 0.075 to 0.085 ( p = 0 .029 ), with filtering winning in 71% of configurations. 
+
+F. Limitations 
+
+The evaluation is English-only; multilingual transfer is unknown. Gains shrink sharply with more real data: +0.76pp at 50-shot versus +4.89pp at 10-shot, and under the 5-classifier protocol the 50-shot difference no longer reaches significance (p = 0 .16 ). The benefit also vanishes as classes multiply, turning negative at 77 classes ( −0.99 pp) and neutral at 150 (+0 .01 pp). The same embedding model is used for both filter-ing and classification, introducing potential circularity, though cross-model ablation (90.5% agreement across 4 embedding models) and superiority over teacher-model filtering ( +2 .78 vs 
+
++2 .43 pp for the binary variants; paired geometric-vs-teacher difference p = 0 .0001 ) mitigate this concern. LLM response caching produces zero cross-seed variance for deterministic classifiers (80% of configurations); restricting analysis to stochastic classifiers still yields significance (+1.79pp, p =0.0015 , d = 0 .52 ). VI. C ONCLUSION 
+
+We presented a geometric filtering framework for LLM-based data augmentation in few-shot text classification. The key idea is simple: generate a surplus of LLM candidates, embed them, and retain only those whose Euclidean distance to real class examples indicates geometric consistency. A soft weighting mechanism further modulates each sample’s training contribution based on its filter score. Across 6,700+ experimental configurations, 13 datasets, 5 classifiers, and 10 augmentation methods, the method achieves statistically significant improvements over SMOTE (+2.61pp, 
+
+p < 0.0001 , Cohen’s d = 0 .95 , 88.9% win rate). The approach generalizes to NER (+9.26pp, 100% win rate) without filter modification, is robust across 5 LLMs from 4 providers, and concentrates its largest benefits on the most difficult classes (+10.44pp for classes with baseline F1 < 30%). The most practically relevant finding is that the simplest distance-based filter consistently outperforms complex multi-criteria alternatives. This counterintuitive result is explained by three mechanisms: metric correlation in L2-normalized spaces that makes cosine similarity redundant, diversity loss under restrictive filter intersection, and density estimator instability in the few-shot regime. This finding aligns with broader evi-dence that representation quality matters more than selection algorithm complexity [26]. Future directions include multilingual evaluation with cross-lingual embedding models, validation with locally-deployed open-source LLMs (Llama, Mistral) that bypass content filters, joint Bayesian hyperparameter optimization across filter and weighting parameters, and extension to other NLP tasks such as question answering and abstractive summarization. ACKNOWLEDGMENT 
+
+This work was developed as part of the Master of Science in Data Science program at Universidad Adolfo Ib´ a˜ nez. The au-thors thank ANID FONDECYT 1230315, ANID-MILENIO-NCN2024 103, ANID-MILENIO-NCN2024 047, and Centro de Modelamiento Matem´ atico (CMM) FB210005, BASAL funds for centers of excellence from ANID-Chile. REFERENCES [1] S. Gopali, F. Abri, A. S. Namin, and K. S. Jones, “The applicability of LLMs in generating textual samples for analysis of imbalanced datasets,” 
+
+IEEE Access , vol. 12, pp. 136 451–136 465, 2024. [2] N. V. Chawla, K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer, “SMOTE: Synthetic minority over-sampling technique,” J. Artif. Intell. Res. , vol. 16, pp. 321–357, 2002. [3] H. He, Y. Bai, E. A. Garcia, and S. Li, “ADASYN: Adaptive synthetic sampling approach for imbalanced learning,” in Proc. IEEE IJCNN ,2008, pp. 1322–1328. [4] C. Whitehouse, M. Choudhury, and A. F. Aji, “LLM-powered data augmentation for cross-lingual commonsense reasoning,” in Proc. ACL 2023 , 2023, pp. 1234–1245. [5] T. Brown et al. , “Language models are few-shot learners,” in Advances in Neural Information Processing Systems , vol. 33, 2020, pp. 1877–1901. [6] Z. Li, H. Zhu, Z. Lu, and M. Yin, “Synthetic data generation with large language models for text classification: Potential and limitations,” in 
+
+Proc. EMNLP 2023 , 2023, pp. 10 443–10 461. [7] J. Cegin, J. Simko, and P. Brusilovsky, “LLMs vs established text aug-mentation techniques for classification: When do the benefits outweigh the costs?” in Proc. NAACL 2025 , 2025, pp. 10 543–10 570. [8] J. M. Springer, C. Devoto, M. I. Tosheva, and P. Ramesh, “On the influence of synthetic data for few-shot text classification,” in Findings ACL 2025 , 2025, pp. 8249–8268. [9] J. Wei and K. Zou, “EDA: Easy data augmentation techniques for boosting performance on text classification tasks,” in Proc. EMNLP-IJCNLP , 2019, pp. 6382–6388. [10] S. Y. Feng, V. Gangal, J. Wei, S. Chandar, S. Vosoughi, T. Mitamura, and E. Hovy, “A survey of data augmentation approaches for NLP,” in 
+
+Findings ACL-IJCNLP 2021 , 2021, pp. 968–988. [11] S. F. Taskiran, B. Turkoglu, E. Kaya, and T. Asuroglu, “A comprehensive evaluation of oversampling techniques for enhancing text classification performance,” Scientific Reports , vol. 15, no. 1, p. 21631, 2025. [12] C. Suhaeni and H.-S. Yong, “Mitigating class imbalance in senti-ment analysis through GPT-3-generated synthetic sentences,” Appl. Sci. ,vol. 13, p. 9766, 2023. [13] N. A. Cloutier and N. Japkowicz, “Fine-tuned generative LLM oversam-pling can improve performance over traditional techniques on multiclass imbalanced text classification,” in Proc. IEEE Big Data 2023 , 2023, pp. 5181–5186. [14] H. Dai, Z. Liu, W. Liao, X. Huang, Y. Cao, Z. Wu, L. Zhao, S. Xu, W. Liu, N. Liu, S. Li, D. Zhu, H. Cai, L. Sun, Q. Li, D. Shen, T. Liu, and X. Li, “AugGPT: Leveraging ChatGPT for text data augmentation,” arXiv preprint arXiv:2302.13007, 2023. [15] F. Piedboeuf and P. Langlais, “Evaluation protocols for low-resource text classification with data augmentation,” in Findings EMNLP 2024 ,2024, pp. 3195–3207. [16] T. Isomura, R. Shimizu, and M. Goto, “LLMOverTab: Tabular data augmentation with language model-driven oversampling,” Expert Syst. Appl. , vol. 264, p. 125852, 2025. [17] M. Bystro´ nski, M. Hołysz, G. Piotrowski, N. V. Chawla, and T. Kaj-danowicz, “SMOTExT: SMOTE meets large language models,” arXiv preprint arXiv:2505.13434, 2025. [18] N. T. Sundararajan and A. Kumarapathirage, “SentiGEN: A sentiment-aware generative model for text data augmentation,” in Findings EMNLP 2023 , 2023, pp. 9138–9149. [19] A. Bodaghi, P. S. Murthy, A. F. Kazerooni, and A. Caliskan, “Augmen-Toxic: LLM-powered data augmentation for enhanced toxicity detec-tion,” in WWW ’24 Companion , 2024, pp. 101–105. [20] N. Reimers and I. Gurevych, “Sentence-BERT: Sentence embeddings using Siamese BERT-networks,” in Proc. EMNLP-IJCNLP , 2019, pp. 3982–3992. [21] N. Muennighoff, N. Tazi, L. Magne, and N. Reimers, “MTEB: Massive text embedding benchmark,” in Proc. EACL 2023 , 2023, pp. 2014–2037. [22] M. M. Breunig, H.-P. Kriegel, R. T. Ng, and J. Sander, “LOF: Identifying density-based local outliers,” in Proc. ACM SIGMOD , 2000, pp. 93–104. [23] F. Tessari and N. Hogan, “Surpassing cosine similarity for multidi-mensional comparisons: Dimension insensitive Euclidean metric,” arXiv preprint arXiv:2407.08623, 2024. [24] M. Robinson, S. Dey, and T. Chiang, “Token embeddings violate the manifold hypothesis,” in Advances in Neural Information Processing Systems (NeurIPS 2025) , 2025. [25] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, “BERT: Pre-training of deep bidirectional transformers for language understanding,” in Proc. NAACL-HLT 2019 , 2018, pp. 4171–4186. [26] Y. Du, Y. Song, H. M. Wong, D. Ignatev, A. Gatt, and D. Nguyen, “Disentangling the roles of representation and selection in data pruning,” in Proc. ACL 2025 , 2025, pp. 16 791–16 809.
