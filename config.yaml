@@ -25,3 +25,60 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: few-shot
+      description: 关于跨域小样本学习、元学习、原型学习、度量学习、表示学习和对比学习等相关主题的论文检索。
+      enabled: true
+      paper_sources:
+        - arxiv
+      keywords:
+        - keyword: cross-domain few-shot learning
+          keyword_cn: 跨域小样本学习
+          query: few-shot learning methods that generalize across different domains
+        - keyword: few-shot classification
+          keyword_cn: 小样本分类
+          query: few-shot classification algorithms for image recognition
+        - keyword: few-shot learning
+          keyword_cn: 小样本学习
+          query: few-shot learning techniques and benchmarks
+        - keyword: domain adaptation few-shot
+          keyword_cn: 小样本域适应
+          query: domain adaptation with few labeled target examples
+        - keyword: domain generalization
+          keyword_cn: 域泛化
+          query: learning domain-invariant representations for unseen domains
+        - keyword: meta learning
+          keyword_cn: 元学习
+          query: meta-learning algorithms for fast task adaptation
+      intent_queries:
+        - query: How do recent methods address few shot learning when the source and target domains are different?
+          query_cn: 当源域和目标域不同时，近期方法如何解决小样本学习问题？
+          enabled: true
+          source: manual
+          note: ''
+        - query: What meta learning strategies improve cross domain few shot classification performance?
+          query_cn: 哪些元学习策略能提高跨域小样本分类性能？
+          enabled: true
+          source: manual
+          note: ''
+        - query: How is contrastive learning used in few shot recognition and representation learning?
+          query_cn: 对比学习如何用于小样本识别和表示学习？
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-08-22T10:57:23.365Z'
+source_backends:
+  arxiv:
+    papers_table: arxiv_papers
+    use_vector_rpc: true
+    vector_rpc: match_arxiv_papers
+    vector_rpc_exact: match_arxiv_papers_exact
+    use_bm25_rpc: true
+    bm25_rpc: match_arxiv_papers_bm25
+    sync_table: arxiv_sync_status
+    sync_success_value: success
+    schema: public
+    kind: supabase
+    enabled: true
+    url: https://lyucdwgefyfbmaiopjbk.supabase.co
+    anon_key: sb_publishable_lX-oi64Uxyd7SIVv3_w2Uw_MTOojeKq
