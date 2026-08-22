@@ -1,0 +1,183 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-22T19:42:07.054299+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2608.15632v1",
+      "source": "arxiv",
+      "title": "Sparse Prototype Code Underlies Classification and Prediction Across Modalities",
+      "abstract": "Neural representations have become a central tool for studying the internal mechanisms of modern AI models, yet their complex high-dimensional structure makes them difficult to interpret. We show that classification tasks give rise to a universal representational geometry, shared across state-of-the-art models in vision, audio, and language processing. The key structure is that within-class variability is not random in representation space. Instead, its classifier-relevant component has strong and structured correlations with the class's own centroid and with the centroids of its competing classes. Building on this observation, we derive an analytical mean-field theory governed mainly by the variability along true-class and rival-class centroid coordinates, together with a global renormalization of the class radius that compensates for the non-Gaussian statistics of real representations. The theory accurately predicts classification accuracy across architectures and modalities. The relevant geometric quantities improve systematically with model scale, mirroring the observed gains in accuracy. A striking feature of the theory is its sparsity: accurate prediction requires only a small set of centroid coordinates associated with the true class and its strongest rivals - connecting our framework to sparse-feature extraction approaches such as sparse autoencoders. Together, these results provide a parsimonious predictive theory of neural representations and suggest that classification in deep networks is governed by a sparse, centroid-aligned structure embedded within the full high-dimensional representation space.",
+      "authors": [
+        "Yehonatan Avidan",
+        "Daniel D. Lee",
+        "Haim Sompolinsky"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cond-mat.dis-nn",
+        "cs.AI",
+        "stat.ML"
+      ],
+      "published": "2026-08-16T08:53:21+00:00",
+      "link": "https://arxiv.org/pdf/2608.15632v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "universal prototype code underlying classification across modalities",
+      "llm_evidence_cn": "跨模态分类背后的通用原型编码",
+      "llm_evidence": "跨模态分类背后的通用原型编码",
+      "canonical_evidence": "跨模态分类背后的通用原型编码",
+      "llm_tldr_en": "Shows a universal sparse prototype code in neural representations across modalities, deriving a mean-field theory that explains classification and informs prototype-based few-shot learning.",
+      "llm_tldr_cn": "神经网络表示的高维结构难以解释，本文发现分类任务在视觉、音频、语言模型中存在普适的表示几何：类内变异的分类器相关成分与类原型及竞争类原型存在强结构化关联。作者由此推导了平均场理论，揭示稀疏原型编码机制。该工作为理解原型网络等小样本学习方法的原理提供了理论视角，并为跨模态分类与预测研究奠定基础。",
+      "llm_tldr": "神经网络表示的高维结构难以解释，本文发现分类任务在视觉、音频、语言模型中存在普适的表示几何：类内变异的分类器相关成分与类原型及竞争类原型存在强结构化关联。作者由此推导了平均场理论，揭示稀疏原型编码机制。该工作为理解原型网络等小样本学习方法的原理提供了理论视角，并为跨模态分类与预测研究奠定基础。",
+      "llm_tags": [
+        "query:few-shot:composite"
+      ],
+      "matched_query_tag": "query:few-shot:composite",
+      "matched_query_text": "Papers central to 关于跨域小样本学习、元学习、原型学习、度量学习、表示学习和对比学习等相关主题的论文检索。, especially work that connects or combines: few-shot learning methods that generalize across different domains; few-shot classification algorithms for image recognition; few-shot learning techniques and benchmarks; domain adaptation with few labeled target examples; learning domain-invariant representations for unseen domains; meta-learning algorithms for fast task adaptation; How do recent methods address few shot learning when the source and target domains are different?; What meta learning strategies improve cross domain few shot classification performance?; How is contrastive learning used in few shot recognition and representation learning?.",
+      "matched_requirement_id": "req-composite-few-shot",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.15972v1",
+      "source": "arxiv",
+      "title": "CM-MAE: A Physics-Guided Cross-Modal Self-Supervised Learning Framework for Vision-Wireless Applications",
+      "abstract": "Synchronized camera and wireless measurements observe the same scene through different physical channels. The central difficulty is that a representation learned in one deployment can fail when viewpoint, traffic, illumination, and propagation geometry change. This paper presents CM-MAE, a self-supervised vision--wireless pretraining framework for cross-scenario representation transfer. The evaluated real-data model uses only RGB frames and the measured 64-beam received-power vector available in DeepSense 6G; it does not use ray-traced paths, calibrated depth, or beam-index labels during pretraining. Its central pretraining term is a \\emph{soft contrastive alignment loss}. Instead of making the synchronized image--wireless pair the only positive pair, this loss builds a target distribution from similarities between measured beam-power profiles, so nonidentical samples with similar directional responses are not forced apart as false negatives. A masked joint decoder provides the complementary local objective by reconstructing hidden visual patches and wireless angular clusters under modality dropout. After pretraining, a differential-rate fine-tuning rule lets a new fusion head adapt quickly while the encoders move slowly. Under a sequence-disjoint DeepSense 6G protocol, adding the soft alignment loss improves a matched linear-probe transfer average from 24.88\\% to 29.49\\%. Mild fusion fine-tuning reaches 77.38\\% Top-1 accuracy on unseen Scenarios 6--8, and optional transductive normalization adaptation reaches 78.69\\%. Since the fusion setting uses the contemporaneous 64-beam power vector at inference, these results should be read as representation-transfer diagnostics, not as proactive beam-prediction or reduced-sweeping claims.",
+      "authors": [
+        "Yubo Zhang",
+        "Yiyao Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-08-16T23:55:03+00:00",
+      "link": "https://arxiv.org/pdf/2608.15972v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "cross-scenario representation transfer via soft contrastive alignment",
+      "llm_evidence_cn": "通过软对比对齐实现跨场景表示迁移",
+      "llm_evidence": "通过软对比对齐实现跨场景表示迁移",
+      "canonical_evidence": "通过软对比对齐实现跨场景表示迁移",
+      "llm_tldr_en": "Cross-modal self-supervised pretraining with a soft contrastive alignment loss that transfers visual-wireless representations across different scenarios and deployment conditions.",
+      "llm_tldr_cn": "该论文提出CM-MAE，一个面向视觉-无线联合感知的跨模态自监督预训练框架。它针对表示在不同部署场景间失效的问题，设计了物理引导的软对比对齐损失，仅使用RGB帧和波束接收功率向量进行预训练。实验评估展示了跨场景表示迁移的有效性。这项工作为跨域表示学习提供了可借鉴的对比学习机制，虽未涉足小样本分类，但其跨场景迁移思想与领域不变表示学习目标一致。",
+      "llm_tldr": "该论文提出CM-MAE，一个面向视觉-无线联合感知的跨模态自监督预训练框架。它针对表示在不同部署场景间失效的问题，设计了物理引导的软对比对齐损失，仅使用RGB帧和波束接收功率向量进行预训练。实验评估展示了跨场景表示迁移的有效性。这项工作为跨域表示学习提供了可借鉴的对比学习机制，虽未涉足小样本分类，但其跨场景迁移思想与领域不变表示学习目标一致。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning domain-invariant representations for unseen domains",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.16589v1",
+      "source": "arxiv",
+      "title": "Ultra: Unsupervised Cross-Task Optimization for Reliable Restoration Segmentation Collaboration under Adverse Weather",
+      "abstract": "Unsupervised Domain Adaptation for Adverse Weather Semantic Segmentation (UDA-ASS) aims to transfer semantic knowledge from labeled normal-weather images to unlabeled adverse environments. Existing approaches implicitly assume that restoration and segmentation provide mutually beneficial guidance. However, under severe degradation and without target-domain supervision, the validity of cross-task optimization directions becomes fundamentally unidentifiable, leading to hallucination-driven error propagation. In this work, we propose a novel Unsupervised Restoration-Segmentation Collaborative Learning Framework (Ultra), which reframes cross-task interaction as direction selection under uncertainty and causal effect estimation, enabling reliable collaboration through candidate direction generation and intervention-based filtering. In detail, we propose CTDN and CMIL. The former exploits complementary visual structures and semantic information to generate candidate optimization directions and performs cooperative direction selection between restoration and segmentation. The latter reformulates cross-task information transfer from correlation-based propagation into causal effect assessment, suppressing hallucination propagation. Extensive experiments on three widely used UDA-ASS benchmarks demonstrate state-of-the-art segmentation performance. Beyond segmentation, our framework achieves better unsupervised restoration results than existing UDA-ASS restoration methods and generalizes to unsupervised restoration and object detection collaboration tasks. Code and models will be available at https://github.com/Wang-Shiqin/Ultra.",
+      "authors": [
+        "Shiqin Wang",
+        "Zhiqian Li",
+        "Haoyuan Du",
+        "Junming Chen",
+        "Jiayuan Li",
+        "Tianrun Xu",
+        "Haoyang Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-08-17T13:49:10+00:00",
+      "link": "https://arxiv.org/pdf/2608.16589v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unsupervised domain adaptation to adverse weather for semantic segmentation",
+      "llm_evidence_cn": "无监督域适应到恶劣天气的语义分割",
+      "llm_evidence": "无监督域适应到恶劣天气的语义分割",
+      "canonical_evidence": "无监督域适应到恶劣天气的语义分割",
+      "llm_tldr_en": "Ultra reframes cross-task interaction in unsupervised adverse-weather domain adaptation as direction selection under uncertainty, preventing hallucination-driven error propagation and improving target-domain segmentation.",
+      "llm_tldr_cn": "无监督域适应到恶劣天气的语义分割中，恢复与分割任务的优化方向在严重退化且无目标域监督时不可识别，容易导致幻觉驱动的错误传播。Ultra将跨任务交互重构为不确定性下的方向选择，并结合因果约束稳定训练。在多个恶劣天气数据集上，Ultra有效抑制了错误传播，显著提升目标域分割准确率。该方法为无监督域适应中的多任务协作提供了更可靠的优化框架。",
+      "llm_tldr": "无监督域适应到恶劣天气的语义分割中，恢复与分割任务的优化方向在严重退化且无目标域监督时不可识别，容易导致幻觉驱动的错误传播。Ultra将跨任务交互重构为不确定性下的方向选择，并结合因果约束稳定训练。在多个恶劣天气数据集上，Ultra有效抑制了错误传播，显著提升目标域分割准确率。该方法为无监督域适应中的多任务协作提供了更可靠的优化框架。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning domain-invariant representations for unseen domains",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.18339v1",
+      "source": "arxiv",
+      "title": "From Inference to Adaptation: A Unified Optimal Transport View of Vision Language Model",
+      "abstract": "Vision-language models (VLMs) have demonstrated remarkable zero-shot capabilities yet remain sensitive to real-world distribution shifts during inference. Although significant efforts are devoted to adapting VLMs at test time, they rely heavily on noisy pseudo-labels predicted directly from raw embedding similarities during inference, which are unreliable under distribution shift and mislead the adaptation. To avoid noise amplification, existing works craft coarse-grained surrogate objectives during adaptation, which fail to explicitly model sample-level relationships across different modalities, creating objective mismatch with inference, thus leading to marginal performance improvement. In this work, we aim to bridge the detached objectives of inference and adaptation for VLMs, and propose a principled VLM TTA method called \\algname. For VLM inference, we formulate the zero-shot image classification task as a cross-modal alignment problem encoded via a Wasserstein OT formulation, providing robust pseudo-labels at the sample-level to effectively adapt VLMs. For VLM adaptation, we adopt a soft-label InfoNCE loss to adapt VLMs based on the OT-induced pseudo-labels, leveraging fine-grained supervisions to explicitly model relationships of individual image-text pairs via contrastive learning, which empowers accurate inference at the same granularity. Moreover, we theoretically reveal that the InfoNCE loss can be neatly reformulated as a Wasserstein OT formulation, thereby unifying the objectives of the inference and adaptation of VLMs to achieve their mutual benefits. Extensive experiments demonstrate the effectiveness and efficiency of our methods, outperforming the best-performing methods by up to 7% with state-of-the-art efficiency.",
+      "authors": [
+        "Qi Yu",
+        "Zhichen Zeng",
+        "Katherine Tieu",
+        "Xiyuan Yang",
+        "Ruizhong Qiu",
+        "Yuchen Yan",
+        "Lihui Liu",
+        "Yanjun Zhao",
+        "Lingjie Chen",
+        "Jingrui He",
+        "Hanghang Tong"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-08-18T21:44:32+00:00",
+      "link": "https://arxiv.org/pdf/2608.18339v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Test-time adaptation to distribution shift via optimal transport, transferable to domain adaptation with limited labeled target examples",
+      "llm_evidence_cn": "通过最优传输进行测试时自适应以应对分布偏移，可迁移至小样本目标域适应",
+      "llm_evidence": "通过最优传输进行测试时自适应以应对分布偏移，可迁移至小样本目标域适应",
+      "canonical_evidence": "通过最优传输进行测试时自适应以应对分布偏移，可迁移至小样本目标域适应",
+      "llm_tldr_en": "Proposes a unified optimal transport view to connect inference and test-time adaptation of vision-language models, addressing noisy pseudo-labels under distribution shift.",
+      "llm_tldr_cn": "视觉语言模型虽有零样本能力，但推理时对分布偏移敏感，现有时适应方法常依赖不可靠的伪标签。本文提出统一的优化传输视角，将推理与适应目标对齐，显式建模跨模态样本关系，避免噪声放大与目标失配。实验表明该方法能更有效地适应分布偏移，提升视觉语言模型在目标域上的表现，对小样本域适应具有借鉴意义。",
+      "llm_tldr": "视觉语言模型虽有零样本能力，但推理时对分布偏移敏感，现有时适应方法常依赖不可靠的伪标签。本文提出统一的优化传输视角，将推理与适应目标对齐，显式建模跨模态样本关系，避免噪声放大与目标失配。实验表明该方法能更有效地适应分布偏移，提升视觉语言模型在目标域上的表现，对小样本域适应具有借鉴意义。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "domain adaptation with few labeled target examples",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
