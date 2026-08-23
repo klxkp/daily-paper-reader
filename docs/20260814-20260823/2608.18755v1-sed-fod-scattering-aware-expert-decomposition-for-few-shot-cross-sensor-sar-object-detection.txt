@@ -1,0 +1,408 @@
+Title: SED-FOD: Scattering-Aware Expert Decomposition for Few-Shot Cross-Sensor SAR Object Detection
+
+URL Source: https://arxiv.org/pdf/2608.18755v1
+
+Published Time: Thu, 20 Aug 2026 00:43:28 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# SED-FOD: Scattering-Aware Expert Decomposition for Few-Shot Cross-Sensor SAR Object Detection 
+
+Shu Yang, Zhen Chen, Zhiyu Jiang, Yanlei Li, and Xingdong Liang 
+
+Abstract —Synthetic aperture radar (SAR) object detection is an important part of remote sensing interpretation. However, because of variations in frequency band, resolution, background clutter, and target scattering responses, the performance of existing detectors often degrades when training and testing data are acquired from different SAR domains. Although domain adaptation methods offer a promising paradigm for solving this problem, most of them mainly pursue domain-invariant feature alignment and suppress sensor-dependent scattering characteris-tics that are useful for object detection. This problem becomes more challenging in few-shot scenarios, where only a few fully annotated target-domain SAR images are available. To address this issue, we propose a scattering-aware shared-specific feature decomposition framework for few-shot SAR domain adaptation object detection. We decompose detection features into a shared path and several soft-gated scattering-specific expert paths. The shared path learns transferable object structural information and is used for asymmetric domain alignment, while the scattering-specific experts adaptively compensate heterogeneous SAR re-sponses. In addition, routing-domain auxiliary loss is introduced to encourage specific experts to capture sensor-dependent routing preferences, and an expert balancing loss is used to prevent routing collapse. Extensive experiments on four bidirectional heterogeneous SAR detection tasks between FARAD-X/FARAD-Ka and MiniSAR under different few-shot settings have been conducted and experimental results demonstrate that the pro-posed method achieves superior performance in both forward and reverse adaptation directions. 
+
+Index Terms —Synthetic aperture radar (SAR) object detection, few-shot domain adaptation, cross-sensor, mixture of experts. 
+
+I. I NTRODUCTION 
+
+Synthetic Aperture Radar (SAR) is an active microwave imaging sensor that utilizes pulse compression and syn-thetic aperture techniques to provide two-dimensional high-resolution imagery. Owing to its all-day and all-weather capa-bilities, SAR is widely used in remote-sensing interpretation tasks [1]–[3]. SAR object detection is an essential task in SAR image interpretation for locating targets of interest, such as vehicles, ships, and aircraft, from complex backgrounds [4]– [6]. In recent years, deep-learning-based detectors have sig-nificantly improved SAR object detection performance by learning discriminative representations from large amounts of annotated data with similar statistical characteristics [7]–[9]. 
+
+> The authors are with the National Key Laboratory of Microwave Imaging Technology, Aerospace Information Research Institute, Chinese Academy of Sciences, Beijing 100190, China, and also with the School of Electronic, Electrical and Communication Engineering, University of Chinese Academy of Sciences, Beijing 100049, China. Corresponding author: Xingdong Liang (e-mail: liangxd@aircas.ac.cn). This work has been submitted to IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible.
+
+However, most existing SAR image object detection studies train and evaluate their model under homogeneous imaging conditions, where training and testing images are acquired from the same or similar sensors. When evaluated on images collected under different SAR imaging conditions, their per-formance may degrade significantly because of cross-sensor distribution discrepancies. [10]. In practical applications, SAR images are often collected by different sensors with diverse frequency bands, resolutions, imaging geometries, polarization modes, and background environments. These factors lead to significant differences in target characteristics and feature distributions [11]. Consequently, the same vehicle target may present obviously different signatures across sensors, while background structures may also produce confusing scattering patterns leading to degraded detection performance and re-duced generalization ability. Unlike conventional transfer learning methods, which usu-ally require sufficient labeled target-domain data from target domain to finetune the model, heterogeneous SAR object detection often suffers from very limited labeled target-domain data. As a result, the distribution discrepancy between training and testing data cannot be effectively overcome [12]. To solve this problem, domain adaptation methods have been proposed. These methods usually reduce the distribution discrepancy be-tween the source and target domains by mapping the data from the source domain and the target domain into the same feature space and aligning domain-invariant representations [13]–[15]. Domain adaptation has been proven to be an effective approach to object detection tasks and is currently widely applied in the fields of computer vision and optical remote sensing. In particular, most previous studies focus on unsupervised domain adaptation, which requires abundant unlabeled data from the target domain. Although this can reduce the high cost caused by the fact that SAR image interpretation usually requires expert knowledge such a requirement is impractical when target data are inherently scarce. This scenario often occurs when a new SAR platform captures a new batch of data and requires rapid preliminary interpretation. Therefore, developing a few-shot domain adaptation strategy is crucial for practical cross-sensor SAR object detection [16]. However, few-shot domain adaptation for SAR object detec-tion still faces certain challenges. Most existing studies mainly pursue domain-invariant representation learning by aligning the source and target feature distributions [17]–[19]. This alignment strategy has been widely adopted in optical domain adaptation, where domain shifts are often dominated by low-level appearance variations such as illumination, weather and styles. As shown in Fig. 1(a), the clear-to-foggy variation in optical images (Foggy Cityscapes [20]) mainly changes low-arXiv:2608.18755v1 [cs.CV] 19 Aug 2026 2FARAD MiniSAR  
+
+> Foggy Cityscapes Cityscapes (b) (a) (c)
+> Fig. 1. Comparison between optical and cross-sensor SAR domain shifts. (a) Cityscapes and Foggy Cityscapes illustrate low-level visual variations caused by fog, which provide limited target-discriminative cues. (b) FARAD and MiniSAR show cross-sensor SAR discrepancies in clutter and target scattering responses. (c) Enlarged vehicle patches highlight shared target structures with green boxes and domain-specific scattering cues with blue dots.
+
+level appearance, while the vehicle structure and scene layout remain largely consistent. Such domain-specific visual varia-tions usually provide limited direct cues for target discrimi-nation and are often treated as nuisance factors to be aligned or suppressed. In contrast, cross-sensor SAR vehicle detection presents a more challenging scenario. Fig. 1(b) shows that cross-sensor SAR images exhibit significant discrepancies in background clutter and target scattering responses. The enlarged vehicle patches in Fig. 1(c) further indicate that SAR targets across domains still share certain structural cues, while their local scattering responses vary noticeably. Therefore, the domain discrepancy in SAR imagery should not be regarded as a simple nuisance appearance shift, and directly enforcing the entire feature representation to be domain-invariant may be suboptimal. [21], [22]. This makes existing feature-level alignment methods poten-tially problematic from two aspects. On the one hand, domain-specific features like scattering centers, shadow responses, and resolution-dependent target structures may be weakened if incorrectly treated as noise, which reduces target objectness and leads to missed detections. On the other hand, background structures such as building edges, parking lots, sidelobe-like bright points, and clutter may exhibit vehicle-like local scattering responses. Forcing source and target features to be aligned through directly minimizing domain discrepancy with only a few target samples may pull such confusing background responses toward the target feature space, resulting in false alarms. Therefore, the key challenge of few-shot SAR adap-tation is not simply to remove domain-specific information, but to distinguish transferable target structures from specific discriminative information that is still useful for detection. This observation motivates us to rethink the role of domain-specific discriminative information in few-shot SAR adapta-tion. Instead of simply minimizing domain discrepancy, we argue that the detection representation should be decom-posed into transferable shared features and sensor-dependent scattering-specific characteristics. The domain invariant rep-resentation is expected to capture domain-transferable target structures while the scattering-specific representation should be preserved and adaptively exploited to compensate for heterogeneous SAR responses. To overcome this issue, we propose a scattering-aware shared-specific feature decomposition framework for few-shot SAR domain adaptive object detection. The proposed method introduces a shared path and multiple soft-gated specific expert paths. The shared path is used to learn transferable target representations to guide subsequent source data selection and domain alignment while the scattering-specific representations learned by the experts will be adaptively weighted to model specific characteristics and provide compensation for object prediction. With the help of both paths, the proposed method aligns transferable structures and retains important scattering-specific information to reduce the risk of over-alignment and over-fitting in few-shot heterogeneous SAR adaptation. The main contributions are as follows:  
+
+> •
+
+We propose a scattering-aware shared-specific feature de-composition framework for few-shot SAR domain adap-tive object detection, which separates transferable domain invariant representation from sensor-dependent scattering characteristics.  
+
+> •
+
+We design a soft gated scattering-specific expert compen-sation module, where multiple experts adaptively model heterogeneous SAR scattering variations.  
+
+> •
+
+We perform source data selection and domain alignment on the shared representation, reducing the risk of over-aligning and over-fitting. Extensive experiments demon-strate that the proposed method significantly outperforms state-of-the-art methods. II. R ELATED WORK 
+
+A. SAR Object Detection and Domain Adaptation 
+
+SAR object detection has received increasing attention because SAR sensors provide reliable imaging under di-verse weather and illumination conditions [23]. Early methods mainly relied on statistical modeling and handcrafted features, among which constant false alarm rate methods and their 3
+
+variants were extensively studied [24]–[26]. With the develop-ment of deep learning, CNN based detectors have substantially improved detection performance in complex SAR scenes [27]– [29]. However, SAR imagery differs fundamentally from op-tical imagery and is characterized by sparse scattering centers, target shadows, speckle noise, and strong background clut-ter [30]–[32]. Target responses also vary with frequency band, spatial resolution, imaging geometry, polarization, and back-ground conditions [16]. Consequently, detectors trained under homogeneous imaging conditions often generalize poorly to heterogeneous SAR data, particularly when only limited target domain annotations are available [33]. Domain adaptive object detection addresses this problem by reducing the distribution discrepancy between source and target domains [34]. Feature alignment methods align image level or instance level representations through adversarial learning or progressive adaptation [35]–[37]. Data enhance-ment methods instead generate target like samples or com-bine source and target content, as exemplified by transition image generation, Cross Domain CutMix, and Fourier domain adaptation [1], [38], [39]. Another line of work adopts pseudo labeling and teacher student learning to progressively refine target domain supervision [40]–[43]. Although effective, these methods typically require sufficient target samples to estimate the target distribution or construct reliable pseudo labels. Their applicability is therefore limited when a newly deployed SAR platform provides only a small number of annotated images. 
+
+B. Few Shot Cross Sensor SAR Object Detection 
+
+Few shot object detection adapts a detector to novel sce-narios using only a small set of annotated samples [44]. A common strategy first trains the detector on source data and then fine tunes selected components using limited target samples. FSDet demonstrates that simple fine tuning provides a competitive baseline [45], while AcroFOD improves adap-tation through domain aware data enhancement and candi-date filtering [46]. AsyFOD further introduces target guided source selection and asymmetric alignment to address the imbalance between abundant source samples and scarce target samples [17]. For SAR imagery, FsDAOD employs mutual information regularization to preserve domain related knowl-edge [16], while CS FSDet introduces distribution alignment and domain interaction modules for cross sensor adapta-tion [47]. These methods demonstrate the value of few shot adaptation when both domain discrepancy and target data scarcity are present. Most existing approaches nevertheless emphasize domain invariant representation learning through feature alignment or enhancement. This strategy may be suboptimal for heteroge-neous SAR imagery because sensor dependent variations con-tain not only nuisance factors but also discriminative scattering cues. Enforcing complete invariance may suppress useful scattering centers, shadow structures, and resolution dependent responses, thereby causing negative transfer. More broadly, conditional representation learning has shown that explicitly preserving task relevant conditions can improve controllability and consistency in pose guided generation, virtual dressing, and story visualization [48]–[51]. Motivated by this princi-ple, our method decomposes the detection representation into transferable shared features and sensor dependent scattering features. Domain adaptation is performed only on the shared representation, while scattering specific experts preserve and adaptively compensate for heterogeneous SAR responses. III. M ETHOD 
+
+The overall framework of the proposed method is illustrated as Fig. 2. Following the asymmetric Adaptation Paradigm [17], source and few-shot target SAR images are first fed into the backbone to extract hierarchical features, which are then used for source selection, domain alignment, and object detection. However, directly applying selection and alignment to the whole detection feature may over-align sensor-dependent scat-tering responses in cross-sensor SAR imagery. To address this issue, we decompose the detection feature into an always-on shared path and multiple soft-gated scattering-specific expert paths. The shared representation is used for source selection and asymmetric alignment, while the scattering-specific ex-perts provide adaptive compensation for object detection. The remainder of this section is organized as follows. Section III-A formulates the few-shot cross-sensor SAR ob-ject detection problem. Section III-B introduces the proposed shared-specific feature decomposition. Section III-C presents the soft-gated scattering-specific expert compensation module. Section III-D describes shared-representation-guided source selection and domain alignment. Finally, Section III-E gives the overall optimization objective. 
+
+A. Problem Formulation 
+
+Let Ds = {(xsi , y si )}Ns 
+
+> i=1
+
+be the labeled source-domain SAR dataset, where xsi denotes a source SAR image and 
+
+ysi = {(bsij , c sij )}M si 
+
+> j=1
+
+denotes the corresponding object an-notations, including bounding boxes bsij and class labels csij .The target-domain few-shot training set is denoted as DKt =
+
+{(xti, y ti )}Ki=1 , where only K fully annotated target-domain im-ages are available for adaptation. In this work, K denotes the number of fully annotated target-domain images rather than the number of object instances. The source and target domains share the same object category but are collected by different scenes, leading to a significant distribution discrepancy, i.e. 
+
+Ps(x, y )̸ = Pt(x, y ).
+
+B. Scattering-Aware Shared-Specific Feature Decomposition 
+
+The above analysis indicates that few-shot cross-sensor SAR adaptation should not only reduce the source–target distribu-tion discrepancy, but also handle sensor-dependent scattering variations. Therefore, the feature representation is expected to satisfy two coupled objectives. First, the detector should align transferable object structures so that vehicle-related rep-resentations can be shared across sensors, which helps reduce missed detections caused by severe domain shift. Second, the detector should preserve and adaptively exploit sensor-dependent scattering responses, so that useful target scattering cues are not suppressed and confusing background scatterers 4Source Domain (fully labeled) 
+
+> FARAD-X/FARAD-Ka
+> Target Domain (few-shot labeled)
+> miniSAR(1/3/5/8/10 images)
+> 𝐀 𝐀
+> 𝐀 𝐀
+> Shared Path Specific Expert Path Weighted Feature Aggregation Router
+> 1×1Conv GroupNorm SiLU 1×1Conv GroupNorm
+> Shared Expert
+> 1×1Conv GroupNorm SiLU 1×1Conv GroupNorm
+> Specific Expert 1 Expert 2 Expert 3 Expert N
+> Asymmetric alignment
+
+ℒ𝐀𝐀𝐀 
+
+> Detection head
+
+ℒ𝐀𝐀𝐀 
+
+> Detection Result
+
+ℒ𝐀𝐀 
+
+ℒ𝐀𝐀𝐀  
+
+> source target
+> FinalienableFeature Aggregation
+> Feature Extractor
+> Shared Parameters Domain Classifier
+> Linear SiLU Linear
+
+𝐀 𝐀 = 𝐀 𝐀 + 𝐀 𝐀 𝐀 𝐀 𝐀 ℎ + 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 
+
+> Feature Extractor
+
+Fig. 2. Overall framework of the proposed method. Source and few-shot target SAR images are fed into a shared feature extractor, followed by an MoE feature learning module composed of an always-on shared path and router-weighted scattering-specific experts. The shared representation is used for asymmetric domain alignment, while the aggregated expert features provide domain-sensitive compensation for object detection. 
+
+can be better distinguished from real vehicles. To this end, we decompose the detection feature into a shared component for domain adaptation and scattering-specific expert components for residual compensation. Given an intermediate detection feature map Fl ∈
+
+RCl×Hl×Wl at the l-th feature level, we decompose it into a domain-shared representation and multiple scattering-specific representations. The domain-shared path is designed to extract transferable responses from the contextual features encoded by the detector, including sensor-stable cues related to target structure, spatial configuration, and object-background rela-tions. It is formulated as 
+
+Fsh  
+
+> l
+
+= Gsh  
+
+> l
+
+(Fl), (1) where Gsh  
+
+> l
+
+(·) denotes the shared feature transformation. In parallel, multiple scattering-specific experts are intro-duced to capture complementary residual responses. The out-put of the e-th expert is given by 
+
+Fsp  
+
+> l,e
+
+= Gsp 
+
+> l,e
+
+(Fl), e = 1 , . . . , E, (2) where E is the number of specific experts and Gsp 
+
+> l,e
+
+(·) denotes the transformation of the e-th expert. Unlike the shared path, the specific expert paths are not explicitly constrained to produce domain-invariant representations. With independent parameters, they can learn complementary channel transforma-tions for scattering-related residual responses associated with variations in frequency band, resolution, clutter, shadow, and scattering-center distribution. The shared transformation and all specific expert transfor-mations adopt the same lightweight architecture while main-taining independent parameters. Specifically, each transfor-mation consists of two pointwise convolutions with channel expansion and projection: 
+
+G(Fl) = GN 2
+
+ W1×12 ∗ ϕ  GN 1
+
+ W1×11 ∗ Fl
+
+ , (3) where W1×11 expands the channel dimension from Cl to 
+
+rC l, W1×12 projects it back to Cl, GN( ·) denotes group normalization, and ϕ(·) is the SiLU activation function. We set the expansion ratio to r = 2 . Using a homogeneous archi-tecture ensures that the complementary behaviors of different experts arise from their independently learned parameters and adaptive routing weights, rather than manually assigned expert structures. 
+
+C. Soft-Gated Scattering-Specific Expert Compensation 
+
+Although the shared path provides transferable object structures, a single domain-specific branch is insufficient to represent the heterogeneous scattering variations in cross-sensor SAR images. The sensor-dependent discrepancy may be caused by different factors, such as scattering-center distribu-tion, shadow response, background clutter, resolution degrada-tion, and sidelobe-like interference. These factors vary across images and local scenes, making the domain-specific residual a mixture of multiple scattering patterns rather than a single deterministic transformation. To model such heterogeneous SAR responses, inspired by the Mixture of Experts model [52], we introduce a soft-gated expert compensation mechanism. For the l-th feature level, a routing function predicts the importance of each scattering-specific expert according to the input feature: 
+
+rl = softmax 
+
+ Rl(GAP( Fl)) 
+
+τ
+
+
+
+, (4) where Rl(·) denotes the routing function, GAP( ·) is global average pooling, τ is a temperature parameter, and 
+
+rl = [ rl, 1, . . . , r l,E ] represents the soft expert weights. The scattering-specific compensation feature is then obtained by 
+
+Fsp l =
+
+> E
+
+X
+
+> e=1
+
+rl,e Fsp l,e . (5) 5
+
+To encourage the router to capture domain-related scattering preferences, we further introduce a routing-domain classifier. Given the domain label di ∈ { 0, 1}, where 0 and 1 denote the source and target domains, respectively, the routing weights from selected feature levels are concatenated as 
+
+qi = Concat ( rl1 (xi), rl2 (xi), . . . , rlm (xi)) , (6) where {l1, . . . , l m} denotes the set of feature levels equipped with scattering-specific experts. A domain classifier Cr (·)
+
+predicts the domain probability from the routing vector: 
+
+ˆdi = Cr (qi). (7) The routing-domain supervision is defined as 
+
+Lrd = 1
+
+|B| 
+
+X
+
+> i∈B
+
+CE 
+
+ˆdi, d i
+
+
+
+, (8) where CE( ·) denotes the cross-entropy loss and B is the training mini-batch. This auxiliary loss is not used to make the whole representation domain-invariant. Instead, it encourages the router to softly adjust the weights of scattering-specific experts according to sensor-dependent response patterns. The classifier is used only during training and is removed during inference. The final output feature is formulated as 
+
+eFl = Fl + αlFsh l + βlFsp l , (9) where αl and βl control the contributions of the shared rep-resentation and the scattering-specific compensation, respec-tively. The original feature Fl is preserved through a residual connection to maintain the basic detection representation. The shared path is mandatory for all samples and provides a stable cross-sensor feature basis, while the soft-gated scattering-specific experts adaptively compensate for sensor-dependent SAR responses. It is worth noting that the shared path does not participate in the expert competition. This design is particularly important in the few-shot target setting, where completely relying on routed experts may overfit the limited target-domain samples. By enforcing all samples to pass through the shared path, the detector maintains transferable object representations, while the expert paths only provide adaptive residual compensation for scattering-specific variations. 
+
+D. Shared-Representation-Guided Domain Adaptation 
+
+After obtaining the shared and scattering-specific represen-tations, domain adaptation is performed only on the shared representation. This design is motivated by two observations in few-shot cross-sensor SAR adaptation in Fig. 3. First, insufficient feature alignment may leave a large discrepancy between the source and target domains. In this case, the source and target features are scattered in the representation space with only limited overlap, making it difficult for the detector trained on source samples to generalize to the target sensor. Second, directly enforcing strong alignment on the entire detection feature is also risky under the few-shot target setting. Since the target distribution is estimated from only a few annotated target images, the alignment anchor can be severely (a) AcroFOD (b) AsyFOD †    
+
+> Source Target
+> Fig. 3. Motivating t-SNE visualization of source and target feature distri-butions under the 1-shot FARAD-Ka →MiniSAR setting. AcroFOD shows limited source–target overlap, while AsyFOD produces a more concentrated target cluster but still leaves many source samples poorly matched.
+
+biased toward limited target scattering patterns. As a result, the target features may become over-concentrated around a small number of target samples, while many source samples still remain poorly matched to the target domain. Conceptually, both cases lead to a low overlap between the source and target distributions compared with their overall feature spread. Therefore, the key is not to avoid alignment, but to constrain alignment to the transferable part of the representation. The shared path is expected to encode object structures that are relatively stable across sensors, such as target shape, spa-tial layout, and object-background configuration. In contrast, the scattering-specific expert paths contain sensor-dependent responses related to scattering centers, shadow, clutter, and resolution-induced structures. If the entire fused feature is directly aligned, useful scattering-specific cues may be in-correctly suppressed. Therefore, both target-guided source selection and asymmetric feature alignment are conducted in the shared feature space, while the scattering-specific expert paths are preserved for adaptive compensation. Specifically, for each target image xti, its shared feature at the selected high-level feature layer is extracted and globally pooled as 
+
+zti = GAP  Fsh (xti) . (10) The few-shot target samples are then used to estimate the target-domain shared representation: 
+
+¯zt = 1
+
+K
+
+> K
+
+X
+
+> i=1
+
+zti, (11) where K denotes the number of labeled target-domain images available for adaptation. Similarly, for each source image xsi , we obtain its shared representation: 
+
+zsi = GAP  Fsh (xsi ) . (12) Following the target-guided source selection strategy, the rel-evance between each source image and the few-shot target domain is measured in the shared feature space: 
+
+di = D (zsi , ¯zt) , (13) 6
+
+where D(·) denotes the feature discrepancy measure. In our implementation, D(·) is instantiated by the MMD-based dis-crepancy used in the target-guided source selection procedure. Source samples with smaller discrepancies are considered more relevant to the target domain and are preferentially selected for training [46]. Vitally, source selection is performed on the shared representation rather than the original detector feature. Therefore, the selected source samples are expected to share transferable object structures with the target domain in-stead of being selected according to sensor-specific scattering responses. After obtaining the target-similar source samples, asym-metric feature alignment is imposed on the shared represen-tation [17]. Given a mini-batch containing selected source samples and few-shot target samples, the shared alignment loss is formulated as 
+
+Lsh align = Aasy 
+
+ {zsi }ns
+
+> i=1
+
+, {ztj }nt
+
+> j=1
+
+ , (14) where Aasy (·) denotes the adopted asymmetric distribution alignment criterion, and ns and nt are the numbers of se-lected source samples and target samples in the mini-batch, respectively. Different from symmetric alignment that treats the two domains equally, the asymmetric alignment strategy uses the limited target-domain samples as adaptation anchors and encourages the selected source shared features to approach the target-domain distribution. In our implementation, the orig-inal asymmetric alignment criterion is applied to the shared representation rather than the entire fused detection feature. By restricting domain adaptation to the shared feature space, the detector is encouraged to learn domain-invariant object structures while avoiding over-alignment of heterogeneous SAR scattering patterns. Meanwhile, the scattering-specific expert paths are not directly constrained by the alignment loss, allowing them to preserve and compensate sensor-dependent responses caused by frequency band, resolution, clutter, shadow, and scattering-center variations. This shared-specific separation improves the robustness of few-shot cross-sensor SAR object detection. 
+
+E. Optimization Objective 
+
+The overall training objective consists of the detection loss, the shared-representation alignment loss, the routing-domain auxiliary loss, and the expert balancing loss: 
+
+L = Ldet + λalign Lsh align + λrd Lrd + λbal Lbal , (15) where λalign , λrd , and λbal are trade-off coefficients. The detection loss follows the YOLOv5 [43] object detec-tion objective: 
+
+Ldet = Lbox + Lobj + Lcls , (16) where Lbox , Lobj , and Lcls denote the bounding-box regres-sion loss, objectness loss, and classification loss, respectively. The detection loss is computed on both labeled source-domain samples and the few fully annotated target-domain samples. The shared alignment loss Lsh align is imposed only on the domain-shared representation. It encourages the detector to learn transferable object structures across sensors while  
+
+> Fig. 4. Examples of SAR images and corresponding optical scenes from the datasets used in our experiments. (a), (c), and (e) are SAR images from MiniSAR, FARAD-X, and FARAD-Ka, respectively. (b), (d), and (f) show the corresponding optical scenes on Google Earth.
+
+avoiding over-alignment of scattering-specific expert features. The routing-domain loss Lrd is applied to the routing weights of the scattering-specific experts, encouraging the router to capture sensor-dependent scattering preferences. To prevent routing collapse, we further introduce an expert balancing loss [53]. Let ¯rl denote the average routing proba-bility over a mini-batch at the l-th feature level: 
+
+¯rl = 1
+
+|B| 
+
+X
+
+> i∈B
+
+rl(xi). (17) The balancing loss is defined as 
+
+Lbal = X
+
+> l∈S
+
+¯rl − 1
+
+E 1
+
+> 22
+
+, (18) where S denotes the set of feature levels equipped with scattering-specific experts, E is the number of experts, and 1
+
+is an all-one vector. This loss encourages different experts to be sufficiently activated within a mini-batch, thus avoiding the degeneration where only a few experts dominate the routing process. During inference, only the detector with the proposed shared-specific feature decomposition and soft-gated expert compensation is retained. The routing-domain classifier and all auxiliary losses are removed, and no target-domain labels are required. IV. E XPERIMENTS 
+
+A. Datasets and Experimental Settings 
+
+Experiments are conducted on the FARAD-X, FARAD-Ka [54], and MiniSAR [55] vehicle datasets released by Sandia National Laboratories. As summarized in Table I, these datasets were acquired by different radar systems and exhibit evident discrepancies in frequency band, incidence angle, and scene clutter. Representative SAR and optical images are shown in Fig. 4. In this paper, we construct four bidirectional cross-sensor adaptation tasks: FARAD-X to MiniSAR, FARAD-Ka to MiniSAR, MiniSAR to FARAD-X, and MiniSAR to FARAD-Ka. The vehicle category is used as the only target class. Following the preprocessing strategy of 7                            
+
+> TABLE I IMAGING PARAMETERS AND DOMAIN CHARACTERISTICS OF THE DATASETS .
+> Domain FARAD-X FARAD-Ka MiniSAR
+> Band XKa Ku Time 2015.10 2015.08 2005.05 Bandwidth 3 GHz 5 GHz 3 GHz Center Freq. 9.6 GHz 35.6 GHz 16.8 GHz Angle 26 ◦–34 ◦26 ◦–34 ◦26 ◦–29 ◦
+> Resolution 0.1 m 0.1 m 0.1 m Max Range 12 km 6 km 8 km Scene Type Dense urban Dense urban Suburban Location Univ. of New Mexico Univ. of New Mexico Kirtland Air Force Base
+
+SIVED [56], the original large-scale SAR images are cropped into 512 × 512 patches, and only patches containing at least one vehicle target are retained. For the forward tasks, the training split of FARAD-X or FARAD-Ka is used as the source domain, while 30 MiniSAR images form the target-domain candidate set and the remaining 70 images constitute a fixed test set. For the reverse tasks, the MiniSAR training split is used as the source domain, the FARAD training split forms the target-domain candidate set, and the corresponding validation and test splits are combined for evaluation. No target-domain evaluation image is used during adaptation. For the K-shot setting, K fully annotated target images are selected from the candidate set for adaptation, where 
+
+K ∈ {1, 3, 5, 8, 10 }. The few-shot subsets are constructed in a nested manner [45], i.e., the samples used in a lower-shot setting are included in the corresponding higher-shot setting under the same random seed. The unused images in the candidate set are not involved in training. All experiments are implemented based on the Asy-FOD [17] framework for fair comparison with representative few-shot domain adaptation baselines. The input SAR patches are resized to 512 × 512 during both training and testing. The detector is trained for 300 epochs using SGD with an initial learning rate of 0.01 and a batch size of 12, including 11 source-domain images and one target-domain image. All experts are used at each detection feature level. We set 
+
+λrd = 0 .1, λbal = 0 .002 , and τ = 1 . The learnable coefficient 
+
+αl is initialized to 0.3, while βl is fixed to 1. All experiments are conducted on an NVIDIA GeForce RTX 5090 GPU, and performance is evaluated using mAP 50 .
+
+B. Comparison with State-of-the-Art Methods 
+
+To evaluate the effectiveness of the proposed method, we compare it with representative few-shot and domain adaptation baselines under the same SAR few-shot domain adaptation protocol. Source-only denotes the detector trained only with labeled source-domain images and directly evaluated on the target domain, which serves as the reference result without target-domain adaptation. Following AsyFOD, we implement the FSDet [45] baseline on YOLOv5 by freezing the first ten layers and fine-tuning the remaining parameters using the limited target-domain samples. SSDA-YOLO [42] is in-cluded as a YOLO-based domain adaptation baseline and is adapted to the same few-shot target setting for comparison. In addition, AcroFOD [46] and AsyFOD [17] are selected as representative few-shot domain adaptive object detection methods. During reproduction, we found that the asymmetric alignment loss term in the released AsyFOD implementation was not involved in gradient back-propagation. We report both the results obtained using the released implementation, denoted as AsyFOD, and those obtained after correcting the gradient back-propagation, denoted as AsyFOD †. The basic detector, data augmentation strategy, optimizer, learning-rate schedule, and asymmetric alignment configuration are kept consistent with AsyFOD unless otherwise specified. For a fair comparison, all methods are evaluated using the same source-domain data, predefined target-domain few-shot subsets, and target-domain test sets. Table II reports the mAP 50 results on four cross-domain adaptation tasks under different few-shot settings. The upper panel presents the FARAD-X → MiniSAR and FARAD-Ka →
+
+MiniSAR results, while the lower panel presents the MiniSAR 
+
+→ FARAD-X and MiniSAR → FARAD-Ka results. Since Source-only does not use any target-domain samples for adap-tation, its result is independent of the number of target shots. The results show that directly transferring the source-domain detector generally leads to limited target-domain performance because of the considerable discrepancy between heteroge-neous SAR sensors. Most target-adapted methods, particularly AcroFOD and AsyFOD †, improve upon Source-only in the majority of settings, demonstrating the importance of using the limited target-domain annotations for cross-domain adaptation. Among the compared adaptation methods, AcroFOD and AsyFOD obtain strong performance by exploiting few-shot target annotations and source-domain knowledge. In particular, AsyFOD provides a competitive baseline by using target-guided source selection and asymmetric alignment. However, these methods mainly focus on sample selection or feature alignment, while sensor-dependent SAR scattering responses are not explicitly modeled. In contrast, the proposed method decomposes the detection representation into a mandatory shared path and soft-gated scattering-specific expert paths. The shared path provides transferable structural representations for source selection and domain alignment, while the scattering-specific experts preserve and adaptively compensate heteroge-neous SAR responses. As shown in the upper panel of Table II, the proposed method achieves the best performance in all ten FARAD-to-MiniSAR settings. On FARAD-X → MiniSAR, our method improves upon AsyFOD † by 3.80, 2.10, 2.88, 3.99, and 2.35 percentage points under the 1-, 3-, 5-, 8-, and 10-shot settings, respectively. On FARAD-Ka → MiniSAR, the corresponding improvements are 5.96, 8.30, 3.31, 6.00, and 2.21 percentage points. The lower panel further evaluates the proposed method in the reverse adaptation direction when MiniSAR is used as the source domain. Different from the forward tasks, only the 80 images in the MiniSAR training split are available as source-domain training data, whereas the forward tasks use 247 FARAD-X or 251 FARAD-Ka source training images. 8
+
+TABLE II COMPARISON OF DIFFERENT METHODS ON BIDIRECTIONAL FEW -SHOT SAR DOMAIN ADAPTATION TASKS IN TERMS OF M AP 50 (%). 
+
+Methods (a) FARAD-X → MiniSAR (b) FARAD-Ka → MiniSAR 1-shot 3-shot 5-shot 8-shot 10-shot 1-shot 3-shot 5-shot 8-shot 10-shot 
+
+Source-only [43] 22.46 25.77 FSDet [45] 19.38 30.42 36.84 41.01 47.69 27.72 37.33 44.07 53.36 45.26 SSDA-YOLO [42] 23.13 28.48 39.04 40.08 39.45 29.17 39.68 46.67 46.56 50.69 AcroFOD [46] 27.35 36.20 51.81 61.29 64.53 30.98 41.30 55.56 64.08 66.18 AsyFOD [17] 29.09 36.67 49.60 56.58 63.37 37.43 36.90 52.78 60.91 58.62 AsyFOD † [17] 43.39 49.09 66.10 72.07 71.23 41.30 43.30 66.01 69.72 73.21 
+
+Our method 47.19 51.19 68.98 76.06 73.58 47.26 51.60 69.32 75.72 75.42 Methods (c) MiniSAR → FARAD-X (d) MiniSAR → FARAD-Ka 1-shot 3-shot 5-shot 8-shot 10-shot 1-shot 3-shot 5-shot 8-shot 10-shot 
+
+Source-only [43] 19.42 22.64 FSDet [45] 8.22 42.94 53.97 56.97 58.05 15.62 42.28 48.48 54.56 49.77 SSDA-YOLO [42] 17.63 25.39 22.92 16.89 16.56 16.66 20.08 22.60 24.63 15.64 AcroFOD [46] 22.41 50.47 44.79 61.68 46.73 19.58 44.37 44.08 54.72 56.72 AsyFOD [17] 21.08 41.02 42.80 44.10 59.42 11.48 34.98 58.90 51.80 56.95 AsyFOD † [17] 23.94 52.85 55.44 62.75 64.45 26.26 52.24 61.98 64.62 64.57 
+
+Our method 24.94 54.22 58.31 64.50 71.76 23.94 55.80 62.00 72.51 69.77 
+
+Note: The K-shot setting denotes the use of K fully annotated images from the target domain. AsyFOD denotes the results reproduced using the released implementation, whereas AsyFOD † denotes the reproduced results obtained after correcting the back-propagation of the asymmetric alignment loss. TABLE III DOMAIN -WISE ROUTER DISTRIBUTION STATISTICS ON THE SOURCE AND TARGET IMAGE SETS . E ACH EXPERT ENTRY REPORTS THE SOURCE /TARGET MEAN ROUTING WEIGHTS (%). TVD DENOTES THE TOTAL VARIATION DISTANCE BETWEEN THE SOURCE AND TARGET MEAN ROUTING DISTRIBUTIONS ,
+
+> AND ENTROPY DENOTES THE NORMALIZED SOURCE
+
+/TARGET ROUTING ENTROPY .
+
+Adaptation Task Level Expert 1 Expert 2 Expert 3 Expert 4 TVD (%) Entropy 
+
+FARAD-X → MiniSAR P3 23.01/22.78 28.47/29.02 24.44/24.23 24.08/23.97 0.55 0.9973/0.9966 P4 24.30/24.94 24.30/23.89 26.62/28.08 24.79/23.09 2.10 0.9993/0.9977 FARAD-Ka → MiniSAR P3 22.97/22.76 26.73/26.87 27.12/27.35 23.18/23.02 0.37 0.9977/0.9973 P4 25.89/25.50 24.92/24.90 25.30/25.16 23.88/24.44 0.56 0.9996/0.9997 
+
+The reverse tasks therefore provide less source-domain super-vision and more limited coverage of target and background variations, constituting a more challenging adaptation setting. On MiniSAR → FARAD-X, the proposed method outperforms AsyFOD † under all five shot settings, with improvements of 1.00, 1.37, 2.87, 1.75, and 7.31 percentage points, respec-tively. On MiniSAR → FARAD-Ka, AsyFOD † obtains the best 1-shot result of 26.26%, whereas the proposed method achieves 23.94%. Nevertheless, our method performs best in the remaining four settings and improves upon AsyFOD †
+
+by 3.56, 0.02, 7.89, and 5.20 percentage points under the 3-, 5-, 8-, and 10-shot settings, respectively. The relatively lower result on the 1-shot MiniSAR → FARAD-Ka task suggests that, when both the source-domain training set and the target-domain adaptation set are extremely limited, the target distribution estimated from a single FARAD-Ka image may not be sufficiently representative. As more target-domain images become available, the routing preferences and shared target representation can be estimated more reliably, and the advantage of the proposed scattering-specific compensation becomes more evident. These improvements demonstrate that aligning only the shared representations while preserving scattering-specific responses reduces the risk of over-aligning beneficial, sensor-dependent cues. These results validate the effectiveness of the proposed scattering-aware shared-specific feature decomposition for few-shot SAR domain adaptive object detection. Overall, the framework proves effective not only for adapting FARAD domains to MiniSAR, but also under the more challenging reverse setting with a markedly smaller MiniSAR source-domain training set. Fig. 5 presents qualitative detection results on MiniSAR test images under the 5-shot FARAD-X → MiniSAR setting. Each column corresponds to the same test scene, while the rows from top to bottom show the ground truth, AcroFOD, AsyFOD †, and the proposed method, respectively. Compared with AcroFOD and AsyFOD †, the proposed method produces more reliable detection results in complex SAR scenes. In the first column, AcroFOD fails to detect the isolated ve-hicle near the buildings, while AsyFOD † produces additional false alarms in the surrounding background. In contrast, the proposed method correctly detects the target while suppressing background interference. In the third column, the vehicle adjacent to the building is particularly challenging because its scattering response can be confused with nearby strong background structures. Among the compared methods, only 9   
+
+> Fig. 5. Qualitative comparison on MiniSAR test images under the 5-shot FARAD-X →MiniSAR adaptation task. Each column represents one test scene, while the rows from top to bottom correspond to the ground truth, AcroFOD, AsyFOD †, and the proposed method. Green and red boxes denote ground-truth annotations and detection results, respectively.
+
+the proposed method successfully detects this target. For the dense vehicle regions shown in the second and fifth columns, the proposed method also provides more complete detection results, indicating better robustness to densely dis-tributed targets and cluttered SAR backgrounds. These obser-vations suggest that the scattering-specific expert compensa-tion helps preserve useful target-related scattering cues while reducing interference from clutter and strong background scatterers. Fig. 6 visualizes the P3 activation responses of the shared path and four experts on two representative MiniSAR test images. The shared path produces relatively smooth structural responses, whereas the experts exhibit more differentiated patterns. In these examples, Experts 1 and 3 show relatively stronger responses to target-adjacent shadow and surrounding context, while Experts 2 and 4 emphasize more localized scatterers, clutter edges, and structural boundaries. The experts therefore present an evident grouping tendency rather than four completely independent response modes. This observa-tion indicates that the expert paths provide complementary scattering-related cues beyond the shared representation, and also offers qualitative support for the comparable performance of the two- and four-expert configurations reported in the subsequent parameter analysis. To quantitatively complement the expert activation maps in Fig. 6, we further compare the router distributions of source- and target-domain images within the same trained model. As shown in Table III, all four experts maintain non-negligible routing weights, while their relative contributions vary across feature levels and domains. For FARAD-X → MiniSAR, a relatively larger domain-dependent variation is observed at P4, where the routing weight of Expert 3 increases from 26.62% to 28.08%, whereas that of Expert 4 decreases from 24.79% to 23.09%. The corresponding total variation distance reaches 2.10%, which is larger than that at P3. In contrast, the FARAD-Ka → MiniSAR model exhibits smaller routing variations, indicating a relatively stable expert combination with fine-10 Original Shared Expert1 Expert2 Expert3 Expert4         
+
+> Fig. 6. Visualization of P3 shared and expert activation responses on MiniSAR test images under the 5-shot FARAD-X →MiniSAR setting. From left to right: original image, shared path, and Experts 1–4. (a) AcroFOD (b) AsyFOD †(c) Ours
+> Source Target
+> Fig. 7. t-SNE visualization of source-domain and target-domain shared feature distributions under the 1-shot FARAD-Ka →MiniSAR adaptation task. Blue circles and orange triangles denote source-domain and target-domain samples, respectively. (a) AcroFOD. (b) AsyFOD †. (c) Ours. The proposed method shows a closer source–target distribution in the shared feature space, indicating more effective transferable representation learning for few-shot SAR domain adaptation.
+
+grained domain-dependent adjustment. Meanwhile, the nor-malized routing entropies remain close to one, demonstrating that the router performs soft expert reweighting rather than collapsing to a single expert. Together with the differentiated spatial responses in Fig. 6, these results show that the expert paths provide complementary representations whose relative contributions can be softly adjusted under cross-domain inputs without routing collapse. We next analyze the adaptation be-havior of the shared representation by visualizing the source-domain and target-domain feature distributions using t-SNE, as shown in Fig. 7. For the proposed method, the visualized features are extracted from the shared path, which is used for target-guided source selection and domain alignment. For the baseline methods, we visualize the corresponding features used for alignment before the detection head. AcroFOD produces dispersed source and target features with limited overlap, indicating that insufficient alignment cannot effectively bridge the cross-sensor discrepancy. AsyFOD † brings part of the source and target features closer, but the target features are highly concentrated under the 1-shot setting, while a large portion of source features still remain away from the target cluster. This suggests that direct alignment with extremely limited target samples may be biased toward a narrow target distribution. In contrast, the proposed method obtains a more compact and better-overlapped shared feature distribution, supporting the effectiveness of performing adaptation on the shared representation while leaving scattering-specific experts for residual compensation. As the number of target shots increases, the target-domain estimate becomes more reliable, and the alignment bias can be gradually alleviated. This observation supports our motivation that domain alignment should be mainly performed on shared representations, while scattering-specific expert paths are preserved to compensate sensor-dependent SAR responses. 
+
+C. Ablation Study 
+
+To evaluate the contribution of each component, we conduct ablation studies on FARAD-X → MiniSAR and FARAD-Ka 
+
+→ MiniSAR under different few-shot settings. AsyFOD † is used as the baseline because it mainly performs adaptation through transferable feature alignment without explicitly mod-eling sensor-dependent scattering responses. The shared-only variant uses the proposed feature decomposition structure but retains only the shared path. We further evaluate the expert-only variant, fused-feature alignment, the shared-feature align-ment loss Lsh align , the routing-domain loss Lrd , and the expert balancing loss Lbal .As shown in Table IV, the shared-only variant obtains average mAP 50 values of 60.17% and 59.81% on the two tasks, which are close to the AsyFOD baseline. This shows that the shared path mainly preserves transferable features, while its improvement alone is limited. Applying alignment to the fused feature achieves average mAP 50 values of 58.05% and 60.09%, which are lower than those of the full model. This indicates that directly aligning the fused representation may suppress useful sensor-dependent responses retained by the expert paths. Moreover, removing Lsh align reduces the average performance to 49.53% and 52.44%, confirming the importance of aligning the shared representation. 11                                                                                                                       
+
+> TABLE IV ABLATION RESULTS OF THE PROPOSED COMPONENTS IN TERMS OF M AP 50 (%).
+> Methods FARAD-X →MiniSAR FARAD-Ka →MiniSAR 1-shot 3-shot 5-shot 8-shot 10-shot Avg. 1-shot 3-shot 5-shot 8-shot 10-shot Avg.
+> AsyFOD †baseline 43.39 49.09 66.10 72.07 71.23 60.38 41.30 43.30 66.01 69.72 73.21 58.71 Fused-feature alignment 40.41 46.17 66.73 70.10 66.82 58.05 42.64 47.30 66.58 71.98 71.94 60.09 Shared only 46.16 50.43 58.57 74.19 71.51 60.17 41.67 46.83 61.69 74.15 74.73 59.81 w/o Lsh align 28.37 40.61 55.59 63.79 59.31 49.53 36.50 42.85 54.19 63.74 64.92 52.44 w/o Lrd 46.32 50.17 63.81 73.92 72.71 61.39 41.05 51.67 68.01 69.55 73.10 60.68 w/o Lbal 45.23 51.14 68.12 74.59 71.19 62.05 28.64 51.53 69.32 72.55 74.63 59.33 Expert only 44.60 49.56 42.96 71.24 72.10 56.09 43.70 48.32 66.77 74.83 73.86 61.50
+> Our method (full) 47.19 51.19 68.98 76.06 73.58 63.40 47.26 51.60 69.32 75.72 75.42 63.86
+
+The expert-only variant achieves average mAP 50 values of 56.09% and 61.50%. Its performance is unstable on FARAD-X 
+
+→ MiniSAR, especially in the 5-shot setting. In comparison, the full model achieves 63.40% and 63.86% on the two tasks. These results show that shared features and expert features are complementary, and using either path alone cannot provide stable performance across different domains and shot numbers. Without Lrd , the average mAP 50 decreases to 61.39% and 60.68%, respectively. This suggests that domain-aware routing helps the experts learn sensor-related response patterns. Re-moving Lbal reduces the average performance to 62.05% and 59.33%. The large decrease in the 1-shot FARAD-Ka setting shows that the balancing loss helps prevent the router from relying too much on only a few experts. Overall, the full model achieves the best average perfor-mance on both tasks. The results confirm that combining the shared path, scattering-specific experts, shared-feature alignment, routing-domain supervision, and expert balancing provides more effective and stable few-shot SAR domain adaptation. 
+
+D. Parameter Analysis 
+
+We further analyze the influence of the number of scattering-specific experts. Tables V and VI report the mAP 50 
+
+results with different expert numbers on FARAD-X → Min-iSAR and FARAD-Ka → MiniSAR, respectively. When only one expert is used, the model degenerates into a single scattering-specific transformation, which limits its ability to represent diverse SAR scattering variations. Using multiple experts usually provides a more flexible representation than a single expert, but the benefit is not strictly monotonic under the few-shot setting. E=2 and E=4 achieve comparable results, while E=8 may introduce redundant routing uncertainty. It can be observed that E = 2 and E = 4 achieve compara-ble overall performance. Specifically, E = 4 obtains the best average mAP 50 on FARAD-X → MiniSAR, while E = 2 
+
+achieves a slightly higher average result on FARAD-Ka →
+
+MiniSAR. However, the difference between E = 2 and E = 4 
+
+is small. The four-expert configuration achieves the best aver-age performance on FARAD-X → MiniSAR while remaining comparable to the two-expert configuration on FARAD-Ka →
+
+MiniSAR. When the number of experts is further increased to E = 8 , the performance does not consistently improve,                                                                           
+
+> TABLE V EFFECT OF THE NUMBER OF SCATTERING -SPECIFIC EXPERTS ON
+> FARAD-X →MINI SAR IN TERMS OF M AP 50 (%).
+> Experts EFARAD-X →MiniSAR Avg. 1-shot 3-shot 5-shot 8-shot 10-shot
+> 144.97 52.21 68.35 70.49 68.77 60.96 244.54 53.48 68.41 72.14 75.46 62.81 447.19 51.19 68.98 76.06 73.58 63.40
+> 843.12 50.04 67.68 73.35 77.48 62.33 TABLE VI EFFECT OF THE NUMBER OF SCATTERING -SPECIFIC EXPERTS ON
+> FARAD-K A→MINI SAR IN TERMS OF M AP 50 (%).
+> Experts EFARAD-Ka →MiniSAR Avg. 1-shot 3-shot 5-shot 8-shot 10-shot
+> 144.17 54.18 70.73 76.77 75.52 64.27 249.61 46.68 71.06 78.48 76.75 64.52
+> 447.26 51.60 69.32 75.72 75.42 63.86 843.08 49.85 67.52 77.06 78.07 63.12
+
+suggesting that too many experts may introduce redundant routing uncertainty under the few-shot target-domain setting. Therefore, we set the number of scattering-specific experts to 
+
+E = 4 by default in the main experiments. V. C ONCLUSION 
+
+We present a scattering-aware shared-specific feature de-composition framework for few-shot SAR domain adap-tive object detection. Different from conventional feature-alignment methods that mainly learn domain-invariant repre-sentations, the proposed method considers that cross-domain SAR shifts contain both transferable target structures and sensor-dependent scattering responses. To avoid over-aligning useful scattering-specific cues, the proposed framework in-troduces a mandatory shared path for source selection and domain alignment, and several soft-gated scattering-specific experts for adaptive residual compensation. Routing-domain auxiliary supervision and expert balancing regularization are further used to encourage domain-sensitive expert weighting and stable expert utilization. 12 
+
+Experiments on four bidirectional cross-sensor adaptation tasks demonstrate the effectiveness of the proposed method in both adaptation directions. Compared with AsyFOD †, the proposed method improves the average mAP 50 by 3.02, 5.16, 2.86, and 2.87 percentage points on the four tasks, respectively, and achieves the best performance in 19 of the 20 evaluated task-shot settings. The reverse-task results further show that the proposed method remains effective when MiniSAR is used as the source domain and the more cluttered FARAD domains are used as target domains, although adaptation under the extremely limited 1-shot setting remains sensitive to the representativeness of the target samples. Ablation studies confirm that aligning shared representations while preserving scattering-specific expert compensation provides more stable few-shot cross-sensor adaptation. REFERENCES [1] Y. Shi, L. Du, and Y. Guo, “Unsupervised domain adaptation for sar target detection,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 14, pp. 6372–6385, 2021. [2] L. Kong, F. Gao, X. He, J. Wang, J. Sun, H. Zhou, and A. Hussain, “Few-shot class-incremental sar target recognition via orthogonal distributed features,” IEEE Transactions on Aerospace and Electronic Systems ,vol. 61, no. 1, pp. 325–341, 2025. [3] J. Li, C. Qu, and J. Shao, “Ship detection in sar images based on an improved faster r-cnn,” in 2017 SAR in Big Data Era: Models, Methods and Applications (BIGSARDATA) , 2017, pp. 1–6. [4] W. Li, W. Yang, Y. Hou, L. Liu, Y. Liu, and X. Li, “Saratr-x: Toward building a foundation model for sar target recognition,” IEEE Transactions on Image Processing , vol. 34, pp. 869–884, 2025. [5] S. Wei, X. Zeng, Q. Qu, M. Wang, H. Su, and J. Shi, “Hrsid: A high-resolution sar images dataset for ship detection and instance segmentation,” IEEE Access , vol. 8, pp. 120 234–120 254, 2020. [6] B. Zou, J. Qin, and L. Zhang, “Vehicle detection based on semantic-context enhancement for high-resolution sar images in complex back-ground,” IEEE Geoscience and Remote Sensing Letters , vol. 19, pp. 1–5, 2022. [7] S. Chen, R. Zhan, W. Wang, and J. Zhang, “Learning slimming sar ship object detector through network pruning and knowledge distillation,” 
+
+IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 14, pp. 1267–1282, 2021. [8] Q. Zhang, R. Cong, C. Li, M.-M. Cheng, Y. Fang, X. Cao, Y. Zhao, and S. Kwong, “Dense attention fluid network for salient object detec-tion in optical remote sensing images,” IEEE Transactions on Image Processing , vol. 30, pp. 1305–1317, 2021. [9] L. Huang, W. Zhao, Y. Liu, D. Yang, A. W.-C. Liew, and Y. You, “An evidential multi-target domain adaptation method based on weighted fusion for cross-domain pattern classification,” IEEE Transactions on Neural Networks and Learning Systems , vol. 35, no. 10, pp. 14 218– 14 232, 2024. [10] M. Xu, M. Wu, K. Chen, C. Zhang, and J. Guo, “The eyes of the gods: A survey of unsupervised domain adaptation methods based on remote sensing data,” Remote Sensing , vol. 14, no. 17, p. 4380, 2022. [11] X. Zhang, S. Zhang, Z. Sun, C. Liu, Y. Sun, K. Ji, and G. Kuang, “Cross-sensor sar image target detection based on dynamic feature discrimination and center-aware calibration,” IEEE Transactions on Geoscience and Remote Sensing , vol. 63, pp. 1–17, 2025. [12] S. Zhao, Z. Zhang, T. Zhang, W. Guo, and Y. Luo, “Transferable sar image classification crossing different satellites under open set condition,” IEEE Geoscience and Remote Sensing Letters , vol. 19, pp. 1–5, 2022. [13] M. Wang and W. Deng, “Deep visual domain adaptation: A survey,” 
+
+Neurocomputing , vol. 312, pp. 135–153, 2018. [14] G. Wilson and D. J. Cook, “A survey of unsupervised deep domain adaptation,” ACM Transactions on Intelligent Systems and Technology (TIST) , vol. 11, no. 5, pp. 1–46, 2020. [15] P. Singhal, R. Walambe, S. Ramanna, and K. Kotecha, “Domain adap-tation: Challenges, methods, datasets, and applications,” IEEE Access ,vol. 11, pp. 6973–7020, 2023. [16] S. Zhao, Y. Kang, H. Yuan, G. Wang, H. Wang, S. Xiong, and Y. Luo, “Fsdaod: Few-shot domain adaptation object detection for heterogeneous sar image,” Science of Remote Sensing , vol. 11, p. 100202, 2025. [17] Y. Gao, K.-Y. Lin, J. Yan, Y. Wang, and W.-S. Zheng, “Asyfod: An asymmetric adaptation paradigm for few-shot domain adaptive object detection,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2023, pp. 3261–3271. [18] A. Kumar, P. Sattigeri, K. Wadhawan, L. Karlinsky, R. Feris, B. Free-man, and G. Wornell, “Co-regularized alignment for unsupervised do-main adaptation,” Advances in neural information processing systems ,vol. 31, 2018. [19] L. Zhang, B. Zhang, B. Shi, J. Fan, and T. Chen, “Few-shot cross-domain object detection with instance-level prototype-based meta-learning,” 
+
+IEEE Transactions on Circuits and Systems for Video Technology ,vol. 34, no. 10, pp. 9078–9089, 2024. [20] C. Sakaridis, D. Dai, and L. Van Gool, “Semantic foggy scene under-standing with synthetic data,” International Journal of Computer Vision ,vol. 126, no. 9, pp. 973–992, 2018. [21] Y. Shi, Y. Li, L. Du, Y. Du, and Y. Guo, “Unsupervised domain adaptative sar target detection based on feature decomposition and uncertainty-guided self-training,” IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 17, pp. 20 265– 20 283, 2024. [22] S. Zhao, Y. Luo, T. Zhang, W. Guo, and Z. Zhang, “A feature decomposition-based method for automatic ship detection crossing different satellite sar images,” IEEE Transactions on Geoscience and Remote Sensing , vol. 60, pp. 1–15, 2022. [23] Y. Li, X. Li, W. Li, Q. Hou, L. Liu, M.-M. Cheng, and J. Yang, “Sardet-100k: Towards open-source benchmark and toolkit for large-scale sar object detection,” Advances in Neural Information Processing Systems ,vol. 37, pp. 128 430–128 461, 2024. [24] M. Weiss, “Analysis of some modified cell-averaging cfar processors in multiple-target situations,” IEEE Transactions on Aerospace and Electronic Systems , vol. AES-18, no. 1, pp. 102–114, 1982. [25] A. Frery, H.-J. Muller, C. Yanasse, and S. Sant’Anna, “A model for extremely heterogeneous clutter,” IEEE Transactions on Geoscience and Remote Sensing , vol. 35, no. 3, pp. 648–659, 1997. [26] C. Tison, J.-M. Nicolas, F. Tupin, and H. Maitre, “A new statistical model for markovian classification of urban areas in high-resolution sar images,” IEEE Transactions on Geoscience and Remote Sensing , vol. 42, no. 10, pp. 2046–2057, 2004. [27] Z. Wang, L. Du, J. Mao, B. Liu, and D. Yang, “Sar target detection based on ssd with data augmentation and transfer learning,” IEEE Geoscience and Remote Sensing Letters , vol. 16, no. 1, pp. 150–154, 2019. [28] A. Krizhevsky, I. Sutskever, and G. E. Hinton, “Imagenet classification with deep convolutional neural networks,” Advances in neural informa-tion processing systems , vol. 25, 2012. [29] O. Kechagias-Stamatis and N. Aouf, “Automatic target recognition on synthetic aperture radar imagery: A survey,” IEEE Aerospace and Electronic Systems Magazine , vol. 36, no. 3, pp. 56–81, 2021. [30] C. Oliver and S. Quegan, Understanding synthetic aperture radar images . SciTech Publishing, 2004. [31] C. V. Jakowatz, D. E. Wahl, P. H. Eichel, D. C. Ghiglia, and P. A. Thompson, Spotlight-mode synthetic aperture radar: a signal processing approach: a signal processing approach . Springer Science & Business Media, 2012. [32] S. qi Huang, D. zhi Liu, G. qing Gao, and X. jian Guo, “A novel method for speckle noise reduction and ship target detection in sar images,” Pattern Recognition , vol. 42, no. 7, pp. 1533–1542, 2009. [Online]. Available: https://www.sciencedirect.com/science/article/pii/ S0031320309000417 [33] J. Zhou, B. Peng, J. Xie, B. Peng, L. Liu, and X. Li, “Conditional random field-based adversarial attack against sar target detection,” IEEE Geoscience and Remote Sensing Letters , vol. 21, pp. 1–5, 2024. [34] J. Li, Z. Yu, Z. Du, L. Zhu, and H. T. Shen, “A comprehensive survey on source-free domain adaptation,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 46, no. 8, pp. 5743–5762, 2024. [35] Y. Chen, W. Li, C. Sakaridis, D. Dai, and L. Van Gool, “Domain adaptive faster r-cnn for object detection in the wild,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 3339– 3348. [36] Y. Guo, L. Du, and G. Lyu, “Sar target detection based on domain adaptive faster r-cnn with small training data size,” Remote Sensing ,vol. 13, no. 21, p. 4202, 2021. [37] B. Zou, J. Qin, and L. Zhang, “Cross-scene target detection based on feature adaptation and uncertainty-aware pseudo-label learning for high 13 
+
+resolution sar images,” ISPRS Journal of Photogrammetry and Remote Sensing , vol. 200, pp. 173–190, 2023. [38] Y. Nakamura, Y. Ishii, Y. Maruyama, and T. Yamashita, “Few-shot adaptive object detection with cross-domain cutmix,” in Asian Conference on Computer Vision , 2022. [Online]. Available: https: //api.semanticscholar.org/CorpusID:251953274 [39] Y. Yang and S. Soatto, “Fda: Fourier domain adaptation for semantic segmentation,” 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pp. 4084–4094, 2020. [Online]. Available: https://api.semanticscholar.org/CorpusID:215745272 [40] Q. Cai, Y. Pan, C.-W. Ngo, X. Tian, L. yu Duan, and T. Yao, “Exploring object relation in mean teacher for cross-domain detection,” 
+
+2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pp. 11 449–11 458, 2019. [Online]. Available: https://api.semanticscholar.org/CorpusID:131774688 [41] R. Ramamonjison, A. Banitalebi-Dehkordi, X. Kang, X. Bai, and Y. Zhang, “Simrod: A simple adaptation method for robust object detection,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2021, pp. 3570–3579. [42] H. Zhou, F. Jiang, and H. Lu, “Ssda-yolo: Semi-supervised domain adaptive yolo for cross-domain object detection,” ArXiv , vol. abs/2211.02213, 2022. [Online]. Available: https://api.semanticscholar.org/CorpusID:253370411 [43] G. Jocher et al. , “ultralytics/yolov5.” [Online]. Available: https: //github.com/ultralytics/yolov5 [44] Y. Song, T.-Y. Wang, P. Cai, S. K. Mondal, and J. P. Sahoo, “A comprehensive survey of few-shot learning: Evolution, applications, challenges, and opportunities,” ACM Computing Surveys , vol. 55, pp. 1 – 40, 2022. [Online]. Available: https://api.semanticscholar.org/CorpusID: 248798765 [45] X. Wang, T. E. Huang, T. Darrell, J. E. Gonzalez, and F. Yu, “Frustratingly simple few-shot object detection,” 
+
+ArXiv , vol. abs/2003.06957, 2020. [Online]. Available: https: //api.semanticscholar.org/CorpusID:212725414 [46] Y. Gao, L. Yang, Y. Huang, S. Xie, S. Li, and W. Zheng, “Acrofod: An adaptive method for cross-domain few-shot object detection,” in 
+
+European Conference on Computer Vision , 2022. [Online]. Available: https://api.semanticscholar.org/CorpusID:252438651 [47] C. Liu, Y. He, X. Zhang, Y. Wang, Z. Dong, and H. Hong, “Cs-fsdet: A few-shot sar target detection method for cross-sensor scenarios,” Remote Sensing , vol. 17, no. 16, p. 2841, 2025. [48] F. Shen and J. Tang, “Imagpose: A unified conditional framework for pose-guided person generation,” Advances in neural information processing systems , vol. 37, pp. 6246–6266, 2024. [49] F. Shen, H. Ye, J. Zhang, C. Wang, X. Han, and Y. Wei, “Advancing pose-guided image synthesis with progressive conditional diffusion models,” in The Twelfth International Conference on Learning Representations , 2024. [Online]. Available: https://openreview.net/ forum?id=rHzapPnCgT [50] F. Shen, X. Jiang, X. He, H. Ye, C. Wang, X. Du, Z. Li, and J. Tang, “Imagdressing-v1: Customizable virtual dressing,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 39, no. 7, 2025, pp. 6795–6804. [51] F. Shen, H. Ye, S. Liu, J. Zhang, C. Wang, X. Han, and Y. Wei, “Boost-ing consistency in story visualization with rich-contextual conditional diffusion models,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 39, no. 7, 2025, pp. 6785–6794. [52] R. A. Jacobs, M. I. Jordan, S. J. Nowlan, and G. E. Hinton, “Adaptive mixtures of local experts,” Neural computation , vol. 3, no. 1, pp. 79–87, 1991. [53] X. Lin, J. Peng, Z. Gan, J. Zhu, and J. Liu, “Yolo-master: Moe-accelerated with specialized transformers for enhanced real-time detec-tion,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2026, pp. 18 440–18 449. [54] Sandia National Laboratories, “FARAD SAR pub-lic release data,” https://www.sandia.gov/radar/ pathfinder-radar-isr-and-synthetic-aperture-radar-sar-systems/ complex-data-clone/, 2015, accessed: Jul. 9, 2026. [55] ——, “SANDIA miniSAR complex im-agery dataset,” https://www.sandia.gov/radar/ pathfinder-radar-isr-and-synthetic-aperture-radar-sar-systems/ complex-data-clone/, 2005, accessed: Jul. 9, 2026. [56] X. Lin, B. Zhang, F. Wu, C. Wang, Y. Yang, and H. Chen, “Sived: A sar image dataset for vehicle detection based on rotatable bounding box,” 
+
+Remote Sensing , vol. 15, no. 11, p. 2825, 2023.
