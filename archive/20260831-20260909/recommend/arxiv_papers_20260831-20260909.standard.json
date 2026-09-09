@@ -1,0 +1,365 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-09-09T09:26:23.664950+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 7,
+    "quick_skim_target": 11,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2609.04837v1",
+      "source": "arxiv",
+      "title": "PAPT++: Risk-Aware Adversarial Tuning and Generation for Single Domain Generalization",
+      "abstract": "Single domain generalization (SDG) aims to learn a model from one labeled source domain that generalizes to unseen target domains. A common strategy is to enrich the source distribution with augmented or generated samples, and recent text-to-image (T2I) diffusion models provide a strong generative prior for this purpose. However, diversity alone is insufficient for robust generalization, because useful generated samples should also capture variations that the current classifier finds difficult. Motivated by distributionally robust optimization (DRO), we define a semantic ambiguity set in the class-conditional generative space of a pretrained T2I model and search it for samples with high classification loss under the current classifier. To this end, we introduce PAPT++, a risk-aware adversarial generation-training framework for SDG. PAPT++ first learns diverse semantic reference images for each class through image-text alignment and intra-class diversity regularization. These references then serve as denoising targets during classifier-guided diffusion synthesis, reducing semantic drift while guiding generation toward challenging variations. The generated samples are combined with the source data to update the classifier, and the updated classifier guides the next synthesis round in return. In this way, PAPT++ progressively exposes the classifier to challenging yet semantically consistent variations. Extensive experiments on standard SDG benchmarks demonstrate the superiority of the proposed PAPT++ method and the effectiveness of its main components.",
+      "authors": [
+        "Zhipeng Xu",
+        "De Cheng",
+        "Xinyang Jiang",
+        "Lingfeng He",
+        "Huaijie Wang",
+        "Dongsheng Li",
+        "Nannan Wang",
+        "Xinbo Gao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-09-04T07:54:30+00:00",
+      "link": "https://arxiv.org/pdf/2609.04837v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Single domain generalization learns a classifier from one labeled source domain and targets unseen domains without fine-tuning, directly aligning with the requirement about generalizing to unseen domains.",
+      "llm_evidence_cn": "单源域泛化从一个有标注源域学习并面向未见目标域，无需微调即可泛化，符合针对未见域泛化的需求；但不涉及少样本。",
+      "llm_evidence": "单源域泛化从一个有标注源域学习并面向未见目标域，无需微调即可泛化，符合针对未见域泛化的需求；但不涉及少样本。",
+      "canonical_evidence": "单源域泛化从一个有标注源域学习并面向未见目标域，无需微调即可泛化，符合针对未见域泛化的需求；但不涉及少样本。",
+      "llm_tldr_en": "Proposes PAPT++ for single domain generalization, using a text-to-image diffusion prior and DRO-motivated semantic ambiguity sets to generate and tune on samples with high classifier loss, improving generalization to unseen target domains.",
+      "llm_tldr_cn": "针对单源域泛化从单一有标注源域泛化到未见目标域的任务，论文指出仅增加生成样本多样性不够，还需要覆盖当前分类器难以处理的变体。受分布鲁棒优化启发，PAPT++在预训练文生图扩散模型的条件生成空间定义语义模糊集，搜索当前分类器下高分类损失的样本，并进行风险感知对抗调优与生成。结果表明该策略显著提升了对未见目标域的泛化性能，是域泛化方法的有力候选，但研究不涉及少样本分类设置。",
+      "llm_tldr": "针对单源域泛化从单一有标注源域泛化到未见目标域的任务，论文指出仅增加生成样本多样性不够，还需要覆盖当前分类器难以处理的变体。受分布鲁棒优化启发，PAPT++在预训练文生图扩散模型的条件生成空间定义语义模糊集，搜索当前分类器下高分类损失的样本，并进行风险感知对抗调优与生成。结果表明该策略显著提升了对未见目标域的泛化性能，是域泛化方法的有力候选，但研究不涉及少样本分类设置。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.06131v1",
+      "source": "arxiv",
+      "title": "IIns-VAE+: A Robust Transfer Learning Framework for Environmental Identification in Wireless Sensing",
+      "abstract": "Environmental identification in wireless sensing is essential for 6G integrated sensing and communication (ISAC) systems to achieve reliable situational awareness. However, deep learning (DL) models for this task often fail to generalize under domain shift across diverse environments. While the Inter-Instance Variational Auto-encoder (IIns-VAE) learns features of rich representation, its neural classifier remains vulnerable to these distribution changes. In this paper, we propose IIns-VAE+, a hybrid model that combines the IIns-VAE framework with Minimax Risk Classifiers (MRC) to improve adaptability in transfer learning scenarios. We use real-world datasets to evaluate our framework across three transfer learning scenarios, including general to specific room environments, high to low label resolutions, and mixed to specific environments. The experimental results indicate that IIns-VAE+ significantly outperforms baselines, demonstrating its critical value in building adaptable and robust perceptive networks in future 6G systems.",
+      "authors": [
+        "Yuxiao Li",
+        "Keke Hu",
+        "Bobai Zhao",
+        "Santiago Mazuelas",
+        "Yuan Shen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-09-05T14:55:56+00:00",
+      "link": "https://arxiv.org/pdf/2609.06131v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "combines IIns-VAE with minimax risk classifiers to adapt neural classifiers under domain shift across wireless sensing environments",
+      "llm_evidence_cn": "结合IIns-VAE与极小极大风险分类器以应对跨环境域偏移下的分类器退化",
+      "llm_evidence": "结合IIns-VAE与极小极大风险分类器以应对跨环境域偏移下的分类器退化",
+      "canonical_evidence": "结合IIns-VAE与极小极大风险分类器以应对跨环境域偏移下的分类器退化",
+      "llm_tldr_en": "Proposes IIns-VAE+, which couples Inter-Instance Variational Auto-Encoder with Minimax Risk Classifiers to improve transferability of environmental identification models when wireless sensing domains shift, and evaluates on real-world transfer scenarios.",
+      "llm_tldr_cn": "无线感知环境识别中的深度学习模型在域偏移下性能下降，因为其神经分类器对分布变化敏感。作者提出IIns-VAE+，将表征丰富的IIns-VAE与极小极大风险分类器相结合，在迁移学习场景中保持分类器适应性。基于真实数据集在多个迁移场景下的评估表明该框架能缓解跨环境分布失配导致的退化。这项工作为跨域感知识别提供了可借鉴的鲁棒迁移分类方案。",
+      "llm_tldr": "无线感知环境识别中的深度学习模型在域偏移下性能下降，因为其神经分类器对分布变化敏感。作者提出IIns-VAE+，将表征丰富的IIns-VAE与极小极大风险分类器相结合，在迁移学习场景中保持分类器适应性。基于真实数据集在多个迁移场景下的评估表明该框架能缓解跨环境分布失配导致的退化。这项工作为跨域感知识别提供了可借鉴的鲁棒迁移分类方案。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2609.02299v1",
+      "source": "arxiv",
+      "title": "Domain shift-robust object detection with GenAI image editing",
+      "abstract": "Object detectors often degrade under domain shifts such as changes in lighting, weather, or occlusion. These shifts alter object appearance and expose a reliance on visual shortcuts learned from the training distribution that do not generalize across domains. Acquiring sufficient real-world samples to capture such domain variation is particularly difficult in specialized, low-data settings. Recent advances in diffusion-based generative image editing have shown promise for improving the in-domain performance of object detectors through synthetic data augmentation. However, their potential to improve out-of-domain robustness remains largely unexplored. We hypothesize that generative image editing can simulate a controlled domain shift in training data, effectively bridging the gap between source and target domains. To test this, we studied camouflaged military vehicle detection as a challenging domain shift scenario. Detectors trained on uncamouflaged data demonstrate substantial degradation on real test imagery containing foliage, netting, and multi-spectral camouflage across 15 vehicle classes in close-up, ground-level imagery. We used two diffusion-based editing models, Qwen Image Edit 2509 and Flux.2 Dev, to synthetically add camouflage to the training data, alongside a LoRA fine-tuned version of Qwen. A non-generative black-bar occlusion baseline served as a lower bound on augmentation quality. Using a GroundingDINO detector trained on real and synthetic data, generative camouflage augmentation yielded substantial mAP improvements for foliage (+20.1) and netting (+14.4) camouflage. Generating multi-spectral camouflage proved more challenging, but LoRA fine-tuning improved performance by 4.4 mAP over the uncamouflaged baseline.",
+      "authors": [
+        "Isabel D. Stein",
+        "Thijs A. Eker",
+        "Sebastiaan P. Snel",
+        "Ella P. Fokkinga",
+        "Klamer Schutte",
+        "Luca Ambrogioni",
+        "Friso G. Heslinga"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-09-02T08:44:27+00:00",
+      "link": "https://arxiv.org/pdf/2609.02299v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "object detectors degrade under domain shift; generative image editing simulates controlled domain shift in training data",
+      "llm_evidence_cn": "目标检测器因域偏移而性能下降；用生成式图像编辑在训练中模拟受控域偏移",
+      "llm_evidence": "目标检测器因域偏移而性能下降；用生成式图像编辑在训练中模拟受控域偏移",
+      "canonical_evidence": "目标检测器因域偏移而性能下降；用生成式图像编辑在训练中模拟受控域偏移",
+      "llm_tldr_en": "This paper hypothesizes that diffusion-based generative image editing can simulate controlled domain shifts in training data, thereby improving out-of-domain robustness of detectors in specialized low-data settings.",
+      "llm_tldr_cn": "目标检测器在光照、天气、遮挡等域偏移下容易退化，在低数据专业设置中又难以采集足够真实样本来覆盖域变化。作者提出利用扩散生成式图像编辑在训练数据上模拟受控的域偏移，以改善检测器对未见域的鲁棒性。这将合成数据增强的作用从提升域内性能扩展到提升域外泛化。该工作为数据受限条件下的跨域目标检测提供了新的生成增强解决思路。",
+      "llm_tldr": "目标检测器在光照、天气、遮挡等域偏移下容易退化，在低数据专业设置中又难以采集足够真实样本来覆盖域变化。作者提出利用扩散生成式图像编辑在训练数据上模拟受控的域偏移，以改善检测器对未见域的鲁棒性。这将合成数据增强的作用从提升域内性能扩展到提升域外泛化。该工作为数据受限条件下的跨域目标检测提供了新的生成增强解决思路。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "distribution mismatch between source and target domains causing performance degradation",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2609.00282v1",
+      "source": "arxiv",
+      "title": "Lightweight Adaptation of EEG Foundation Models for Stroke Motor Imagery Decoding: Domain Shift and Subject-Level Robustness",
+      "abstract": "Motor imagery (MI) electroencephalography (EEG) decoding could support post-stroke rehabilitation, but models developed on healthy cohorts may not transfer reliably to pathological EEG. We evaluated whether Low-Rank Adaptation (LoRA) can efficiently adapt three pretrained EEG foundation models (i.e., LaBraM-base, REVE-base, and REVE-large) for binary left- versus right-hand MI decoding. Frozen-backbone head-only baselines and LoRA adaptation were evaluated using subject-wise five-fold cross-validation on the PhysioNet EEG Motor Movement/Imagery Dataset and a binary subset of the UET175 dataset comprising 30 stroke participants. On EEGMMIDB, LoRA increased accuracy to 0.822 for LaBraM-base and 0.957 for REVE-base. On UET175, all head-only models performed near chance. With LoRA, LaBraM-base remained near chance (0.499$\\pm$0.009), whereas REVE-base reached 0.847$\\pm$0.194 and outperformed REVE-large (0.806$\\pm$0.178), indicating that increased model capacity alone did not improve stroke-domain adaptation. The strongest stroke configuration, REVE-base LoRA, was further evaluated using within-cohort leave-one-subject-out cross-validation (LOOCV), showing 0.952 mean accuracy, but subject-wise accuracy ranged from 0.586 to 1.000, revealing a small low-performing tail. Zero-shot transfer from EEGMMIDB to UET175 remained near chance (0.464$\\pm$0.072). These findings show that healthy-benchmark performance does not ensure transfer to stroke EEG. Translation of EEG foundation models to pseudo-online or real-time rehabilitation BCIs should therefore include target-domain adaptation and subject-level assessment of temporal informativeness, spatial sensitivity, and physiological discriminability.",
+      "authors": [
+        "Anh T. Nguyen",
+        "Zihua Sun",
+        "Michelle J. Johnson"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE",
+        "cs.LG"
+      ],
+      "published": "2026-08-31T19:26:41+00:00",
+      "link": "https://arxiv.org/pdf/2609.00282v1",
+      "tags": [
+        "keyword:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Uses LoRA to adapt pretrained EEG foundation models from healthy to pathological domain for motor imagery classification under domain shift, but target-domain labels are available rather than few-shot.",
+      "llm_evidence_cn": "利用LoRA将预训练脑电基础模型从健康域适配到卒中病态域以进行运动想象分类，处理分布差异但并非少样本分类。",
+      "llm_evidence": "利用LoRA将预训练脑电基础模型从健康域适配到卒中病态域以进行运动想象分类，处理分布差异但并非少样本分类。",
+      "canonical_evidence": "利用LoRA将预训练脑电基础模型从健康域适配到卒中病态域以进行运动想象分类，处理分布差异但并非少样本分类。",
+      "llm_tldr_en": "Evaluates LoRA for adapting pretrained EEG foundation models under healthy-to-stroke domain shift for binary motor-imagery classification, showing improved accuracy and subject-level robustness but using target-subject labels rather than few-shot samples.",
+      "llm_tldr_cn": "论文研究健康人群与卒中患者脑电信号的域偏移问题，将预训练脑电基础模型通过低秩适配LoRA轻量微调于左右手运动想象二分类，骨干网络保持冻结。在EEGMMIDB与包含30名卒中患者的UET175子集上进行受试者级五折验证，LoRA显著提升了准确率与鲁棒性。该工作属于有目标域标签的参数高效域适配，并非少样本分类，但LoRA作为轻量适配方式可迁移至资源受限的跨域场景。",
+      "llm_tldr": "论文研究健康人群与卒中患者脑电信号的域偏移问题，将预训练脑电基础模型通过低秩适配LoRA轻量微调于左右手运动想象二分类，骨干网络保持冻结。在EEGMMIDB与包含30名卒中患者的UET175子集上进行受试者级五折验证，LoRA显著提升了准确率与鲁棒性。该工作属于有目标域标签的参数高效域适配，并非少样本分类，但LoRA作为轻量适配方式可迁移至资源受限的跨域场景。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2609.03505v1",
+      "source": "arxiv",
+      "title": "An Adversarial Zero-Shot Learning Approach for Anomaly Detection in Multivariate IoT Traffic Data",
+      "abstract": "Anomaly detection in Internet of Things (IoT) networks presents unique challenges due to the diversity of devices, lack of labeled data, and domain variability across environments. In this paper, we propose a novel framework for multivariate time-series anomaly detection that leverages adversarial learning and contrastive loss within a sequence-based Variational Autoencoder (VAE) architecture. Our method enables zero-shot domain adaptation by jointly optimizing domain-invariant latent representations and semantically structured embedding spaces, without requiring labeled data or raw feature transfer. To address the heterogeneity of IoT deployments, we introduce encoder and decoder adaptor layers that align feature distributions across domains while preserving contextual semantics. Additionally, we propose a destination-based segmentation strategy to better model real-world communication structures in IoT traffic. Our framework is comprehensively evaluated on six distinct datasets spanning industrial, enterprise, general-purpose, smart home, and military automation domains across 44 transfer scenarios. Experimental results demonstrate strong zero-shot generalization in several cross-domain settings and competitive performance against a contrastive domain-adaptation baseline under realistic, heterogeneous, and privacy-constrained IoT conditions.",
+      "authors": [
+        "Mahshid Rezakhani",
+        "Tolunay Seyfi",
+        "Fatemeh Afghah"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.NI"
+      ],
+      "published": "2026-09-03T08:07:06+00:00",
+      "link": "https://arxiv.org/pdf/2609.03505v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Zero-shot adaptation across IoT environments via domain-invariant latent alignment and adaptor layers",
+      "llm_evidence_cn": "用域不变潜在表示与适配层对齐跨环境特征分布，实现零样本域适应",
+      "llm_evidence": "用域不变潜在表示与适配层对齐跨环境特征分布，实现零样本域适应",
+      "canonical_evidence": "用域不变潜在表示与适配层对齐跨环境特征分布，实现零样本域适应",
+      "llm_tldr_en": "A VAE-based adversarial zero-shot method aligns feature distributions across IoT environments using domain-invariant latent representations and contrastive semantic constraints, reducing reliance on labeled data for cross-domain anomaly detection.",
+      "llm_tldr_cn": "IoT网络的设备多样且部署环境差异大，缺少标注又存在显著域变化，使异常检测难以迁移。论文在序列变分自编码器中融入对抗学习和对比损失，将跨环境数据映射到域不变且语义结构化的潜在空间，并通过编码器和解码器适配层对齐特征分布，从而在不使用标注和原始特征迁移的情况下完成零样本域适应。该方法把零样本域适应引入多变量时序异常检测，为跨域少样本学习方法提供了通用的表示对齐思路。",
+      "llm_tldr": "IoT网络的设备多样且部署环境差异大，缺少标注又存在显著域变化，使异常检测难以迁移。论文在序列变分自编码器中融入对抗学习和对比损失，将跨环境数据映射到域不变且语义结构化的潜在空间，并通过编码器和解码器适配层对齐特征分布，从而在不使用标注和原始特征迁移的情况下完成零样本域适应。该方法把零样本域适应引入多变量时序异常检测，为跨域少样本学习方法提供了通用的表示对齐思路。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2609.03655v1",
+      "source": "arxiv",
+      "title": "PL-SCEA: Reconfiguring Pretrained Attention for Few-Shot Industrial Anomaly Detection",
+      "abstract": "Vision Foundation Models (VFMs) provide transferable patch representations for few-shot industrial anomaly detection, but their attention computation is typically inherited from pretraining objectives centered on semantic aggregation. This creates a potential mismatch: token relations that support semantic recognition may not adequately expose the localized texture and structural deviations required for anomaly localization. We therefore investigate the hypothesis that the attention computation of a frozen VFM can be reconfigured as a task-relevant component of anomaly detection. We instantiate this idea with Power-Law Self-Correlation Enhanced Attention (PL-SCEA), which retains the semantic context of pretrained query-key attention while constructing token-adaptive self-correlations over contextualized value features. Positive-correlation filtering and power-law reweighting then emphasize relations that are salient relative to each token's relational background, without introducing additional trainable attention projections. The resulting features are modeled by a lightweight variational autoencoder that provides a fixed-size reconstruction-based representation of category-specific normality. The two stages serve complementary roles: attention reconfiguration shapes how local relational deviations are represented, while reconstruction-based modeling converts deviations from learned normality into anomaly scores. Across MVTec AD and VisA, the complete framework achieves competitive image-level detection and consistently strong pixel-level localization across the evaluated few-shot settings. Ablations further show that PL-SCEA improves localization with either the VAE or a memory bank under the tested setting. These results support the view that task-aligned attention reconfiguration can improve the anomaly-localization capability of frozen pretrained representations.",
+      "authors": [
+        "Xiaoyu Yang",
+        "Qixing Wu",
+        "Huixian Zhao",
+        "Changlong Jin"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-09-03T10:54:05+00:00",
+      "link": "https://arxiv.org/pdf/2609.03655v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "uses a frozen vision foundation model with reconfigured attention for few-shot anomaly detection with scarce target samples",
+      "llm_evidence_cn": "在只有少量样本的少样本异常检测中重配置预训练注意力",
+      "llm_evidence": "在只有少量样本的少样本异常检测中重配置预训练注意力",
+      "canonical_evidence": "在只有少量样本的少样本异常检测中重配置预训练注意力",
+      "llm_tldr_en": "PL-SCEA reconfigures the query-key attention of a frozen vision foundation model with power-law self-correlation, retaining semantic context while exposing local structure deviations for few-shot industrial anomaly detection.",
+      "llm_tldr_cn": "工业异常检测在只有少量样本时借助视觉基础模型的迁移补丁表征，但预训练注意力偏向语义聚合，难以体现局部纹理与结构偏差。作者提出PL-SCEA，用幂律自相关增强注意力并重配置冻结模型中的查询-键计算，在保留语义上下文的同时突出异常定位所需特征。该方法把预训练注意力作为任务相关组件调节，从而提升少样本工业异常检测与定位能力。",
+      "llm_tldr": "工业异常检测在只有少量样本时借助视觉基础模型的迁移补丁表征，但预训练注意力偏向语义聚合，难以体现局部纹理与结构偏差。作者提出PL-SCEA，用幂律自相关增强注意力并重配置冻结模型中的查询-键计算，在保留语义上下文的同时突出异常定位所需特征。该方法把预训练注意力作为任务相关组件调节，从而提升少样本工业异常检测与定位能力。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2609.05864v1",
+      "source": "arxiv",
+      "title": "Hierarchical Prompt Injector for Domain Generalization Segmentation",
+      "abstract": "Domain Generalized Semantic Segmentation (DGSS) is a challenging task, as vision models often rely on low-level appearance cues that change across domains. In contrast, structural attributes exhibit cross-domain stability, motivating the use of structural priors for DGSS. Existing methods use prompt learning to transfer such priors into DGSS models, but typically encode each class as a single holistic prompt. Moreover, these methods apply prompts uniformly to all pixels, offering no mechanism to adapt when only a subset of object regions is visible due to viewpoint changes, occlusion, and environmental variation. We address this with \\textbf{Spatial Hierarchical Prompts (SHP)} that enrich each class with region-level geometric anchors capturing structural appearance from distinct viewing angles, ensuring complementary coverage under arbitrary viewpoints. Additionally, we propose the \\textbf{Hierarchical Prompt Injector (HPI)}, which enables spatially adaptive prompt injection in foundation models. HPI spatially grounds prompts by modeling their semantic relevance and spatial influence with visual features. Considering the difficulty of learning spatially and semantically aware prompt injection, we further introduce auxiliary supervision to align hierarchical prompts with their corresponding object regions. We achieve 70.62\\% and 72.74\\% mIoU on synthetic-to-real and real-to-real benchmarks, respectively. Code and checkpoints are released at https://github.com/MosukFate/HPI",
+      "authors": [
+        "Xin Kun Lin",
+        "Ruoyu Guo",
+        "Jiaqi Guo",
+        "Maurice Pagnucco",
+        "Yang Song"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-09-05T03:56:00+00:00",
+      "link": "https://arxiv.org/pdf/2609.05864v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Domain generalization without fine-tuning via hierarchical prompts, though for semantic segmentation",
+      "llm_evidence_cn": "以层次提示达成无需微调的跨域泛化，但面向语义分割任务",
+      "llm_evidence": "以层次提示达成无需微调的跨域泛化，但面向语义分割任务",
+      "canonical_evidence": "以层次提示达成无需微调的跨域泛化，但面向语义分割任务",
+      "llm_tldr_en": "This DGSS paper introduces Spatial Hierarchical Prompts (SHP) so each class carries region-level geometric anchors and prompt aggregation adapts to visible object parts, supporting generalization to unseen domains without fine-tuning on target data.",
+      "llm_tldr_cn": "域泛化语义分割要求模型在未知目标域上无需微调即可分割，但视觉模型常依赖跨域不稳的低层外观特征，而结构属性更稳定。现有提示学习方法将每个类别编码为单一整体提示并对所有像素统一施加，难以处理遮挡和视角变化下仅部分区域可见的情况。论文提出空间层次提示(SHP)，为每个类补充区域级几何锚点与结构先验，以此缓解局部外观变化引起的域偏移。该方法为将结构先验注入分割模型实现跨域泛化提供了一条新路径。",
+      "llm_tldr": "域泛化语义分割要求模型在未知目标域上无需微调即可分割，但视觉模型常依赖跨域不稳的低层外观特征，而结构属性更稳定。现有提示学习方法将每个类别编码为单一整体提示并对所有像素统一施加，难以处理遮挡和视角变化下仅部分区域可见的情况。论文提出空间层次提示(SHP)，为每个类补充区域级几何锚点与结构先验，以此缓解局部外观变化引起的域偏移。该方法为将结构先验注入分割模型实现跨域泛化提供了一条新路径。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2609.06406v1",
+      "source": "arxiv",
+      "title": "Hierarchical Wasserstein Merging for Multi-Domain Multi-Task Learning: From Specialists to a Generalist",
+      "abstract": "Multi-domain multi-task learning (MD-MTL) aims to build a single generalist model that performs well across heterogeneous domains and tasks. However, joint training often suffers from interference under distribution shifts. Existing model merging methods mostly operate on model parameters while overlooking the geometric structure of latent representation distributions across domains and tasks. To address these limitations, we propose Hierarchical Wasserstein Merging (HWM), a representation-level framework that models each domain-task specialist as a distribution of hidden representations on a shared support. HWM constructs task-level and global Wasserstein barycenters to capture within-task domain variation and cross-task structure, enabling either training-free specialist aggregation by Wasserstein-derived weights or training-based generalist learning through a hybrid Wasserstein alignment loss. Experiments on four NLP tasks across four domains per task show that HWM achieves superior effectiveness and generalization capability in MD-MTL settings.",
+      "authors": [
+        "Ming Cheng",
+        "Jiaying Gong",
+        "Hoda Eldardiry"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-09-06T05:50:11+00:00",
+      "link": "https://arxiv.org/pdf/2609.06406v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-domain multi-task generalist built by representation-level Wasserstein merging to handle distribution shifts",
+      "llm_evidence_cn": "通过表示级Wasserstein合并构建多域多任务通用模型以处理分布偏移",
+      "llm_evidence": "通过表示级Wasserstein合并构建多域多任务通用模型以处理分布偏移",
+      "canonical_evidence": "通过表示级Wasserstein合并构建多域多任务通用模型以处理分布偏移",
+      "llm_tldr_en": "HWM treats each domain-task specialist as a hidden-representation distribution, then builds task-level and global Wasserstein barycenters to merge them. This yields a single generalist that handles multi-domain multi-task distribution shifts and avoids joint-training interference.",
+      "llm_tldr_cn": "多域多任务模型联合训练容易因分布偏移而相互干扰，现有模型合并方法主要操作权重参数，忽视了表示分布的几何结构。该文提出层次化Wasserstein合并框架，将每个域-任务专家建模为共享支撑上的隐表示分布，并通过任务级与全局的Wasserstein重心来聚合专家知识。实验表明，该表示级合并方法在多个异质域与任务上取得了超过联合训练和已有参数合并方法的性能。这项工作为以低代价把多个专家整合为通用模型提供了新的思路。",
+      "llm_tldr": "多域多任务模型联合训练容易因分布偏移而相互干扰，现有模型合并方法主要操作权重参数，忽视了表示分布的几何结构。该文提出层次化Wasserstein合并框架，将每个域-任务专家建模为共享支撑上的隐表示分布，并通过任务级与全局的Wasserstein重心来聚合专家知识。实验表明，该表示级合并方法在多个异质域与任务上取得了超过联合训练和已有参数合并方法的性能。这项工作为以低代价把多个专家整合为通用模型提供了新的思路。",
+      "llm_tags": [
+        "query:few-shot:composite"
+      ],
+      "matched_query_tag": "query:few-shot:composite",
+      "matched_query_text": "Papers central to 查找跨域小样本分类相关论文, especially work that connects or combines: classification task where training and test domains differ and only a few labeled samples are available; distribution mismatch between source and target domains causing performance degradation; techniques for adapting a model from a source domain to a target domain with different data distribution; learning a model that can generalize to unseen domains without fine-tuning; What methods are proposed to handle domain shift in few shot classification tasks; How can meta learning be applied to cross domain few shot classification.",
+      "matched_requirement_id": "req-composite-few-shot",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2609.08526v1",
+      "source": "arxiv",
+      "title": "Transfer Learning with Heterogeneous Feature Spaces in Linear Regression",
+      "abstract": "Transfer learning improves target-task performance by leveraging related source data. Most methods assume shared feature spaces, yet in many applications, each source observes only a subset of target covariates. Classical imputation fails here due to block missingness, and standard imputation matrices are not optimized for target parameter estimation. We study low- and high-dimensional linear regression and propose Heterogeneous Importance Weighting (HIW). Our method aligns feature spaces via projection-based imputation and transfers information through sample-selected importance weighting. This framework accommodates diverse projection matrices to construct target-oriented imputation. We develop a classification-based procedure with pseudo-responses to estimate conditional error densities for the weights. We establish entry-wise and global convergence rates for the estimator, with numerical and real-data studies demonstrating its effectiveness.",
+      "authors": [
+        "Zejing Zheng",
+        "Rui Huang",
+        "Junlong Zhao"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME"
+      ],
+      "published": "2026-09-08T10:16:35+00:00",
+      "link": "https://arxiv.org/pdf/2609.08526v1",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "source-to-target transfer with heterogeneous feature spaces via projection-based imputation and importance weighting",
+      "llm_evidence_cn": "通过投影插补与重要性加权实现异构特征空间的源到目标迁移",
+      "llm_evidence": "通过投影插补与重要性加权实现异构特征空间的源到目标迁移",
+      "canonical_evidence": "通过投影插补与重要性加权实现异构特征空间的源到目标迁移",
+      "llm_tldr_en": "Classical transfer learning assumes shared covariates; real sources observe only target subsets. HIW uses projection-based imputation to align feature spaces and sample-selected importance weighting to transfer information, enabling target-oriented estimation in low- and high-dimensional linear regression.",
+      "llm_tldr_cn": "传统迁移学习假设源与目标特征空间相同，而实际中源域只观测到目标变量的子集，直接插值会因块缺失失效。该文提出异构重要性加权方法，通过基于投影的插补对齐特征空间，并用样本选择的重要性加权传递源域信息。在线性回归的低维与高维场景中，该方法比一般插补更能服务目标参数估计。文中还构造了基于伪响应的分类式流程用于样本选择，说明该方法能处理异构特征迁移。",
+      "llm_tldr": "传统迁移学习假设源与目标特征空间相同，而实际中源域只观测到目标变量的子集，直接插值会因块缺失失效。该文提出异构重要性加权方法，通过基于投影的插补对齐特征空间，并用样本选择的重要性加权传递源域信息。在线性回归的低维与高维场景中，该方法比一般插补更能服务目标参数估计。文中还构造了基于伪响应的分类式流程用于样本选择，说明该方法能处理异构特征迁移。",
+      "llm_tags": [
+        "query:few-shot"
+      ],
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

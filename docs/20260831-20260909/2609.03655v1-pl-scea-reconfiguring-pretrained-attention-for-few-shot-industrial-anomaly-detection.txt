@@ -1,0 +1,323 @@
+Title: PL-SCEA: Reconfiguring Pretrained Attention for Few-Shot Industrial Anomaly Detection
+
+URL Source: https://arxiv.org/pdf/2609.03655v1
+
+Published Time: Fri, 04 Sep 2026 01:02:57 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# PL-SCEA: Reconfiguring Pretrained Attention for Few-Shot Industrial Anomaly Detection 
+
+# Xiaoyu Yang 1, Qixing Wu 1, Huixian Zhao 1, Changlong Jin 1∗ 
+
+> 1
+
+School of Airspace Science and Engineering, Shandong University, Shandong, China {yangxiaoyu,wuqixing,zhaohuixian}@mail.sdu.edu.cn, cljin@sdu.edu.cn 
+
+Abstract 
+
+Vision Foundation Models (VFMs) provide transferable patch representations for few-shot industrial anomaly detection, but their attention computation is typically inherited from pre-training objectives centered on semantic aggregation. This creates a potential mismatch: token relations that support se-mantic recognition may not adequately expose the localized texture and structural deviations required for anomaly local-ization. We therefore investigate the hypothesis that the at-tention computation of a frozen VFM can be reconfigured as a task-relevant component of anomaly detection. We in-stantiate this idea with Power-Law Self-Correlation Enhanced Attention (PL-SCEA), which retains the semantic context of pretrained query-key attention while constructing token-adaptive self-correlations over contextualized value features. Positive-correlation filtering and power-law reweighting then emphasize relations that are salient relative to each token’s re-lational background, without introducing additional trainable attention projections. The resulting features are modeled by a lightweight variational autoencoder that provides a fixed-size reconstruction-based representation of category-specific nor-mality. The two stages serve complementary roles: attention reconfiguration shapes how local relational deviations are rep-resented, while reconstruction-based modeling converts de-viations from learned normality into anomaly scores. Across MVTec AD and VisA, the complete framework achieves com-petitive image-level detection and consistently strong pixel-level localization across the evaluated few-shot settings. Abla-tions further show that PL-SCEA improves localization with either the VAE or a memory bank under the tested setting. These results support the view that task-aligned attention re-configuration can improve the anomaly-localization capability of frozen pretrained representations. 
+
+# Introduction 
+
+Industrial anomaly detection typically trains on normal im-ages to identify defective samples and localize anoma-lous regions. Feature-matching (Defard et al. 2021; Roth et al. 2022), knowledge-distillation (Deng and Li 2022; Salehi et al. 2021), and reconstruction (Zavrtanik, Kris-tan, and Skočaj 2021) methods perform well on MVTec AD (Bergmann et al. 2019) and VisA (Zou et al. 2022), but generally require category-specific normal data that cover texture, pose, and structural variation. Rebuilding such 
+
+> ∗
+
+Corresponding author. 
+
+datasets for new product categories is costly. Few-shot indus-trial anomaly detection must therefore establish category-specific normality from only K normal reference images while remaining sensitive to local defects. In few-shot settings, the limited normal references make the quality and organization of pretrained patch representa-tions particularly important. RADIO (Ranzinger et al. 2024b) distills complementary capabilities from DINO (Caron et al. 2021), CLIP (Radford et al. 2021), and SAM (Kirillov et al. 2023), while RADIOv3 (Ranzinger et al. 2024a) further im-proves the spatial detail of dense representations. Neverthe-less, these models inherit attention computations optimized primarily for general-purpose semantic representation. Their pretrained features therefore provide a strong starting point, but the way token information is aggregated may remain mis-matched with the localized texture and structural deviations that characterize industrial anomalies. Attention computation determines how each output patch aggregates evidence from the remaining tokens. In the ex-ample shown in Figure 2, the original QK attention pre-serves semantic context but produces relatively fragmented responses around boundaries and high-contrast regions. Di-rect QQ, KK, and VV correlations form more spatially con-tinuous patterns, but some also merge locally distinct regions and reduce defect contrast. This observation suggests com-plementary roles for semantic conditioning and same-type token relations. It further raises a broader question: can the attention computation of a frozen VFM be reconfigured for anomaly localization without discarding the semantic struc-ture learned during pretraining? Motivated by this question, we argue that the attention computation of a frozen VFM should be treated as a task-relevant design variable rather than an immutable part of the feature extractor. Importantly, modifying attention is not beneficial by default: directly replacing QK attention with QQ, KK, or VV correlations may discard useful semantic conditioning or over-smooth local structures. An anomaly-oriented reconfiguration should instead retain pretrained QK context while selectively reshaping token relations according to their relative relational salience. We instantiate this design principle with Power-Law Self-Correlation Enhanced Attention (PL-SCEA). PL-SCEA first contextualizes value features through the original QK at-tention and then computes pairwise self-correlations over arXiv:2609.03655v1 [cs.CV] 3 Sep 2026 the contextualized tokens. Token-wise standardization and power-law reweighting emphasize relations that are salient relative to each token’s relational background, and the result-ing weights are used to reaggregate the original value tokens. This design preserves pretrained semantic conditioning while altering how local relational evidence is represented, without introducing additional trainable attention projections. Attention reconfiguration alone does not define how category-specific normality should be represented from a few reference images. We therefore pair PL-SCEA with a lightweight variational autoencoder (Kingma and Welling 2013) that reconstructs relation-enhanced normal patch fea-tures. The two stages address different parts of the detection pipeline: PL-SCEA shapes how local relational deviations are exposed in the feature space, whereas the reconstruction model summarizes normality and converts deviations from that normality into patch-level anomaly scores. The result-ing parametric normality model has a fixed storage footprint and avoids nearest-neighbor retrieval over an explicit feature memory bank. We evaluate the complete framework on MVTec AD and VisA across 1–8-shot settings. It maintains competitive image-level detection performance and improves pixel-level F1-max on MVTec AD by 4.1–4.8 percentage points over AnomalyDINO-S. Controlled comparisons further show that replacing QK attention with PL-SCEA improves localization with either the VAE or a memory bank in the MVTec AD 1-shot setting. Meanwhile, the PL-SCEA–VAE combination obtains the strongest pixel-level results in the component comparison. These findings suggest that attention reconfigu-ration and reconstruction-based normality modeling provide complementary benefits rather than attributing the complete improvement to either component alone. Figure 1 summa-rizes the training and inference pipeline. Our contributions are summarized as follows: 
+
+• We formulate and empirically examine the hypothesis that the attention computation of a frozen vision foundation model can be reconfigured to improve few-shot industrial anomaly localization, rather than treating pretrained token interactions as fixed. 
+
+• We instantiate this design principle with PL-SCEA, which retains pretrained QK semantic conditioning while constructing token-adaptive, power-law-reweighted self-correlations without introducing additional trainable at-tention projections. 
+
+• We combine relation-aware feature construction with reconstruction-based latent normality modeling. Exper-iments on MVTec AD and VisA show strong localization performance across 1–8-shot settings, while controlled comparisons with both a VAE and a memory bank in-dicate that the effect of PL-SCEA is not restricted to a single normality model. 
+
+# Related Work 
+
+Vision Foundation Models transfer broad visual priors to downstream tasks. For anomaly detection, CLIP (Rad-ford et al. 2021) contributes vision-language alignment, DINO (Caron et al. 2021) contributes self-supervised fea-tures, and SAM (Kirillov et al. 2023) contributes dense re-gion awareness. RADIO (Ranzinger et al. 2024b) distills several teachers rather than relying on one pretraining objec-tive. Its encoder combines the global semantics, local cor-respondence, and dense spatial cues of DINO, CLIP, and SAM. RADIOv3 (Ranzinger et al. 2024a) further sharpens high-resolution dense features. We use a frozen RADIOv3 encoder and modify only how its existing tokens interact. 
+
+Few-Shot Anomaly Detection Given a few normal reference images, few-shot industrial anomaly detection aims to learn category-specific normality and localize regions that devi-ate from it. We focus on low-level visual anomalies, such as scratches, cracks, contamination, and local structural dam-age, rather than semantic anomalies such as incorrect object categories. Because limited normal samples cannot cover variations in texture, pose, and structure, the central chal-lenge is to construct a robust category-specific normality model from pretrained visual knowledge. Cross-category methods transfer anomaly-detection knowledge to new categories through unsupervised meta-learning (Wu et al. 2021), hierarchical generation (Sheynin, Benaim, and Wolf 2021), or registration-based align-ment (Huang et al. 2022). However, they generally require auxiliary category data or target-category adaptation. Feature-matching methods encode normal images into patch features and use the nearest-neighbor distance to nor-mal features as the anomaly score. PatchCore (Roth et al. 2022) compresses the feature bank through coreset sam-pling, GraphCore (Xie et al. 2023) models graph relations among support features, and AnomalyDINO (Damm et al. 2025) shows that high-quality DINO features with nearest-neighbor retrieval can achieve strong few-shot performance. FastRecon (Fang et al. 2023) reconstructs query features from support features and scores their reconstruction discrepancy. These methods typically remain dependent on reference-feature storage or retrieval. Despite their different scoring mechanisms, these ap-proaches primarily operate on patch representations that have already been formed by the pretrained backbone. They there-fore address how normal features are stored, matched, or reconstructed, rather than whether the backbone’s token in-teraction rule is itself appropriate for anomaly localization. Vision–language methods compare image or patch fea-tures with normal and anomalous textual prompts. Win-CLIP (Jeong et al. 2023), PromptAD (Li et al. 2024), and InCTR (Zhu and Pang 2024) introduce multi-scale windows, learnable prompts, and normal-image context, respectively, while AnoPLe (Lee et al. 2026) and KAG-prompt (Tao et al. 2025) further model interactions among visual prompts, tex-tual prompts, and multi-level features. AnomalyGPT (Gu et al. 2024) extends this paradigm to instruction-guided anomaly analysis. Although these methods can use language semantics to alleviate normal-data scarcity, their localiza-tion performance still depends on the quality of dense visual features. 
+
+Attention Reshaping in Vision Transformers. Final-layer attention has also been modified to improve local features for dense prediction. SCLIP (Wang, Mei, and Yuille 2024) Figure 1: Overview of the proposed framework. The first stage reconfigures the final-layer attention computation of a frozen vision foundation model. PL-SCEA preserves QK semantic conditioning, constructs self-correlations over contextualized value features, and uses the reweighted relations to produce relation-aware patch representations. The second stage models these representations with a lightweight VAE. During inference, cosine discrepancies between the PL-SCEA-enhanced features and their deterministic VAE reconstructions are converted into an anomaly map. The two stages respectively control how relational deviations are represented and how deviations from learned normality are scored. builds attention from query-query and key-key similarities, NACLIP (Hajimiri, Ben Ayed, and Dolz 2025) imposes a spatial-neighborhood prior, and ClearCLIP (Lan et al. 2024) combines same-type attention with a simplified architecture to limit interference from global semantics. For anomaly de-tection, AnomalyCLIP (Zhou et al. 2024) substitutes value-value attention for the original QK relation to sharpen anoma-lous regions in CLIP features. These studies show that pre-trained attention need not remain fixed when dense local representations are required. However, directly replacing QK attention with a same-type relation does not explain how pretrained semantic conditioning and anomaly-sensitive re-lational structure should be combined. We investigate this is-sue in few-shot industrial anomaly detection by retaining QK conditioning while reconfiguring the self-correlation struc-ture of contextualized tokens. 
+
+# Attention Reconfiguration and Latent Normality Modeling 
+
+Our framework separates few-shot anomaly detection into two complementary stages. The first stage concerns repre-sentation formation: PL-SCEA reconfigures the final-layer token interactions of a frozen VFM to produce relation-aware patch features. The second stage concerns normality esti-mation: Latent Normality Modeling reconstructs these fea-tures and uses their directional reconstruction discrepancies as anomaly evidence. This decomposition allows us to ex-amine whether attention reconfiguration contributes beyond a particular downstream normality model. 
+
+Token Correlations for Anomaly Detection 
+
+The final self-attention block directly influences how out-put patch representations aggregate information from the remaining tokens. Because the pretrained model is opti-mized for general-purpose representation learning, its origi-nal attention computation may emphasize semantic or high-contrast structures that are useful for recognition but less aligned with fine-grained anomaly localization. Figure 2 illustrates this mismatch in one example. The original QK attention retains semantic context but produces relatively fragmented responses, whereas QQ, KK, and VV correlations form more continuous relation maps. However, direct same-type correlations can also merge locally distinct patterns. The comparison indicates that changing the atten-tion relation is not sufficient by itself; the form of the recon-figuration matters. Tokens from repetitive textures and regular structures of-ten exhibit consistent relational patterns, while local defects may disturb these patterns. This motivates an attention de-sign that retains QK semantic conditioning but recalibrates token relations according to their relative correlation back-ground. PL-SCEA implements this design by computing self-correlations over semantically contextualized value fea-tures and selectively reweighting the resulting relations. Figure 2: Comparison of anomaly responses produced by different attention branches. The ring-shaped responses in the non-PL-SCEA maps appear to be associated with the shadow above the object, which forms a strong intensity boundary. 
+
+Power-Law Self-Correlation Enhanced Attention 
+
+To implement this task-aligned attention reconfiguration, PL-SCEA first obtains semantically conditioned value repre-sentations using the original QK attention, extracts the to-ken self-correlation structure from these representations, and constructs new attention relations through token-adaptive standardization and power-law reweighting. Rather than in-discriminately increasing token similarity, PL-SCEA empha-sizes above-average self-correlations on a per-token basis, thereby increasing the relative contrast between strongly and weakly related tokens. Let X ∈ RN ×C be the spatial-token input to the final attention layer, where N is the number of spatial patch tokens and C is the feature dimension. Prefix tokens are excluded from the PL-SCEA correlation construction and downstream patch-level anomaly scoring. For a multi-head attention module with H heads, each head has dimension 
+
+d = C/H . Using the pretrained QKV projections, we obtain 
+
+Q, K, V ∈ RN ×d. For clarity, we formulate the computation for a single head. The original attention is 
+
+Aqk = Softmax 
+
+ QK ⊤
+
+√d
+
+
+
+. (1) The contextualized value representation is then 
+
+Y = Aqk V. (2) Unlike standard self-attention, we do not use Y directly as the final attention output. Instead, it serves as a semanti-cally conditioned intermediate representation for estimating relational consistency among tokens. 
+
+Semantically conditioned self-correlation. To reduce the influence of feature magnitude and emphasize directional consistency among token representations, we first apply L2
+
+normalization to each contextualized token along the feature dimension: 
+
+˜yi = yi
+
+∥yi∥2 + ϵ , (3) where ϵ ensures numerical stability. Pairwise self-correlation is then 
+
+Sij = ˜ y⊤ 
+
+> i
+
+˜yj , (4) where Sij is the cosine similarity between tokens i and j
+
+after the initial semantic aggregation. 
+
+Token-adaptive correlation standardization. The correla-tion distributions may differ substantially across query to-kens and attention heads. For token i, PL-SCEA computes the row-wise mean and standard deviation: 
+
+μi = 1
+
+N
+
+> N
+
+X
+
+> j=1
+
+Sij , σi =
+
+vuut 1
+
+N
+
+> N
+
+X
+
+> j=1
+
+(Sij − μi)2. (5) The standardized correlation is 
+
+ˆSij = Sij − μi
+
+σi + ϵ . (6) 
+
+Power-law correlation enhancement. This operation con-verts absolute cosine similarity into relational salience rela-tive to the correlation background of the current token. When 
+
+ˆSij > 0, the relation between tokens i and j is stronger than the average correlation of token i. Each token is there-fore calibrated against its own relational distribution rather than a single global criterion. Weak or moderately strong to-ken interactions may introduce relational noise and obscure subtle local anomalies. PL-SCEA consequently retains only above-average correlations and enhances their contrast with a power-law transformation: 
+
+Rij =
+
+h
+
+max(0 , ˆSij )
+
+iγ
+
+, γ > 0. (7) The exponent γ > 0 controls the concentration of the re-tained positive standardized correlations. When 0 < γ < 1,the power transformation compresses the relative differences between stronger and weaker positive correlations. When 
+
+γ = 1 , it preserves the magnitudes of the positive standard-ized correlations while removing non-positive entries. When 
+
+γ > 1, it increases their relative contrast, assigning greater normalized weight to the strongest relations. We use γ = 2 
+
+by default. 
+
+Value reaggregation. We normalize the enhanced correla-tions row-wise to obtain the final PL-SCEA weights: 
+
+Di =
+
+> N
+
+X
+
+> j=1
+
+Rij , APL -SCEA  
+
+> ij
+
+=
+
+
+
+Rij 
+
+Di
+
+, Di > 0,δij , Di = 0 ,
+
+(8) where δij is the Kronecker delta. The fallback branch retains the token itself when a row contains no positively salient relation. Therefore, 
+
+APL -SCEA  
+
+> ij
+
+≥ 0,
+
+> N
+
+X
+
+> j=1
+
+APL -SCEA  
+
+> ij
+
+= 1 . (9) Finally, PL-SCEA uses the new attention weights to reaggre-gate the original value tokens: 
+
+O = APL -SCEA V. (10) The head-wise outputs are concatenated and passed through the frozen pretrained output projection. The surround-ing residual connection, LayerNorm placement, and feed-forward/MLP sublayer remain unchanged from the original RADIOv3 block. Only the resulting spatial-token features are passed to Latent Normality Modeling and patch-level anomaly scoring. 
+
+Reconstruction-Based Latent Normality Modeling 
+
+After attention reconfiguration, Latent Normality Modeling (LNM) uses a lightweight VAE (Kingma and Welling 2013) to model the PL-SCEA-enhanced patch representations. Its role is distinct from that of PL-SCEA: the attention module determines how relational evidence is represented, whereas LNM learns a compact category-specific model of normal-ity and converts reconstruction discrepancies into anomaly scores. Let xi denote the i-th enhanced patch feature. During training, xi is first L2-normalized to obtain the clean recon-struction target ¯xi. Gaussian noise is then added, followed by another normalization, to obtain the encoder input exi.The encoder Eϕ maps exi to the mean μi and standard deviation σi of the Gaussian posterior qϕ(zi | exi). During training, the latent variable zi is sampled using reparame-terization, and the decoder Dθ reconstructs the normalized patch feature bxi. The LNM objective combines cosine re-construction loss with KL regularization: 
+
+LLNM = 1
+
+B
+
+> B
+
+X
+
+> i=1
+
+[1 − sim cos (bxi, ¯xi)] 
+
+| {z }
+
+> Lcos
+
++ β 1
+
+B
+
+> B
+
+X
+
+> i=1
+
+DKL [qϕ (zi | exi) ∥N (0, I)] 
+
+| {z }
+
+> LKL
+
+.
+
+(11) The reconstruction term encourages the model to preserve the directional structure of normal features, while the KL term regularizes the latent distribution toward a standard Gaussian. We use a small β to limit the risk that excessive regularization suppresses fine-grained variations among nor-mal patches. At inference, no stochastic sampling is performed. The encoder receives the normalized test feature ¯xi, and its pos-terior mean μi is passed to the decoder for deterministic reconstruction. The raw and standardized anomaly scores are 
+
+ai = 1 − sim cos (¯ xi, Norm 2 [Dθ (μi)]) , (12) 
+
+˜ai = ai − ma
+
+sa + ϵ , (13) where ma and sa are the mean and standard deviation of the reconstruction scores computed from normal train-ing patches. Under this reconstruction-based modeling as-sumption, normal features are expected to produce smaller directional discrepancies than anomalous features. We there-fore use the standardized reconstruction discrepancy as the patch-level anomaly score. Considering only the category-specific normality state, LNM compresses a variable number of normal patch features into the fixed-size parameter set Θ = {ϕ, θ }, where ϕ and 
+
+θ denote the encoder and decoder parameters, respectively. Its additional storage complexity is therefore O(|Θ|) and does not grow with the number of reference samples. In contrast, the corresponding memory-bank state grows with the number of stored patch features. The frozen backbone, which is shared by both alternatives, is excluded from this comparison. 
+
+# Experiments 
+
+Datasets. MVTec AD (Bergmann et al. 2019) contains over 5,000 high-resolution images from 15 texture and object categories, with image-level anomaly labels and pixel-level masks. VisA (Zou et al. 2022) contains 9,621 normal and 1,200 anomalous images from products with complex struc-tures and positional variation, covering scratches, dents, dis-coloration, cracks, and structural defects. 
+
+Evaluation Metrics. We report image-level AUROC, AUPR, and F1-max, and pixel-level AUROC, F1-max, and PRO. PRO measures region overlap across thresholds. All met-rics are percentages. For PL-SCEA, the main results in Ta-bles 1 and 2 are category macro-averages over three support-set seeds, reported as mean ± sample standard deviation. Baseline entries are taken from the cited sources; because support-set selection and implementation details may differ, comparisons with our local results are descriptive rather than strictly controlled. 
+
+Implementation Details. We follow AnomalyDINO (Damm et al. 2025) for preprocessing. A frozen RADIOv3-B serves as the encoder, with PL-SCEA ( γ = 2) replacing self-attention in its final Transformer block. L2-normalized patch features are modeled by a lightweight VAE with a 64-dimensional latent space. We train for up to 600 epochs using AdamW with a learning rate of 8 × 10 −4, weight decay of 
+
+1 × 10 −5, and batch size of 512 on one 12-GB NVIDIA RTX 3080 Ti. At inference, patch scores are standardized using normal training reconstruction errors and Gaussian-smoothed; the image score is the mean of the top 1% patch scores. 
+
+Quantitative Results 
+
+MVTec AD. Among the methods listed in Table 1, PL-SCEA obtains the highest or tied-highest reported mean on all image- and pixel-level metrics in the 1- and 2-shot set-tings. With 4 and 8 shots, its image-level AUROC is respec-tively 0.4 and 0.2 points below that of AnomalyDINO-S, while it retains the highest reported means on all pixel-level metrics and the highest or tied-highest image-level AUPR and F1-max. In particular, PL-SCEA improves pixel-level F1-max over AnomalyDINO-S by 4.1–4.8 points across the four shot settings. These results indicate that the complete framework provides consistent localization gains while main-taining competitive image-level detection. 
+
+VisA. Among the methods listed in Table 2, the complete framework obtains the highest reported means on all classi-fication and segmentation metrics in the 2-, 4-, and 8-shot Shots Method Image-level Pixel-level AUROC AUPR F1-max AUROC F1-max PRO 1-shot PatchCore (Roth et al. 2022) 83.4 ±3.0 92.2 ±1.5 90.5 ±1.5 92.0 ±1.0 50.4 ±2.1 79.7 ±2.0 APRIL-GAN (Chen, Han, and Zhang 2023) 92.0 ±0.3 95.8 ±0.2 92.4 ±0.2 95.1 ±0.1 54.2 ±0.0 90.6 ±0.2 WinCLIP+ (Jeong et al. 2023) 93.1 ±2.0 96.5 ±0.9 93.7 ±1.1 95.2 ±0.5 55.9 ±2.7 87.1 ±1.2 AdaptCLIP (Gao et al. 2026) 94.5 ±0.5 97.5 ±0.1 95.0 ±0.0 94.3 ±0.1 54.0 ±0.7 –AnomalyDINO-S (Damm et al. 2025) 96.6 ±0.4 98.2 ±0.2 95.8 ±0.5 96.8 ±0.1 60.2 ±1.1 92.7 ±0.1 
+
+PL-SCEA (Proposed) 96.9 ±0.9 98.2 ±0.8 95.9 ±0.7 97.5 ±0.1 64.3 ±1.4 93.7 ±0.2 
+
+2-shot PatchCore (Roth et al. 2022) 86.3 ±3.3 93.8 ±1.7 92.0 ±1.5 93.3 ±0.6 53.0 ±1.7 82.3 ±1.3 APRIL-GAN (Chen, Han, and Zhang 2023) 92.4 ±0.3 96.0 ±0.2 92.6 ±0.1 95.5 ±0.0 55.9 ±0.5 91.3 ±0.1 WinCLIP+ (Jeong et al. 2023) 94.4 ±1.3 97.0 ±0.7 94.4 ±0.8 96.0 ±0.3 58.4 ±1.7 88.4 ±0.9 AdaptCLIP (Gao et al. 2026) 95.7 ±0.6 97.9 ±0.2 95.4 ±0.1 94.5 ±0.0 55.0 ±0.3 –AnomalyDINO-S (Damm et al. 2025) 96.9 ±0.7 98.2 ±0.5 96.1 ±0.3 97.0 ±0.2 61.0 ±0.5 93.1 ±0.2 
+
+PL-SCEA (Proposed) 97.0 ±1.0 98.6 ±0.4 96.7 ±0.0 97.9 ±0.0 65.7 ±0.5 94.2 ±0.2 
+
+4-shot PatchCore (Roth et al. 2022) 88.8 ±2.6 94.5 ±1.5 92.6 ±1.6 94.3 ±0.5 55.0 ±1.9 84.3 ±1.6 APRIL-GAN (Chen, Han, and Zhang 2023) 92.8 ±0.2 96.3 ±0.1 92.8 ±0.1 95.9 ±0.0 56.9 ±0.1 91.8 ±0.1 WinCLIP+ (Jeong et al. 2023) 95.2 ±1.3 97.3 ±0.6 94.7 ±0.8 96.2 ±0.3 59.5 ±1.8 89.0 ±0.8 AdaptCLIP (Gao et al. 2026) 96.6 ±0.3 98.4 ±0.2 96.0 ±0.0 94.8 ±0.1 56.8 ±0.7 –AnomalyDINO-S (Damm et al. 2025) 97.7 ±0.2 98.7 ±0.1 96.6 ±0.0 97.2 ±0.1 61.8 ±0.1 93.4 ±0.1 
+
+PL-SCEA (Proposed) 97.3 ±1.1 98.9 ±0.3 96.9 ±0.2 98.0 ±0.2 66.3 ±1.0 94.6 ±0.4 
+
+8-shot APRIL-GAN (Chen, Han, and Zhang 2023) 93.1 ±0.2 96.4 ±0.2 93.1 ±0.2 96.2 ±0.1 57.7 ±0.2 92.4 ±0.2 WinCLIP+ (Jeong et al. 2023) 94.6 ±0.1 – – – – –AnomalyDINO-S (Damm et al. 2025) 98.2 ±0.2 98.7 ±0.1 97.4 ±0.2 97.4 ±0.1 62.3 ±0.1 93.8 ±0.1 
+
+PL-SCEA (Proposed) 98.0 ±0.2 99.1 ±0.1 97.4 ±0.2 98.2 ±0.1 67.1 ±0.7 95.0 ±0.2 
+
+Table 1: Few-shot anomaly-detection results on MVTec AD. Higher is better for all metrics. Values are mean ± standard deviation; – indicates an unreported result. The highest reported mean within each shot is in bold .
+
+Figure 3: Qualitative results on the MVTec AD and VisA datasets. settings. With one shot, it obtains the highest classification F1-max and all three pixel-level metrics, while its image-level AUROC and AUPR are respectively 0.1 and 1.0 points below the highest reported means. The reported performance of PL-SCEA increases with the number of normal references across all six metrics. Shots Method Classification Segmentation AUROC AUPR F1-max AUROC F1-max PRO 1-shot PatchCore (Roth et al. 2022) 79.9 ±2.9 82.8 ±2.3 81.7 ±1.6 95.4 ±0.6 38.0 ±1.9 80.5 ±2.5 WinCLIP+ (Jeong et al. 2023) 83.8 ±4.0 85.1 ±4.0 83.1 ±1.7 96.4 ±0.4 41.3 ±2.3 85.1 ±2.1 AnomalyDINO-S (Damm et al. 2025) 87.4 ±1.2 89.0 ±1.0 84.3 ±0.5 97.8 ±0.1 45.1 ±0.9 92.5 ±0.5 AdaptCLIP (Gao et al. 2026) 90.5 ±1.2 92.3 ±0.9 86.5 ±1.0 96.8 ±0.0 44.6 ±0.4 –APRIL-GAN (Chen, Han, and Zhang 2023) 91.2 ±0.8 93.3 ±0.8 86.9 ±0.6 96.0 ±0.0 38.5 ±0.3 90.0 ±0.1                                                                                                       
+
+> PL-SCEA (Proposed) 91.1 ±2.4 92.3 ±1.6 88.3 ±1.4 98.0 ±0.1 46.8 ±0.8 93.1 ±0.2
+> 2-shot PatchCore (Roth et al. 2022) 81.6 ±4.0 84.8 ±3.2 82.5 ±1.8 96.1 ±0.5 41.0 ±3.9 82.6 ±2.3 WinCLIP+ (Jeong et al. 2023) 84.6 ±2.4 85.8 ±2.7 83.0 ±1.4 96.8 ±0.3 43.5 ±3.3 86.2 ±1.4 AnomalyDINO-S (Damm et al. 2025) 89.7 ±1.3 90.7 ±0.8 86.3 ±1.2 98.0 ±0.1 47.6 ±0.5 93.4 ±0.6 APRIL-GAN (Chen, Han, and Zhang 2023) 92.2 ±0.3 94.2 ±0.3 87.7 ±0.3 96.2 ±0.0 39.3 ±0.2 90.1 ±0.1 AdaptCLIP (Gao et al. 2026) 92.2 ±0.8 93.6 ±0.6 88.0 ±0.7 97.1 ±0.0 46.1 ±0.4 –
+> PL-SCEA (Proposed) 94.0 ±0.3 94.7 ±0.2 89.9 ±0.6 98.3 ±0.1 48.7 ±1.2 94.2 ±0.1
+> 4-shot PatchCore (Roth et al. 2022) 85.3 ±2.1 87.5 ±2.1 84.3 ±1.3 96.8 ±0.3 43.9 ±3.1 84.9 ±1.4 WinCLIP+ (Jeong et al. 2023) 87.3 ±1.8 88.8 ±1.8 84.2 ±1.6 97.2 ±0.2 47.0 ±3.0 87.6 ±0.9 APRIL-GAN (Chen, Han, and Zhang 2023) 92.6 ±0.4 94.5 ±0.3 88.4 ±0.5 96.2 ±0.0 40.0 ±0.1 90.2 ±0.1 AnomalyDINO-S (Damm et al. 2025) 92.6 ±0.9 92.9 ±0.7 88.8 ±0.9 98.2 ±0.0 49.4 ±0.3 94.1 ±0.1 AdaptCLIP (Gao et al. 2026) 93.1 ±0.2 94.3 ±0.2 88.5 ±0.2 97.3 ±0.0 47.2 ±0.5 –
+> PL-SCEA (Proposed) 94.9 ±0.3 95.5 ±0.2 91.1 ±0.5 98.6 ±0.0 50.6 ±1.0 95.1 ±0.1
+> 8-shot WinCLIP+ (Jeong et al. 2023) 85.0 ±0.0 –––––APRIL-GAN (Chen, Han, and Zhang 2023) 93.0 ±0.2 94.9 ±0.3 88.8 ±0.2 96.3 ±0.0 40.2 ±0.1 90.2 ±0.0 AnomalyDINO-S (Damm et al. 2025) 93.8 ±0.3 94.3 ±0.4 90.0 ±0.1 98.4 ±0.0 51.1 ±0.4 94.8 ±0.2
+> PL-SCEA (Proposed) 96.5 ±0.2 97.0 ±0.2 92.9 ±0.2 98.9 ±0.0 52.1 ±0.3 95.6 ±0.0
+
+Table 2: Few-shot anomaly-detection results on VisA. Higher is better for all metrics. Values are mean ± standard deviation; – indicates an unreported result. The highest reported mean within each shot is in bold .
+
+Qualitative Analysis 
+
+Figure 3 presents qualitative examples covering fine scratches, local damage, and larger structural defects on MVTec AD and VisA. In the displayed cases, the predicted responses overlap the annotated anomalous regions across different defect shapes and scales. The 4-shot maps also ap-pear more concentrated than their 1-shot counterparts, with fewer responses in normal textures and backgrounds. These observations are consistent with the quantitative localization results, although the qualitative examples alone do not estab-lish performance across all categories. 
+
+Ablation Studies 
+
+Unless otherwise stated, all ablations use a fixed MVTec AD 1-shot support set and report single-run category macro-averages over 15 categories. These controlled comparisons are not numerically interchangeable with the three-seed means in Table 1. Effect of Attention Reconfiguration. Ta-ble 3 examines whether changing the attention computation is sufficient by itself and whether the form of the reconfig-uration matters. Among the tested formulations, PL-SCEA obtains the highest image-level AUROC, image-level AUPR, pixel-level AUROC, and pixel-level F1-max. Relative to the original QK attention, it improves pixel-level F1-max by 3.78 points. Direct QQ, KK, and VV replacements do not re-produce the same overall gains, and VV reduces pixel-level F1-max by 6.35 points relative to QK. These results show that attention modification is not universally beneficial; re-taining QK conditioning while selectively reweighting con-textualized self-correlations is important under this setting. QQ obtains the highest PRO of 93.77%, while PL-SCEA remains within 0.03 points at 93.74%.                               
+
+> Attn. I-AUROC I-AUPR P-AUROC P-F1 PRO QK 96.54 98.06 97.12 61.54 93.55 QQ 96.65 98.31 97.14 63.81 93.77
+> KK 95.82 97.30 97.14 61.74 93.37 VV 92.44 95.34 95.45 55.19 91.53 PL-SCEA 97.26 98.65 97.56 65.32 93.74
+
+Table 3: Ablation of attention variants on MVTec AD un-der the fixed single-seed 1-shot setting. Values are category macro-averages over 15 categories.                         
+
+> Layer I-AUROC P-AUROC P-F1 PRO 296.0 97.1 62.5 93.4 495.0 97.0 61.5 91.9 695.6 97.1 62.3 92.9 895.8 96.8 60.7 92.4 10 97.0 97.3 63.3 93.5
+> 12 97.3 97.6 65.3 93.7
+
+Table 4: Effect of the PL-SCEA insertion layer on MVTec AD under the fixed single-seed 1-shot setting. Values are rounded to one decimal. 
+
+Effect of the Insertion Layer. Table 4 shows that applying PL-SCEA to the final RADIOv3 layer obtains the highest re-ported values on all selected metrics, reaching 97.3% image-level AUROC, 97.6% pixel-level AUROC, 65.3% pixel-level F1-max, and 93.7% PRO. Compared with layer 2, the final layer improves image-level AUROC and pixel-level F1-max by 1.3 and 2.8 points, respectively. This empirical trend is consistent with the hypothesis that later, more contextualized features provide token relations better suited to the proposed reconfiguration. Based on these results, we apply PL-SCEA only to the final Transformer block.                 
+
+> Attn. Model I-AUROC P-AUROC P-F1 PRO PL-SCEA VAE 97.3 97.6 65.3 93.7
+> QK VAE 96.5 97.1 61.5 93.5 PL-SCEA Memory bank 97.5 97.0 64.9 93.1 QK Memory bank 97.1 96.3 61.4 92.9
+
+Table 5: Complementarity between PL-SCEA and the nor-mality model on MVTec AD under the fixed single-seed 1-shot setting. QK denotes the original attention. Values are rounded to one decimal; the VAE rows correspond to Table 3. 
+
+Complementarity with Normality Modeling. Table 5 separates the effects of attention formulation and normal-ity modeling. Relative to QK attention, PL-SCEA improves pixel-level F1-max by 3.8 points with the VAE and by 3.5 points with the memory bank. It also improves pixel-level AUROC and PRO under both normality models. The ef-fect of attention reconfiguration is therefore observed with both tested downstream alternatives rather than being re-stricted to the VAE. Meanwhile, pairing PL-SCEA with the VAE obtains the highest pixel-level AUROC, F1-max, and PRO, whereas the memory-bank variant obtains a 0.2-point higher image-level AUROC. These results suggest comple-mentary roles for relation-aware feature construction and reconstruction-based normality modeling, but do not estab-lish a strictly synergistic interaction between them. 
+
+Inference-State Memory. Figure 4 compares the category-specific inference state required by the two normal-ity models. The VAE maintains a fixed 14.0-MB footprint across 1–8 shots, whereas the memory bank grows linearly from 34.8 to 278.4 MB. At 8 shots, the VAE requires ap-proximately 5.0% of the memory used by the memory bank, corresponding to a 95.0% reduction. This result highlights the storage benefit of reconstruction-based parametric nor-mality modeling; it does not include the frozen backbone shared by both alternatives. 
+
+Effect of the Power Exponent. Figure 5 shows that the re-ported image-level AUROC and AUPR increase as γ changes from 0.5 to 2, reaching 97.25% and 98.66%, respectively. Both metrics are lower at larger tested values; at γ = 6 ,they decrease to 97.12% and 98.43%. The results there-fore favor a moderate exponent. This pattern suggests that moderate reweighting can emphasize informative relations, whereas stronger concentration may suppress complemen-tary contextual information. We use γ = 2 in the remaining experiments. 
+
+Figure 4: Category-specific inference-state memory across different few-shot settings on MVTec AD. The shared frozen backbone is excluded. 
+
+Figure 5: Effect of the power exponent γ on image-level AUROC and AUPR on MVTec AD under the fixed single-seed 1-shot setting. 
+
+# Conclusion 
+
+This study indicates that the attention computation of a frozen vision foundation model is not merely an inherited implementation detail; when reconfigured in a task-aligned manner, it can improve few-shot industrial anomaly local-ization. PL-SCEA operationalizes this principle by retaining pretrained QK conditioning while standardizing and power-law reweighting the self-correlations of contextualized to-kens. Reconstruction-based latent normality modeling com-plements this representation stage by compactly summariz-ing normal features and converting their reconstruction dis-crepancies into anomaly scores. Results on MVTec AD and VisA support the effectiveness of the complete framework, while the MVTec AD 1-shot ablations show that the localiza-tion gains of PL-SCEA persist with either a VAE or a memory bank. Within the tested datasets and backbone, these findings support attention reconfiguration as a useful design direction for adapting pretrained representations to localized anomaly detection. 
+
+# References 
+
+Bergmann, P.; Fauser, M.; Sattlegger, D.; and Steger, C. 2019. MVTec AD–A comprehensive real-world dataset for unsupervised anomaly detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recog-nition , 9592–9600. Caron, M.; Touvron, H.; Misra, I.; Jégou, H.; Mairal, J.; Bojanowski, P.; and Joulin, A. 2021. Emerging Properties in Self-Supervised Vision Transformers. In Proceedings of the International Conference on Computer Vision .Chen, X.; Han, Y.; and Zhang, J. 2023. APRIL-GAN: A zero-/few-shot anomaly classification and segmentation method for CVPR 2023 VAND workshop challenge tracks 1&2: 1st place on zero-shot AD and 4th place on few-shot AD. arXiv preprint arXiv:2305.17382 .Damm, S.; Laszkiewicz, M.; Lederer, J.; and Fischer, A. 2025. AnomalyDINO: Boosting patch-based few-shot anomaly detection with DINOv2. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision , 1319–1329. Defard, T.; Setkov, A.; Loesch, A.; and Audigier, R. 2021. PaDiM: A patch distribution modeling framework for anomaly detection and localization. In International con-ference on pattern recognition , 475–489. Springer. Deng, H.; and Li, X. 2022. Anomaly detection via reverse distillation from one-class embedding. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 9737–9746. Fang, Z.; Wang, X.; Li, H.; Liu, J.; Hu, Q.; and Xiao, J. 2023. FastRecon: Few-shot industrial anomaly detection via fast feature reconstruction. In Proceedings of the IEEE/CVF In-ternational Conference on Computer Vision , 17481–17490. Gao, B.-B.; Zhou, Y.; Yan, J.; Cai, Y.; Zhang, W.; Wang, M.; Liu, J.; Liu, Y.; Wang, L.; and Wang, C. 2026. AdaptCLIP: Adapting CLIP for universal visual anomaly detection. In 
+
+Proceedings of the AAAI Conference on Artificial Intelli-gence , volume 40, 4095–4103. Gu, Z.; Zhu, B.; Zhu, G.; Chen, Y.; Tang, M.; and Wang, J. 2024. AnomalyGPT: Detecting industrial anomalies using large vision-language models. In Proceedings of the AAAI conference on artificial intelligence , volume 38, 1932–1940. Hajimiri, S.; Ben Ayed, I.; and Dolz, J. 2025. Pay attention to your neighbours: Training-free open-vocabulary semantic segmentation. In Proceedings of the Winter Conference on Applications of Computer Vision , 5061–5071. Huang, C.; Guan, H.; Jiang, A.; Zhang, Y.; Spratling, M.; and Wang, Y.-F. 2022. Registration based few-shot anomaly detection. In European conference on computer vision , 303– 319. Springer. Jeong, J.; Zou, Y.; Kim, T.; Zhang, D.; Ravichandran, A.; and Dabeer, O. 2023. WinCLIP: Zero-/few-shot anomaly classi-fication and segmentation. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition ,19606–19616. Kingma, D. P.; and Welling, M. 2013. Auto-encoding varia-tional bayes. arXiv preprint arXiv:1312.6114 .Kirillov, A.; Mintun, E.; Ravi, N.; Mao, H.; Rolland, C.; Gustafson, L.; Xiao, T.; Whitehead, S.; Berg, A. C.; Lo, W.-Y.; Dollár, P.; and Girshick, R. 2023. Segment Anything. 
+
+arXiv:2304.02643 .Lan, M.; Chen, C.; Ke, Y.; Wang, X.; Feng, L.; and Zhang, W. 2024. ClearCLIP: Decomposing CLIP representations for dense vision-language inference. In European Conference on Computer Vision , 143–160. Springer. Lee, Y.; Kim, S.; Moon, D.; Jang, S.; and Yoon, H. 2026. Bidirectional Multimodal Prompt Learning with Scale-Aware Training for Few-Shot Multi-Class Anomaly Detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 35577–35586. Li, X.; Zhang, Z.; Tan, X.; Chen, C.; Qu, Y.; Xie, Y.; and Ma, L. 2024. PromptAD: Learning prompts with only normal samples for few-shot anomaly detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 16838–16848. Radford, A.; Kim, J. W.; Hallacy, C.; Ramesh, A.; Goh, G.; Agarwal, S.; Sastry, G.; Askell, A.; Mishkin, P.; Clark, J.; et al. 2021. Learning Transferable Visual Models From Natural Language Supervision. In International conference on machine learning , 8748–8763. PmLR. Ranzinger, M.; Barker, J.; Heinrich, G.; Molchanov, P.; Catanzaro, B.; and Tao, A. 2024a. PHI-S: Distribu-tion Balancing for Label-Free Multi-Teacher Distillation. arXiv:2410.01680. Ranzinger, M.; Heinrich, G.; Kautz, J.; and Molchanov, P. 2024b. AM-RADIO: Agglomerative Vision Foundation Model Reduce All Domains Into One. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 12490–12500. Roth, K.; Pemula, L.; Zepeda, J.; Schölkopf, B.; Brox, T.; and Gehler, P. 2022. Towards total recall in industrial anomaly detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 14318–14328. Salehi, M.; Sadjadi, N.; Baselizadeh, S.; Rohban, M. H.; and Rabiee, H. R. 2021. Multiresolution knowledge distillation for anomaly detection. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , 14902– 14912. Sheynin, S.; Benaim, S.; and Wolf, L. 2021. A hierarchi-cal transformation-discriminating generative model for few shot anomaly detection. In Proceedings of the IEEE/CVF international conference on computer vision , 8495–8504. Tao, F.; Xie, G.-S.; Zhao, F.; and Shu, X. 2025. Kernel-aware graph prompt learning for few-shot anomaly detec-tion. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 39, 7347–7355. Wang, F.; Mei, J.; and Yuille, A. 2024. SCLIP: Rethinking self-attention for dense vision-language inference. In Euro-pean conference on computer vision , 315–332. Springer. Wu, J.-C.; Chen, D.-J.; Fuh, C.-S.; and Liu, T.-L. 2021. Learning unsupervised metaformer for anomaly detection. In Proceedings of the IEEE/CVF international conference on computer vision , 4369–4378. Xie, G.; Wang, J.; Liu, J.; Zheng, F.; and Jin, Y. 2023. Pushing the limits of few-shot anomaly detection in industry vision: GraphCore. arXiv preprint arXiv:2301.12082 .Zavrtanik, V.; Kristan, M.; and Skočaj, D. 2021. DRAEM— A discriminatively trained reconstruction embedding for sur-face anomaly detection. In Proceedings of the IEEE/CVF international conference on computer vision , 8330–8339. Zhou, Q.; Pang, G.; Tian, Y.; He, S.; and Chen, J. 2024. AnomalyCLIP: Object-agnostic prompt learning for zero-shot anomaly detection. In International Conference on Learning Representations .Zhu, J.; and Pang, G. 2024. Toward generalist anomaly de-tection via in-context residual learning with few-shot sample prompts. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 17826–17836. Zou, Y.; Jeong, J.; Pemula, L.; Zhang, D.; and Dabeer, O. 2022. Spot-the-difference self-supervised pre-training for anomaly detection and segmentation. In European confer-ence on computer vision , 392–408. Springer.

@@ -1,0 +1,518 @@
+Title: IIns-VAE+: A Robust Transfer Learning Framework for Environmental Identification in Wireless Sensing
+
+URL Source: https://arxiv.org/pdf/2609.06131v1
+
+Published Time: Wed, 09 Sep 2026 00:46:44 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+1
+
+# IIns-VAE+: A Robust Transfer Learning Framework for Environmental Identification in Wireless Sensing 
+
+## Yuxiao Li, Keke Hu, Bobai Zhao, Santiago Mazuelas, and Yuan Shen, 
+
+Abstract —Environmental identification in wireless sensing is essential for 6G integrated sensing and communication (ISAC) systems to achieve reliable situational awareness. However, deep learning (DL) models for this task often fail to generalize under domain shift across diverse environments. While the Inter-Instance Variational Auto-encoder (IIns-VAE) learns features of rich representation, its neural classifier remains vulnerable to these distribution changes. In this paper, we propose IIns-VAE+, a hybrid model that combines the IIns-VAE framework with Minimax Risk Classifiers (MRC) to improve adaptability in transfer learning scenarios. We use real-world datasets to evaluate our framework across three transfer learning scenarios, including general to specific room environments, high to low label resolutions, and mixed to specific environments. The experimental results indicate that IIns-VAE+ significantly outperforms baselines, demonstrating its critical value in building adaptable and robust perceptive networks in future 6G systems. 
+
+Index Terms —Wireless sensing, environmental identification, transfer learning, deep learning, statistical inference, generalization. 
+
+## ✦
+
+## 1 INTRODUCTION 
+
+# WIRELESS sensing has been widely recognized as a key enabler of sixth-generation (6G) wireless sys-tems, driven by their critical role in emerging applications ranging from smart homes to industrial automation [1]– [5]. By sharing spectrum, hardware, and signal processing, integrated sensing and communication (ISAC) can improve resource utilization, enhance coordination, and increase overall network efficiency, thus enabling novel, immersive and context-aware experiences [6], [7]. Within such systems, environmental identification is essential to ensure reliable and precise sensing for various scenarios [8]. The ability of environmental identification enables ISAC systems to dynamically adapt to changing conditions, thereby strength-ening the core functionalities, e.g., object detection, real-time decision-making, and high-accuracy localization [9]– [12]. These techniques underpin a wide range of advanced wireless applications, including autonomous driving [13], crowd sensing [14], environmental monitoring [15], and smart cities [16], [17]. Consequently, robust and accurate environmental identification is becoming increasingly vital for next-generation wireless systems, helping to pave the way for a new era of connectivity in beyond-5G (B5G) and 6G networks. Environmental identification faces inherent challenges 
+
+• Yuxiao Li and Santiago Mazuelas are with the Basque Center for Applied Mathematics (BCAM), 48009 Bilbao, Spain (e-mail: yli@bcamath.org, smazuelas@bcamath.org). 
+
+• Keke Hu is with the College of Semiconductor (College of Inte-grated Circuits), Hunan University, Changsha 410082, China (e-mail: hukeke@hnu.edu.cn) 
+
+• Bobai Zhao is with the College of Computer Science, Beijing Informa-tion Science and Technology University, Beijing 100192, China (e-mail: zhaobobai@bistu.edu.cn) 
+
+• Yuan Shen is with the Department of Electronic Engineering and the Beijing National Research Center for Information Science and Technology, Tsinghua University, Beijing 100084, China, and also with the Shanghai AI Laboratory, Shanghai 201112, China (e-mail: shenyuan ee@tsinghua.edu.cn). 
+
+Fig. 1. Transfer learning in environmental identification. Target domain data can be collected from different environments compared to source domain data. 
+
+due to the variability in wireless scenarios. Signal propa-gation is significantly affected by reflection, scattering, and attenuation caused by dynamic room layouts, heteroge-neous material properties of obstacles, and varied sensor arXiv:2609.06131v1 [cs.AI] 5 Sep 2026 2
+
+deployment configurations. These environmental variations directly manifest in the statistical properties of both the channel impulse response (CIR) and received waveform data, complicating the task of robust and reliable envi-ronmental identification in practical applications. Existing environmental identification methods including traditional techniques such as Support Vector Machines (SVM) [18], [19], Gaussian process regression (GPR) [20], and more advanced deep learning (DL) models such as CNNs [8], [21], [22], have demonstrated promising results in controlled scenarios. However, these approaches are prone to overfit-ting to specific training conditions, which significantly limits their ability to generalize to unseen environments with different propagation characteristics [23]. This limitation becomes particularly severe when the training of a model is confined to simplistic and static conditions, such as a single room configuration or a fixed set of obstacles, while its deployment demands robustness across a wide spectrum of dynamic and real-world environments. Furthermore, many current models focus primarily on coarse-grained classifica-tion tasks, e.g., line-of-sight (LOS) versus non-line-of-sight (NLOS) discrimination [18]–[20]. This narrow scope limits their capability to extract more fine-grained environmental attributes, such as room geometry or material composition, which are essential for robust performance in complex ap-plications requiring detailed situational awareness. Transfer learning enables models to leverage knowledge from a source environment and adapt it to a target en-vironment with minimal performance degradation. In the context of wireless sensing, particularly for ISAC systems, this paradigm allows models trained in a specific setting (e.g., a known indoor room) to generalize effectively to unseen environments (e.g., unfamiliar buildings or outdoor) without requiring extensive retraining [24]. By reducing the reliance on large labeled datasets for each potential target domain, transfer learning substantially improves the scala-bility and practical viability of perceptive networks. While common techniques (e.g., fine-tuning, adversarial domain adaptation, and meta-learning) have successfully addressed domain adaptation challenges in several applications such as signal detection [25], [26] and localization [27]–[29], they often struggle with environmental identification, which is a key component of ISAC situational awareness. This dif-ficulty stems from the substantial variability and complex distributional shifts in wireless environments, caused by the subtle alterations in signal patterns induced by structural or material disparities in the target environment [30], [31]. Meanwhile, the efficacy of several aforementioned meth-ods is constrained by the underlying assumption of moder-ate distributional shifts, rendering them inadequate for the complex scenarios envisaged for 6G, including adaptation from dense urban canyons to deep indoor environments or across diverse office layouts. For instance, while trans-fer learning is employed to adapt localization models in [31], its reliance on feature alignment techniques remains effective only under minor domain shifts. Similarly, fine-tuning is investigated for cross-domain signal detection [26], yet performance deteriorates significantly in highly dynamic settings. Adversarial training [30], though mod-erately successful in aligning feature distribution across source and target domains, fails to preserve fine-grained environmental characteristics, which are essential for de-tailed environmental identification in perceptive networks. More recently, DL models, like Inter-Instance Variational Auto-Encoder (IIns-VAE) [32], have demonstrated superior performance in environmental identification by effectively disentangling position-related and environment-related fea-tures. Nevertheless, its neural classifier exhibits limited gen-eralization capability in unseen environments, constraining its practicality in transfer learning scenarios that are critical for scalable ISAC systems operating under inherent domain shifts. In this paper, we propose IIns-VAE+, a hybrid model designed to advance transfer learning by integrating the fea-ture extraction capability of IIns-VAE with the classification robustness of Minimax Risk Classifiers (MRC). The MRC is formulated to minimize the worst-case risk, enhancing resilience to domain shifts and ensuring adaptability to unseen environments [33]–[35]. By incorporating both linear and Fourier mappings, MRC effectively captures complex environmental characteristics, thereby improving general-ization across diverse practical environments [36]. This in-tegration enables IIns-VAE+ to harness the complementary strengths of DL and risk-aware classification, ensuring reli-able performance under varying environmental conditions and label resolutions. The main contributions of this paper are summarized as follows:  
+
+> •
+
+We propose IIns-VAE+, a novel approach that inte-grates MRC into the IIns-VAE architecture. This hy-brid design synergistically combines the rich repre-sentational learning of DL and the worst-case robust-ness of MRC, significantly improving environmental identification performance in wireless sensing.  
+
+> •
+
+We introduce and formalize two flexible trans-fer learning strategies, layer-wise integration and bottleneck-wise integration. These strategies not only enable effective fine-tuning of the classifier for spe-cific environments, but also provide scalable adapta-tion mechanisms under varying training conditions.  
+
+> •
+
+We conduct a comprehensive evaluation of IIns-VAE+ in three real-world transfer learning scenarios and compare its performance with several baseline methods. Experimental results demonstrate that IIns-VAE+ achieves significant performance improve-ments, confirming its superior adaptability and gen-eralization capabilities across diverse environments. The remaining sections are organized as follows. Sec-tion 2 presents the related work. Section 3 formulates the problem of transfer learning in wireless sensing, specifi-cally for environmental identification. Section 4 presents the proposed IIns-VAE+ framework, detailing the integration of IIns-VAE with MRC and the two transfer learning strategies. Section 5 provides a comprehensive experimental evalua-tion of the proposed framework using real-world datasets. Finally, Section 6 concludes the paper and discusses poten-tial research directions. 
+
+Notations: random variables (RVs) are displayed in sans serif, upright fonts and their realizations in serif, italic fonts; vectors are denoted by bold lowercase letters; a RV and its realization are denoted by x and x; a random vector and 3
+
+its realization are denoted by x and x; x[j] denotes the jth component of the vector x; p(x|y) denotes the conditional distribution of x given y = y; N (x; μ, Σ) denotes the PDF of a Gaussian RV x with mean μ and covariance matrix Σ; E{·} 
+
+denotes the expectation of the argument, and Ex{·} denotes the expectation with respect to RV x; sets are denoted by calligraphic fonts, e.g., D.
+
+## 2 RELATED WORK 
+
+The rapid evolution of wireless sensing technologies, par-ticularly in the context of 6G ISAC systems, has spurred significant research into robust environmental identification methods. These methods are essential to enable reliable situational awareness in dynamic and heterogeneous set-tings. In this section, we review two main strands of related work: (1) DL-based approaches that leverage channel state information (CSI) for sensing and localization, and (2) varia-tional inference (VI) techniques that model uncertainty and facilitate robust inference in complex wireless environments. Together, these lines of research provide the foundation for our proposed IIns-VAE+ framework. 
+
+2.1 Deep Learning-based Approach 
+
+Deep learning has significantly advanced indoor sensing and localization by extracting complex patterns directly from raw CSI, overcoming the limitations of traditional model-based methods. This part explores the mainstream deep learning architectures repurposed for this task. 
+
+Convolutional Neural Networks (CNNs) represent a foundational approach for CSI-based localization. These algorithms treat the multi-dimensional CSI data, with its antenna and subcarrier dimensions, as a pseudo-image. This allows CNNs to effectively extract spatial features such as beam directions and multipath structures using their inherent convolution and pooling operations. Models like CSILoc [37] and Duloc [38] demonstrate the effectiveness of CNNs in achieving robust localization by learning these spatial correlations. However, a significant limitation of CNN-based methods is their inherent weakness in modeling temporal dependencies. They typically process each CSI snapshot independently, ignoring the valuable sequential information that arises from user movement, which can lead to reduced accuracy in dynamic tracking scenarios. 
+
+Recurrent Neural Networks (RNNs) , particularly long short-term memory (LSTM) networks, have been employed to address the temporal dynamics of wireless signals,. As demonstrated in the work by Zhang et al. [39], RNNs excel at processing sequential CSI data, capturing temporal fea-tures like periodic patterns and trends in the channel’s evo-lution over time. This makes them highly suitable for track-ing moving devices and improving localization smooth-ness. Despite this advantage, RNNs, including LSTMs, often struggle with capturing long-range dependencies within se-quences due to issues like vanishing gradients. Furthermore, their sequential processing nature limits computational par-allelism, making training and inference slower compared to other architectures, especially with long data sequences. The Attention Mechanism , and specifically the Trans-former architecture, has emerged as a powerful succes-sor, overcoming many limitations of previous models. Al-gorithms like LoT [40], Swin-Loc [41], and ACPNet [42] leverage self-attention to globally model relationships across all dimensions of the CSI data—antennas, subcarriers, and time—simultaneously. This allows for a more comprehen-sive feature fusion, leading to state-of-the-art localization accuracy. The key strength of attention-based models is their ability to handle long-range dependencies effectively and their high parallelism. The primary drawback, however, is their high computational complexity and substantial data requirements. They often need large amounts of data to generalize well and avoid overfitting, and their resource de-mands can challenge deployment on resource-constrained devices. Finally, Hybrid Models seek to combine the strengths of various architectures to create more powerful solutions. A prominent example is Hi-Loc [43], which integrates CNNs for spatial feature extraction and Bidirectional LSTMs for temporal modeling, augmented with attention mechanisms. This fusion aims to build a more holistic understanding of the CSI data by capturing both its spatial and temporal characteristics. While these models often achieve superior performance by design, their main limitation is increased model complexity and size. This complexity leads to longer training times, higher computational costs, and greater chal-lenges in practical deployment and optimization, posing a trade-off between performance and efficiency. 
+
+2.2 Variational Inference for Sensing and Localization 
+
+Variational Inference (VI) has established itself as a pow-erful and flexible framework for addressing the inherent uncertainties and complex data distributions encountered in wireless signal processing. By moving beyond simplistic point estimates to model rich posterior distributions, VI enables the development of more robust, reliable, and in-telligent communication and sensing systems. Related work are summarized as following: 
+
+Foundational Theories and Methodologies: The ap-plication of VI in wireless sensing is built upon several core theoretical foundations. The VI framework itself [44] provides the fundamental mechanism for approximating in-tractable posterior distributions through optimization tech-niques. Deep generative models, including Variational Au-toencoders (VAEs) [45] and Generative Adversarial Net-works (GANs) [46], offer powerful architectures for learn-ing complex data distributions, while implicit distribution models [47] enable effective handling of distributions with-out explicit density functions. The primary strength of this theoretical foundation lies in its ability to integrate Bayesian inference with the representational power of deep learning, creating a versatile framework for probabilistic modeling. However, these methods introduce considerable complexity in model design and training, with VI being susceptible to approximation errors from restrictive variational families, and GANs facing persistent challenges in training stability and mode collapse. 
+
+Localization Under Environmental Uncertainty: A crit-ical application of VI in wireless systems addresses lo-calization challenges in environmentally uncertain condi-tions. This approach reconceptualizes environmental im-pacts by treating them as latent variables within a proba-bilistic framework [19], advancing beyond traditional point 4
+
+> TABLE 1 Summary of Deep Learning-Based Indoor Localization Algorithms
+
+Category Core Idea Representative Model References 1. Based on Con-volutional Neural Network (CNN) 
+
+Treats CSI as an image (2D grid data) and uses CNN to extract its 
+
+spatial features (e.g., beam direc-tion, multipath structure). 
+
+CSILoc : Uses 1D CNN to pro-cess multi-channel (amplitude, phase) CSI, followed by global average pooling. [37] 
+
+Duloc : Employs a dual-channel CNN, processing CSI divided into two branches based on sub-carrier stability. [38] 
+
+2. Based on Re-current Neural Net-work (RNN) 
+
+Uses RNNs (e.g., LSTM, GRU) to process temporal features in CSI, capturing how the channel varies over time. 
+
+Zhang et al. : Uses an LSTM network to model preprocessed CSI amplitude and phase infor-mation, extracting temporal fea-tures. [39] 
+
+3. Based on Atten-tion Mechanism 
+
+Uses self-attention mechanisms to fuse information from different an-tennas, subcarriers, and time di-mensions in CSI, better capturing long-range dependencies. 
+
+LoT : Leverages the Vision Transformer (ViT) concept, converting CSI into an image format processed by a standard Transformer model. [40] 
+
+Swin-Loc : Uses Swin Trans-former layers to extract features from processed CSI data. [41] 
+
+ACPNet : Combines two types of attention mechanisms (self-attention and channel attention) to process CSI from MIMO sys-tems. [42] 
+
+4. Hybrid Models Combines multiple network archi-tectures to extract different dimen-sional features from CSI simulta-neously (e.g., spatial + temporal). 
+
+Hi-Loc : Combines CNN and Bidirectional LSTM (Bi-LSTM), with a dual-attention mecha-nism to extract spatial and tem-poral information respectively. [43] 
+
+estimates to full posterior distribution estimation through concepts like Soft Range Information [23], [48]. The key advantage of this paradigm is its capacity to explicitly quantify uncertainty, thereby providing systems with inher-ent robustness against outliers and adverse environmen-tal conditions. By modeling complete distance posteriors instead of single-point estimates, these methods support more reliable decision-making in downstream applications. Limitations include the computational overhead of distri-bution estimation and sensitivity to model misspecification, where inaccuracies in modeling environmental effects can propagate through the inference pipeline. 
+
+Disentangled Representation Learning for Joint In-ference: The advancement toward disentangled represen-tation learning marks significant progress in wireless sig-nal processing. Through hierarchical latent variable models [32], this methodology separates different factors of vari-ation—specifically distinguishing distance-related features from environmental characteristics—within the latent space. This disentanglement facilitates simultaneous execution of multiple tasks from a single input signal, such as concur-rent distance estimation and environment identification [32]. The approach offers substantial benefits including enhanced model interpretability, improved generalization through in-variant representations, and efficient multi-task learning. Nevertheless, significant challenges remain, particularly in designing architectures that ensure clean factor separation and addressing the amortization gap problem that can degrade inference performance for out-of-distribution sam-ples. 
+
+Signal Generation and Domain Adaptation: The gen-erative capabilities of VI-based models provide innovative solutions to the critical challenge of data scarcity in wireless systems. By leveraging advanced architectures that integrate VAEs with GANs [32], [46], these methods can synthesize high-fidelity wireless signals with specific characteristics and adapt signals across diverse environmental conditions [46], [47] while maintaining essential information integrity. The advantages are substantial, including dramatic reduc-tion in real-world data collection costs, comprehensive test-ing capabilities for rare scenarios, and enhanced algorithm development through dataset augmentation. The funda-mental challenge lies in ensuring the physical realism and fidelity of generated signals, particularly in preserving crit-5
+
+> TABLE 2 Summary of Variational Inference for Wireless Sensing and Localization
+
+Category Core Idea Representative Work(s) Reference(s) 1. Foundational Theories 
+
+1.1 Variational Inference Approximate complex posterior distri-butions by optimizing a tractable vari-ational distribution. Variational Inference Frame-work [44] 
+
+1.2 Deep Generative Models 
+
+Learn complex data distributions us-ing deep neural networks for genera-tion and representation learning. Variational Autoencoder (VAE) [45] Generative Adversarial Net-work (GAN) [46] 
+
+1.3 Implicit Distributions Model complex distributions with-out explicit density functions through stochastic transformations. Implicit Distribution Models [47] 
+
+2. Localization under Uncertainty 
+
+2.1 Environment as La-tent Variable 
+
+Treat environmental conditions as hid-den variables affecting signal observa-tions. Machine learning for UWB ranging error mitigation [19] 
+
+2.2 Probabilistic Distance Estimation 
+
+Estimate full distance posterior distri-bution rather than point estimates. Soft Range Information (SRI) [23], [48] 
+
+3. Disentangled Repre-sentation Learning 
+
+3.1 Feature Disentangle-ment 
+
+Separate different factors of variation (distance vs. environment) in latent space. VI-based LVM for signal feature disentanglement [32] 
+
+3.2 Joint Inference Perform multiple tasks simultane-ously from a single input signal. IIns-VAE for concurrent dis-tance estimation and environ-ment identification [32] 
+
+4. Signal Generation & Adaptation 
+
+4.1 Realistic Signal Syn-thesis 
+
+Generate high-fidelity wireless signals with specific distance and environ-ment characteristics. IIns-GAN with adversarial training for signal generation [32], [46] 
+
+4.2 Domain Adaptation Adapt signals across different envi-ronmental conditions while preserv-ing distance information. IIns-GAN for cross-domain sig-nal translation [46], [47] 
+
+ical signal properties and preventing the amplification of spurious correlations from training data. In summary, while DL models have demonstrated strong capabilities in extracting discriminative features from wire-less signals, they often lack robustness under domain shift. Meanwhile, VI offers a principled framework for han-dling uncertainty and facilitating transferable representa-tion learning, yet its integration with risk-aware classifica-tion remains underexplored. Our work bridges these two paradigms by combining the disentangled representation power of IIns-VAE with the distributionally robust clas-sification of MRC, thereby addressing key limitations in existing approaches for environmental identification under domain shift. 
+
+## 3 PROBLEM STATEMENT 
+
+This section formally presents the transfer learning prob-lem for environmental identification in wireless sensing, specifically addressing the challenges posed by domain shifts. Three crucial types of transfer scenarios are intro-duced to illustrate the complexities of transfer learning. These scenarios vary in both environmental conditions and signal distributions. Our approach leverages the IIns-VAE for feature extraction and the MRC for robust classification under domain shifts. Finally, we introduce the evaluation 6
+
+> Fig. 2. Comparison of the neural classifier and the MRC classifier under domain shift. The MRC classifier provides resilience to domain shift and ensures more adaptability to new data domain.
+
+metrics and baseline methods to rigorously measure the framework’s effectiveness. 
+
+3.1 Channel Impulse Response and Signal Represen-tation 
+
+In ISAC systems, CSI serves not only for communication equalization but also as a perceptual cornerstone for in-terpreting the physical environment. Generally, the CSI of a multi-antenna, multi-carrier system is a complex matrix, 
+
+H(f, t ), containing multi-dimensional information in space, frequency, and time, providing rich representation to sup-port advanced functions such as beamforming and resource allocation. However, the development of robust perceptual capa-bilities must be grounded in an accurate understanding of the most fundamental properties of the channel, i.e., how multipath propagation in the time domain captures environmental characteristics. This is precisely the core value of the channel impulse response (CIR), as the core of its time dimension, which represents the most direct and fundamental source of information for interpreting environ-mental features. Therefore, for researching environmental identification, a fundamental ISAC task, an in-depth inves-tigation into the characteristics of the CIR is particularly important and representative. The CIR, denoted as h(t), has a physical model that clearly reveals the nature of the signal-environment interaction: 
+
+h(t) = 
+
+> N
+
+X
+
+> i=1
+
+aiδ(t − τi) (1) where N represents the number of significant signal paths, 
+
+ai is the amplitude of the i-th path, τi is the corresponding delay, and δ(·) is the Dirac delta function. Each path is influenced by environmental properties such as geome-try and material composition, rendering the CIR a high-dimensional descriptor of the spatial and material structure of the propagation environment. Let s(t) denote the transmitted signal, and assume the received signal x(t) is the convolution of s(t) with the CIR 
+
+h(t), combined with noise n(t):
+
+x(t) = s(t) ∗ h(t) + n(t) (2) where ∗ denotes convolution. The received signal x(t) thus carries information about both the transmitted signal and the environment through h(t). By analyzing x(t), we aim to infer environmental characteristics, including factors like LOS or NLOS conditions, room geometry, and the presence of obstacles. For environmental identification, relevant features are extracted from the CIR and the received signal x(t). The extracted features can be classified into position-related features and environment-related features. Position-related features, such as path delays τi, are associated with distance and angle information while environment-related features, such as path amplitudes ai and signal scattering, are influ-enced by obstacles and material properties. The CIR-based feature extraction forms the basis of our IIns-VAE model, where these features are mapped into latent variables for classification tasks. The robustness of this classification is further enhanced by the MRC, which mitigates the impact of domain shifts by minimizing the worst-case classification risk seen in Figure 2. 
+
+3.2 Problem Definition: Transfer Learning for Environ-mental Identification 
+
+In wireless sensing, environmental identification involves classifying the environmental scenario based on received signal measurements. Formally, let k ∈ K = {0, 1, ..., K − 1}
+
+denote the environmental label of a scenario where a signal is measured, and p ∈ [0 , p max ] represents the positional pa-rameter (e.g., distance, angle, etc.). The environmental label set K can vary in definition, depending on the classification requirements:  
+
+> •
+
+For binary conditions, such as LOS versus NLOS conditions, the environmental label is k ∈ K LOS =
+
+{0, 1}, where k = 0 denotes LOS and k = 1 denotes NLOS.  
+
+> •
+
+In elaborated scenarios, K may represent multiple attributes, such as obstacle types Kobs or room ge-ometries Kroom , where each element of k captures a 7
+
+particular environmental characteristic. For instance, 
+
+k ∈ K obs × K room could denote both the presence of obstacles and specific room characteristics. The goal of environmental identification is to accurately classify the label k based on signal data, distinguishing between conditions that impact signal propagation. A major challenge in environmental identification is the domain shift between the training environment (source domain) and the operating environment (target domain). In real-world applications, models are often trained on data collected in one environment, where the distribution of signal measurements PS (x, k ) is specific to that setting. However, when the model is deployed in a new, unseen environment (target domain), the distribution PT (x, k ) of signal data differs due to variations in room geometry, obstacles, or material properties. This domain shift leads to performance degradation because the model struggles to generalize from the source domain to the target domain. Transfer learning addresses the problem of domain shift by allowing a model trained on one environment (source domain) to adapt to a new environment (target domain) while minimizing performance degradation. In a transfer learning framework, we define the source domain and target domain as follows:  
+
+> •
+
+Source Domain DS = {(xiS , k iS )}NS
+
+> i=1
+
+: The source domain consists of NS labeled samples (xiS , k iS )
+
+drawn from the joint distribution PS (x, k ), where 
+
+xiS represents signal measurement and kiS represents the corresponding environmental label. This domain provides sufficient labeled data for robust training  
+
+> •
+
+Target Domain DT = {(xT , k T )}: The target domain consists of NT labeled samples (xjT , k jT ) from the distribution PT (x, k ). Here, NT is typically much smaller than NS , reflecting the practical constraint of limited labeled data in new environments. The do-main shift between PS (x, k ) and PT (x, k ) introduces challenges in generalizing across domains. The objective is to develop a model that can effectively use the abundant labeled data from the source domain dis-tribution PS to achieve accurate environmental classification in PT , despite the limited labeled samples in the target domain. This is essential for ensuring that environmental identification models can adapt to new settings with mini-mal additional data. To comprehensively address transfer learning, we con-sider three types of transfer scenarios that highlight distinct challenges in environmental identifications: 1) Room Variability : The model trained in one indoor environment with specific room layout and materi-als (source domain) is transferred to a new indoor environment with different geometry or materials (target domain). This scenario examines the model’s ability to generalize across spatially varying indoor settings. 2) Resolution Change : The model trained on data sampled at a certain resolution (source domain) must adapt to data with a different sampling res-olution (target domain). This scenario assesses the model’s robustness to scale variations and potential loss of information at different resolutions. 3) Mixed-to-Specific Environments : The model is trained on a combined dataset covering various environments, such as both indoor and outdoor settings (source domain), and then applied to a spe-cific, confined environment, like a single indoor set-ting (target domain). This setting tests the model’s adaptability from diverse, mixed-source training data to a constrained target scenario. The key problem, then, is to design a model that can perform accurate environmental identification across these scenarios by effectively adapting from DS to DT while pre-serving high classification accuracy despite distributional shifts. 
+
+## 4 THE II NS -VAE+ F RAMEWORK 
+
+This section introduces the IIns-VAE+ framework, devel-oped to address the limitations of traditional neural classi-fiers in transfer learning for environmental identification. By combining the IIns-VAE with MRC, the framework achieves robust classification under domain shifts. We present the general methodology, integration strategies, transfer learn-ing process, and a brief discussion on the framework’s adaptability. 
+
+4.1 Solution Components: IIns-VAE and MRC 
+
+To takle the challenges of transfer learning for environmen-tal identification, we employ two primary components: IIns-VAE [32] for latent feature extraction and the MRC [49] for risk-aware classification. The IIns-VAE model is structured to separate the latent representations of position-related and environment-related features from wireless signals. Let x represent the observed signal measurement, which contains both positional and en-vironmental information. IIns-VAE seeks to model the latent variables zp (position-related) and ze (environment-related) by maximizing the evidence lower bound (ELBO) on the data log-likelihood for the instance-labels pair (x, p, k ):
+
+LELBO (x, d, k ; ϕ, θ, φ) = Eq(zp ,ze |x;ϕ)
+
+ log p(x|zp, ze; θ)
+
+− DKL 
+
+ q(zp, ze|x; ϕ) p(zp, ze)
+
++ Eq(zp |x;ϕ)
+
+ log p(p|zp; φ)
+
++ Eq(ze |x;ϕ)
+
+ log p(k|ze; φ)
+
+≤ log p(x, d, k ) .
+
+(3) where q(zd, ze|x, d, k ), q(zp) and q(ze|x) represent the approximate posterior distributions, DKL denotes the Kullback-Leibler divergence, ϕ, θ, φ denote the distribution parameters to be inferred. Through this formulation, IIns-VAE captures structured latent representations that decou-ple environmental semantics ze from positional information 
+
+zp.In traditional IIns-VAE, a neural classifier is applied to environmental features ze and generates the classification result. When the applied domains change, such neural classifiers struggle with generalization across domains. This lack of robustness in the neural classifier motivates our integration of a more resilient classification approach. 8
+
+The MRC addresses the limitations of the neural clas-sifier by minimizing worst-case classification risk. MRC seeks a classifer h that optimizes the following optimization objective [50]: 
+
+h∗ ∈ arg min  
+
+> h∈H
+
+max  
+
+> p∈U
+
+Ep
+
+h
+
+l h(x), y i
+
+(4) where H is the set of all possible classifiers, U is the set of all possible distributions over the data, and l is a specified loss function. By focusing on the worst-case distribution p ∈U, MRC ensures that the classifier performs robustly under varying distributions, making it more resilient to domain shift encountered in transfer learning. The uncertainty set U is defined as a set of distributions 
+
+p ∈ ∆( X × Y ) that satisfy constraints on the expectations of a feature mapping Φ : X × Y → Rm. Specifically, the set is defined as: 
+
+U = {p ∈ ∆( X × Y ) : |Ep[Φ( x, y )] − τ | ≤ λ} (5) where τ is the empirical mean vector of Φ, and λ is a confidence vector that controls the size of the uncertainty set based on the estimation errors in τ . The feature mapping 
+
+Φ is crucial for transforming data into a space where MRC can minimize the worst-case classification risk effectively. MRC can employ different types of feature mappings 
+
+Φ. For example, linear mappings directly map features and are effective for scenarios with linearly separable fea-tures. Fourier feature mappings enable MRC to approximate non-linear decision boundaries in high-dimensional spaces by mapping inputs to a kernel-based freature space. This flexibility allows MRC to adapt to diverse environmental conditions, providing robust classification across different transfer settings [35]. The integration of MRC with IIns-VAE has the potential to address a fundamental limitation of traditional classifiers in transfer learning. While IIns-VAE excels at creating struc-tured latent spaces through zp and ze, its neural classifier’s sensitivity to domain-specific variations limits its appli-cability in real-world settings with domain shifts, shown in Figure 3. In the following, we introduce our proposed IIns-VAE+. By replacing the neural classifier with MRC, we combine the feature extraction power of IIns-VAE with the robustness of MRC for worst-case risk minimaiztion, enabling the model to generalize more effectively across domains. 
+
+4.2 General Methodology: Combining IIns-VAE and MRC for Transfer Learning 
+
+The IIns-VAE framework aims to enhance transfer learning performance in environmental identification by leveraging IIns-VAE’s latent feature extraction and MRC’s risk-aware classification. In this combined model, IIns-VAE processes the received signal x and decouples it into two latent variables, zp
+
+(position-related) and ze (environment-related). The distri-bution of ze encodes environmental features that serve as inputs for classification. This structure allows IIns-VAE to capture complex environmental patterns, which are essen-tial for reliable environmental identification. Instead of a traditional neural classifier, we apply MRC to ze for environmental classification. MRC minimizes the 
+
+> Fig. 3. Graphical model for IIns-VAE+ with the environment latent vari-ables for the source and target domains.
+
+worst-case classification risk, ensuring that the classifier remains robust under distributional shifts. This approach enhances the model’s generalization ability when applied to new domains. The integration of IIns-VAE and MRC is designed to overcome the limitations of neural classifiers, providing a solution that remains effective across diverse environmental conditions with minimal retraining. 
+
+4.3 Layer-wise and Bottleneck-wise Integration Strate-gies 
+
+To achieve adaptable transfer learning, the IIns-VAE+ framework incorporates two primary integration strategies. They are designed to fine-tune either the model’s final layer or the bottleneck layer for the target domain. 4.3.0.1 Layer-wise Integration: In this scheme, the IIns-VAE model is trained on the source domain, after which all layers except the final layer are frozen during adaptation to the target domain. The final layer can then be adapted in one of the two ways: 1) Neural Network Layer : The original neural classi-fier layer from IIns-VAE is fine-tuned to adjust the decision boundary for the target environment. 2) MRC Classifier : Alternatively, the neural classifier can be replaced with the MRC classifier, which minimizes empirical risk under variable conditions. The MRC layer is then fine-tuned based on the last-layer features of IIns-VAE, providing robust, risk-aware classification in the target domain. This layer-wise integration approach is computationally ef-ficient, as it updates only the final decision layer, making it well-suited for scenarios where the source and target domains are relatively similar. 4.3.0.2 Bottleneck-wise Integration: In this ap-proach, the IIns-VAE model is initially trained on the source domain, and then the entire classifier, from the bottleneck to the output layer, is fine-tuned on the target domain. This enables a deeper adaptation by adjusting more pa-rameters to fit the target domain’s specific characteristics. The botleneck-wise integration strategy also supports two classifier options: 1) Neural Network Classifier : The full original neural network classifier from IIns-VAE is fine-tuned, al-lowing for gradual adjustment through all classifier layers. 9
+
+> Fig. 4. Network structures of layer-wise and bottleneck-wise integration strategies.
+
+2) MRC Classifier : The entire classifier is replaced with the MRC, enabling comprehensive risk-aware adaptation across layers. This approach is particu-larly beneficial for target environments that differ significantly from the source, as it allows deeper modifications to capture complex domain shifts. This dual-integration structure allows IIns-VAE+ to flex-ibly adapt to both minor and substantial domain shifts, enhancing the framework’s overall adapatability for en-vironmental identification across various wireless sensing scenarios. 
+
+4.4 Transfer Learning Process 
+
+The transfer learning process in the IIns-VAE+ framework is divided into two stages: 1) Source Domain Training : 
+
+> •
+
+The IIns-VAE model is trained on labeled source domain data DS to learn a structured latent representation.  
+
+> •
+
+The encoder processes xS to generate zp and 
+
+ze, where ze serves as the input to the neural classifier in IIns-VAE. The model is initially trained to minimize the reconstruction error and classification risk via 3 within the source domain distribution PS (zp).2) Target Domain Adaptation : 
+
+> •
+
+The IIns-VAE model is frozen, and is used to extract latent variables from target domain data DT . 
+
+> •
+
+Depending on the complexity of domain shifts, either the layer-wise or bottleneck-wise integration strategy is chosen: 
+
+– In layer-wise integration, the MRC clas-sifier is fine-tuned with IIns-VAE’s last-layer feature on the target domain data. 
+
+– In bottleneck-wise integration, the MRC classifier is fine-tuned with IIns-VAE’s bottleneck feature on the target domain data. These steps form the transfer learning algorithm, ensur-ing that the model adapts effectively to new environments with minimal computational cost. 
+
+4.5 Discussion: Hybrid Approach for Transfer Learning 
+
+The proposed IIns-VAE+ framework presents a flexible, hybrid approach with promising implications for transfer learning in wireless sensing. By combining deep generative modeling (IIns-VAE) with risk-aware classification (MRC), this framework tackles domain shifts inherent in environ-mental identification tasks. This makes it adaptable to dy-namic and uncertain environments–a core challenge in real-world wireless sensing applications. The layer-wise and bottleneck-wise integration serve as adaptable solutions, selectable based on the similarity between source and target environments. Layer-wise inte-gration fine-tunes only the MRC classifier on the IIns-VAE’s final-layer features. This preserves largely the encoder’s learned information from the source domain, and allows efficient adaptation with minimal computational cost. This approach is ideal when environments share structural sim-ilarities. In such cases, it maintains stability while allowing modest adjustments to specific target features. For feature mappings in MRC, we choose Fourier map-pings for all cases. For more complex shifts, bottleneck-wise integration enables a deeper adaptation by fine-tuning the MRC classifier on the bottlenecck features from IIns-VAE. Such integration strategy allows the model to cap-10 
+
+(a) PCA of Waveform Features by Room for Database 1 
+
+(b) PCA of CIR Features by Room for Database 2 
+
+> Fig. 5. Comparison of PCA Feature Clustering Across Databases.
+
+ture nuanced differences in the target domain. Although computationally heavier, this strategy proves beneficial in environments with significant variabiliy, ensuring the model adapts robustly to challenging target conditions. This hybrid approach leverages IIns-VAE’s powerful la-tent representation learning, combined with MRC’s robust decision-making under uncertainty. Such a combination al-lows the framework to generalize effectively across diverse environmental seetings. The flexibility of IIns-VAE+ extends further: It can incorporate other generative models for fea-ture extraction or alternative classifiers for decision making. Such flexibility reveals its adaptability and potential as a versatile tool in transfer learning for more advanced wire-less sensing problems. 
+
+## 5 EXPERIMENTS 
+
+The experiments are designed to evaluate the proposed hy-brid framework in practical transfer learning scenarios. We compare the performance of IIns-VAE and its combination with MRC (using both linear and Fourier transformations) under two integration strategies across three distinct learn-ing scenarios. Accuracy, precision, recall and F1 scores are reported for each method and scenario. 
+
+5.1 Datasets 
+
+We explore the transfer learning capabilities of our proposed models using two comprehensive real-world datasets, intro-duced as follows:  
+
+> •
+
+Database 1 is from [51], created using SNPN-UWB board with DecaWave DWM1000 UWB pulse radio module. Each sample includes signal measurements, a real distance, and an environmental label. The signal measurements per sample include a waveform of length 152 and an estimated distance from the device. This database consists of two subsets: 
+
+– Database 1-1 : Includes 9, 000 samples recorded in adjacent office rooms and a hallway with LOS and NLOS environmental labels. 
+
+– Database 1-2 : Include 25 , 100 samples recorded in a different office environment with multi-ple rooms, also labeled with LOS and NLOS conditions.  
+
+> •
+
+Database 2 is from [52], created using DecaWave EVB1000 devices. Each sample includes signal mea-surements, a real distance, and an environmental label array. The signal measurements per sample include a waveform of length 157 and an estimated distance from the device. The environmental label array includes two labels for room setting and block-ing materials, respectively. This database consists of 
+
+49 , 233 samples with signal measurements across various room settings (e.g., large office, small office, outdoor) and obstacle materials (e.g., metal, glass, wood, plastic). These datasets represent diverse wireless channel en-vironments, including indoor and outdoor spaces, and capture a wide range of channel impulse response (CIR) characteristics. We further perform data analysis to inves-tigate the data characteristics and design transfer learning scenarios. Specifically, we perform Principal Component Analysis (PCA) on the waveform features of two datasets. This analysis aims to visualize how well data clusters by environmental labels (i.e., room types and sizes) across different databases, as shown in Figure 5. Figure 5a presents the PCA feature clustering for Database 1, showing room-based clustering, while Figure 5b illustrates Database 2, with environmental types labeled by room size and outdoor set-tings. Despite some degree of clustering, there are significant overlaps between features from different rooms and envi-ronments. This overlap suggests that certain environmental features generalize across diverse settings, supporting the potential for transfer learning. By linking these clusters to specific environmental types, we gain insight into how environmental factors influence signal characteristics. For example, larger room types may show distinct signal patterns compared to outdoor envi-ronments, indicating that source and target domain assign-ments could leverage these environmental distinctions. This label-based comparison across datasets highlights the rele-vance of transfer learning. It suggests that certain learned features can be adaptable across similar enviornmental types in unseen domains. The insights help the design of transfer learning scenar-ios. Specifically, we aim to design scenarios that illustrate how well the datasets represent real-world conditions and the level of difficulty posed by varying environments and obstacles. The results imply that 11  
+
+> •
+
+The two databases include diverse environmental conditions, sufficient to resemble practical use.  
+
+> •
+
+Despite the diversity, the models can still learn gen-eralized features that distinguish between different classes. This supports the potential for successful knowledge trans-fer across different domains in our transfer learning scenar-ios. 
+
+5.2 Transfer Learning Scenarios 
+
+The source domain comprises these broader datasets, while target domain datasets focus on specific environments or reduced label resolutions. In particular, we implement three transfer learning scenarios :1) General to Specific Room Environments : Broad data trained and fine-tuned on specific rooms. 2) High to Low Label Resolutions : Data with high-resolution labels trained and fine-tuned on low-resolution labeled data. 3) Mixed to Specific Environment : Data combining indoor and outdoor environments trained and fine-tuned on specific room settings. In our experiments, we employ two different types of transfer learning strategies to evaluate the flexibility and adaptability of the IIns-VAE model with MRC classifiers: 1) Final Layer Tuning (Classifier Layer Integration) :In this approach, the entire IIns-VAE model is pre-trained on the source domain, but only the final classifier layer (which outputs the environmental label) is fine-tuned on the target domain. This strat-egy minimizes the computational load and data requirement for fine-tuning, focusing on adjusting the decision boundaries in the target domain. The final layer was either kept neural-based or replaced by trainable MRC classifiers. The latent variable dimensions for the layer integration strategy were set to 16 .2) Full Classifier Tuning (Bottleneck Integration) : In this approach, the pre-trained IIns-VAE model is used to extract latent features up to the bottle-neck, and then the entire classifier attached to the bottleneck is fine-tuned on the target domain. The classifier, which is originally neural-based, could be fully replaced with a trainable MRC classifier. This method resembles fountain transfer learning settings, where more significant changes are applied to the model during fine-tuning, allowing the classi-fier to adapt more thoroughly to the target domain. The bottleneck integration strategy, the latent vari-able dimensions were increased to 256 , allowing for more expressive feature representation in the latter case. These two strategies enable us to explore the benefits of lightweight fine-tuning (final layer tuning) versus more intensive adaptation (full classifier tuning), and evaluate how each approach performs in various transfer learning scenarios. 
+
+5.3 Implementations 
+
+Each model was trained for 20 epochs using the Adam optimizer with a learning rate of 0.0002 0.0002, a batch size of 128 , and a dataset split factor of 0.8 for training and testing. The IIns-VAE architecture consists of 4 downsample layers and 3 residual blocks, providing sufficient depth for capturing relevant features in the wireless signal data. The latent variable dimensions for the layer integration strategy were set to 16 , while for the bottleneck integration strategy, the latent variable dimensions were increased to 
+
+256 , allowing for more expressive feature representation in the latter case. The modules, composing both the baseline IIns-VAE and its variants with MRCs, are built using the following architectures:  
+
+> •
+
+Encoder : It includes filters and residual blocks for feature extraction from input signals. The encoder architecture is consistent across all experiments, with adjustable parameters such as the number of filters and downsampling layers.  
+
+> •
+
+Decoder : It mirrors the encoder structure, recon-structing the signal from the latent representation.  
+
+> •
+
+Classifier Base : Responsible for performing initial environmental classification, directly mapping the latent space of the environment dimension to an initial feature set. Only used for the layer integration cases.  
+
+> •
+
+Layer Classifier : Handles classification tasks by fur-ther refining the output from the latent space or performing a direct classification when fine-tuning only the final layer. Can be either neural or MRCs. According to the evaluation criteria in 5.4, we present the comparative analysis of the baseline methods against our proposed models. Our models integrate MRC with IIns-VAE using both layer-wise and bottleneck-wise transfer learning strategies. This comparison allows us to quantify the benefits of transfer learning and to illustrate how much it improves the performance of environmental identification in dynamic and heterogeneous conditions. 
+
+5.4 Evaluation Criteria: Metrics and Baselines 
+
+We use the 4 standard metrics to evaluate the performance: accuracy, precision, recall, and F1 score. Each of these metrics captures different aspects of model performance, providing a comprehensive view of the classifier’s effective-ness.  
+
+> •
+
+Accuracy (A): Measures the overall correctness of the model by calculating the ratio of correctly predicted samples to the total number of samples: 
+
+A = TP + TN TP + TN + FP + FN (6) where TP and TN represent the true positives and true negatives, respectively, and FP and FN repre-sent the false positives and false negatives.  
+
+> •
+
+Precision (P): Focuses on the proportion of correctly identified positive instances (true positives) out of all instances predicted as positive: 
+
+P = TP TP + FP (7) 12 
+
+It reflects the model’s ability to minimize false posi-tives.  
+
+> •
+
+Recall (R): Also known as sensitivity, recall measures the proportion of actual positive instances that are correctly identified by the model: 
+
+R = TP TP + FN (8) It captures the model’s ability to minimize false negatives.  
+
+> •
+
+F1 Score (F1 ): The harmonic mean of precision and recall, providing a balance between the two metrics: 
+
+F1 = 2 × P × RP + R (9) It is especially useful when dealing with imbalanced datasets, as it considers both precision and recall. Overall, accuracy provides broad view, while precision and recall focus on specific types of errors (false positives and false negatives). F1 score helps balance these trade-offs, particularly in cases where the dataset is not evenly distributed. These metrics complement each other, ensuring the model performs well under various practical conditions. We further establish a comparison framework between the proposed transfer learning methods and traditional baseline approaches. The goal is to show how transfer learning improves performance, when compared to existing methods that do no incorporate transfer learning. The baseline methods are: 1) Physical Features (PFs) + SVM : This tradiational ML method uses hand-crafted physical features (PFs) extracted from waveform data, such as re-ceived signal strength (RSS), time of arrival (TOA), and advanced metrics like maximum amplitude (MA), rise time (RT), and mean excess delay (MED) [19]. These features are input into a Support Vector Machine (SVM) classifier for environmental identi-fication. 2) Physical Features (PFs) + MRC (Linear and Fourier) : These methods improve upon the PFs + SVM approach by replacing the SVM classifier with a MRC. The MRC, using linear or Fourier-based fea-ture mappings, adds robustness to environmental uncertainties. 3) IIns-VAE Without Transfer Learning : This baseline tests the DL-based IIns-VAE model without apply-ing any transfer learning techniques. The model is trained solely on the source domain and directly tested on the target domain. It serves as a crucial benchmark, showing the impact of transfer learning when applied to environmental identification tasks. By incorporating these baseline methods into our evalu-ation, we establish a clear distinction between traditional approaches and our proposed transfer learning framework. The performance of these methods will help emphasize the necessity of transfer learning in real-world applications where environmental conditions vary significantly between source and target domains. 
+
+5.5 Results Comparison: IIns-VAE vs. MRCs across In-tegration Strategies 
+
+We present the results of our comparative analysis of IIns-VAE and IIns-MRC models under two distinct integra-tion strategies: layer integration and bottleneck integration, across three different transfer learning scenarios. 
+
+5.5.1 General to Specific Room Environment 
+
+In this scenario, the model is trained on general datasets containing multiple environments and then fine-tuned on a more specific room setting. Specifically, the source domain is from Database 1-1, containing 9000 samples recorded in two adjacent office rooms and a parallel connecting hallway. The target domain is a subset from Database 1-2, focusing on a specific office room similar to the one in Database 1-1. This simulates a common transfer learning challenge where a system is first exposed to diverse environments and subsequently needs to adapt to a narrower context with limited data. The classification task is to distinguish between LOS and NLOS conditions. As shown in Table 3, traditional methods using hand-crafted PFs combined with SVM or MRC classifiers per-form relatively good in this scenario. IIns-VAE without fine-tuning underperforms compared to bothe tranditional and transfer learning approaches, achieving an accuracy of 
+
+0.541 . This implies that IIns-VAE without transfer learning experiences overfitting to the source domain data distribu-tion. When only the final layer is fine-tuned, we observe that IIns-VAE+ achieves the best overall performance, with an accuracy of 0.875 , precision of 0.883 , recall of 0.875 , and F1 score of 0.864 . IIns-VAE follows with 0.818 accuracy and 
+
+0.651 of F1 score. Fine-tuning from the bottleneck level, which allows the entire classifier to be adapted to the target environment, provides a significant performance boost for all methods. IIns-VAE+ still delivers strong results with an accuracy of 
+
+0.827 and an F1 score of 0.826 . Interestingly, IIns-VAE also shows an improvement in accuracy ( 0.829 ) and F1 score (0.705 ), outperforming its performance in layer integration. The results clearly show that transfer learning dra-matically improves performance compared to no transfer baselines. Both layer and bottleneck integration strategies provide significant gains over the baselines, with bottleneck integration generally outperforming layer integration in terms. This suggests that richer feature representations are critical for the LOS/NLOS classification task in this scenario. 
+
+5.5.2 High to Low Label Resolution 
+
+In this scenario, we evaluate the transfer learning capability when shifting from a high-resolution labeled dataset ( 11 
+
+material labels) to a low-resolution one ( 5 material labels). Specifically, the source domain is from Database 2, con-taining 44 , 233 samples with signal measurements and 11 
+
+different obstacle labels, i.e., 10 specific objects blocking the LOS path and 1 LOS label. The target domain is a subset from Database 2 excluded from the source domain data, containing 500 samples with reduced label resolution, i.e. the obstacle labels are combined into 5 different material types as metal, glass, wood, plastic, and the LOS label. The 13 
+
+> TABLE 3 Performance Comparison for General to Specific Room (LOS/NLOS Classification Task).
+
+Model Type Method Accuracy Precision Recall F1 Score 
+
+Baselines (No Transfer) PFs + SVM 0.840 0.853 0.840 0.845 PFs + MRC 0.834 0.875 0.834 0.843 IIns-VAE 0.541 0.351 0.351 0.351 Layer Integration IIns-VAE 0.818 0.809 0.627 0.651 IIns-VAE+ 0.875 0.883 0.875 0.864 
+
+Bottleneck Integration IIns-VAE 0.829 0.790 0.676 0.705 IIns-VAE+ 0.827 0.827 0.827 0.826  
+
+> TABLE 4 Performance Comparison for High to Low Label Resolutions ( 5Material Labels Classification Task).
+
+Model Type Method Accuracy Precision Recall F1 Score 
+
+Baselines (No Transfer) PFs + SVM 0.240 0.499 0.240 0.295 PFs + MRC 0.267 0.394 0.267 0.249 IIns-VAE 0.135 0.027 0.200 0.048 Layer Integration IIns-VAE 0.420 0.199 0.276 0.223 IIns-VAE+ 0.524 0.465 0.524 0.486 
+
+Bottleneck Integration IIns-VAE 0.387 0.189 0.219 0.143 IIns-VAE+ 0.381 0.426 0.381 0.395  
+
+> TABLE 5 Performance Comparison for Mixed to Specific Environment ( 5Material Labels Classification Task).
+
+Method Type Method Accuracy Precision Recall F1 Score 
+
+Baselines (No Transfer) PFs + SVM 0.489 0.394 0.489 0.410 PFs + MRC 0.457 0.351 0.457 0.378 IIns-VAE 0.383 0.176 0.210 0.132 Layer Integration IIns-VAE 0.323 0.124 0.181 0.124 IIns-VAE+ 0.510 0.536 0.500 0.503 
+
+Bottleneck Integration IIns-VAE 0.526 0.330 0.384 0.336 IIns-VAE+ 0.500 0.536 0.500 0.503 key task involves classifying materials based on the wireless signals, where and challenge lies in handling the reduced label granularity during the adaptation to the target domain. The results are shown in Table 4. The performance of traditional machine learning models using hand-crafted PFs with SVM and MRC classifiers, as well as the IIns-VAE without transfer learning, are relatively poor compared to the proposed models. These baseline methods struggle to adapt without transfer learning, with SVM achieving an ac-curacy of only 0.240 , and IIns-VAE performing particularly poorly with 0.135 accuracy and an F1 score of 0.048 . These results highlight the limitations of traditional models and non-transfer learning methods when handling the reduction in label resolution. When only the final layer is tuned, IIns-VAE+ demon-strates the best performance with an accuracy of 0.524 , a precision of 0.465 , recall of 0.524 , and and F1 score of 0.489 .IIns-VAE, on the other hand, struggles in this setting, achiev-ing the lowest performance metrics across the board, with an accuracy of 0.420 and an F1 score of 0.223 . This suggests that the IIns-VAE architecture is less adept at handling the challenge posed by the reduced label resolution without deeper integration of the domain information. Similar to the previous scenario, fine-tuning from the bottleneck level slightly improves performance for both methods, although the gains are less pronounced in this case. Interestingly, IIns-VAE+ does not benefit as much from bottleneck integration in this scenario, achieving slightly lower scores than with layer integration. Transfer learning shows clear improvements over the non-transfer baselines. Bottleneck integration continues to improve performance, but the complexity of the low-label resolution scenario reduces the advantage compared to the first scenario. IIns-VAE+ remains the most robust across both integration types. This scenario further illustrates the robustness of IIns-VAE+ model and highlights the need for careful integration strategy selection based on task complex-ity. 
+
+5.5.3 Mixed to Specific Environment 
+
+In this scenario, we explore the transfer learning challenge of moving from a mixed environment to a more specific setting, where the goal is to classify materials in distinct environments. Specifically, the source domain includes data from Database 2, containing 44 , 233 samples measured in the big room, small room, and outdoor scenario. The tar-get domain is a subset of data excluded from Database 2, containing 5000 samples measured from the medium 14 
+
+(a) General to specific room scenario 
+
+(b) High to low label resolution scenario 
+
+(c) Mixed to Specific Environment Scenario 
+
+> Fig. 6. Performance comparison for the three models in terms of the accuracy, precision, recall, and F1 score. The results illustrate the better adaptability of IIns-VAE+ models, especially IIns-VAE+ (Layer), in han-dling diverse environments with limited target domain data.
+
+office room scenario. The task emphasizes how well the models can adapt to narrower, more focused contexts after being trained on broader environmental data. The results are presented in Table 5. The baseline methods (PFs + SVM and PFs + MRC) demonstrate moderate performance, with SVM achieving an accuracy of 0.489 and F1 score of 0.410 . IIns-VAE trained only on the source domain without transfer yields a lower accuracy of 0.383 and F1 score of 0.132 , showing the clear need for transfer learning in this scenario. When only the final layer is tuned, IIns-VAE+ shows the best performance, achieving an accuracy of 0.500 , a precision of 0.536 , and an F1 core of 0.503 . On the other hand, IIns-VAE performs poorly in this scenario, with an accuracy of only 0.323 and an F1 score of 0.124 , reflecting the challenges of adapting its architecture to the specific environment. Fine-tuning from the bottleneck level continues to show improvements for IIns-VAE, which achieves the highest accuracy ( 0.526 ) and an F1 score of 0.336 . However, IIns-VAE+ performs similarly across both integration strategies, with Fourier integration again slightly outperforming linear in terms of precision and F1 score ( 0.536 and 0.503 , respec-tively). Notably, in this scenario, the bottleneck integration for IIns-VAE yields better performance compared to layer integration. This suggests that deeper adaptation is neces-sary when moving from mixed to specific environments. In this scenario, IIns-VAE+ again demonstrate consistent performance across both integration methods, while IIns-VAE benefits more from bottleneck integration. The need for deeper adaptation when moving from mixed environments to specific ones is evident, as bottleneck integration provides more flexibility in adjusting to the target domain. Overall, the results highlight the importance of the MRC’s advanced classification mechanisms in scenarios that demand high adaptability. 
+
+5.5.4 Cross-Scenario Comparison and Discussion 
+
+The performance comparison across transfer learning sce-narios is summarized in Figures 6. Several key insights emerge: 1) General to Specific Room Scenario : As shown in Figure 6a, this scenario achieves the strongest over-all performance across methods. IIns-VAE+ (Layer integration) outperforms all models, with an ac-curacy of 0.875 and an F1 score of 0.864 . These results indicate that the IIns-VAE+ approach can effectively generalize to specific room environments when pre-trained on general data, likely due to its ability to capture complex spatial patterns. Layer integration appears particularly suitable here, as it retains finer feature details without extensive adap-tation, which is beneficial in structured, room-based environments. 2) High to Low Label Resolution : Figure 6b shows that performance drops for all models in this chal-lenging scenario due to the reduced label resolution. Despite this, IIns-VAE+ (Layer integration) main-tains a competitive edge, with an accuracy of 0.524 15 
+
+> Fig. 7. Comparison of Accuracy for IIns-VAE with MRCs under layer and bottleneck integration setting across different transfer learning scenarios.
+
+and an F1 score of 0.486 , outperforming other mod-els in distinguishing between classes. This high-lights the strength of Fourier-based feature map-pings in preserving meaningful class distinctions even under low-resolution labels, though the perfor-mance gap between layer and bottleneck integration narrows, given the inherent limitations of the low-resolution environment. 3) Mixed to Specific Environment : In the more vari-able environment of Figure 6c, IIns-VAE+ (Bot-tleneck integration) achieves the highest accuracy (0.526 ) and shows a significant improvement in precision, recall, and F1 score over other methods. Bottleneck integration’s deeper adaptation enables IIns-VAE+ to capture complex global representa-tions, enhancing its robustness against variability in this mixed-to-specific setting. This adaptability proves essential in scenarios with high environmen-tal variability, where bottleneck integration allows the model to manage complex domain shifts more effectively. Across all scenarios, IIns-VAE+ consistently outperforms the traditional models (e.g., PFs+SVM and IIns-VAE alone), particularly in terms of F1 score, precision, and recall. The radar plots in Figure 6 illustrate that IIns-VAE+ with bot-tleneck integration significantly boosts these metrics, espe-cially in unstructured or chaotic environments. This can be attributed to the bottleneck’s role in enabling global feature adaptation, which mitigates the impact of domain shifts. The results also indicate the importance of selecting inte-gration strategies according to the environmental structure. Specifically, layer integration performs best in structured environments (e.g., the general to specific room scenarios), where retaining precise feature details through Fourier map-pings supports more accurate classification without exten-sive adaptation. Bottleneck integration excels in variable or chaotic environments (e.g., the mixed-to-specific scenario), where adapatability in the latent space enhances the model’s resilience against domain shifts, improving precision, recall, and F1 score. In conclusion, the findings demonstrate the value of task-specific integration strategies. For structured environ-ments, IIns-VAE+ with layer integration is highly effec-tive, leveraging fine-grained latent features. Conversely, in more variable environments, IIns-VAE+ with bottleneck in-tegration offers enhanced robustness, benefiting from deep adaptation in the latent space. These results highlight the strengths of combing DL’s feature extraction with MRC’s risk-aware classification for robust transfer learning across diverse wireless sening tasks. 
+
+5.6 Ablation Study across Different Feature Mappings 
+
+In addition to the primary results leveraging F feature map-pings for the MRC classifiers, we conduceted an ablation study to evaluate the performance impact of using linear feature mappings. This comparison provides insight into the flexibility and adaptability of MRC when paired with simpler or more complex mappings. The results are shown in heatmaps in 7-8. The results indicate that Fourier feature mappings con-sistently outperform linear mappings across all scenarios and metrics. For instance, in the ”General to Specific Room” scenario, the accuracy of IIns-VAE+ with Fourier mappings reaches 0.875 under layer integration, compared to 0.731 
+
+with linear mappings. Similarly, the F1 score for the ”High to Low Label Resolution” scenario improves from 0.467 
+
+(linear) to 0.486 (Fourier) with layer integration. However, linear mappings still offer competitive performance in less complex settings, such as the ”Mixed to Specific Environ-ment” scenario, where they achieve comparable results to Fourier mappings under bottleneck integration. In summary, the ablation study illustrates the impor-tance of selecting feature mappings based on the complexity of the transfer learning task. Fourier mappings are better suited for scenarios requiring higher adaptability, while linear mappings provide an efficient alternative for simpler environments. 
+
+## 6 CONCLUSION 
+
+This paper presents IIns-VAE+, a hybrid framework for en-vironmental identification in wireless sensing that integrates 16 
+
+Fig. 8. Comparison of F1 Score for IIns-VAE with MRCs under layer and bottleneck integration setting across different transfer learning scenarios. 
+
+the DL capabilities of IIns-VAE with the robust classifica-tion of MRC. Experimental results demonstrate that IIns-VAE+ significantly enhances generalization across diverse environments, outperforming both traditional methods and the baseline IIns-VAE model in various transfer learning scenarios. Our main contribution is a two-stage framework de-signed to address the challenge of environmental identifica-tion across domains. The framework first trains IIns-VAE in the source domain to extract latent environmental features, and then trains MRC in the target domain to adapt the classifier to unseen environments. This decoupled approach provides a practical solution for enhancing environmental perception in ISAC systems. It directly enables the context-aware intelligence required for dynamic optimization of resource allocation, beamforming, and path planning in real-world, non-stationary wireless environments. Consequently, our work offers a robust solution to the problem of domain shift in practical wireless sensing for 6G networks. Future work will investigate more advanced machine learning, particularly deep learning techniques, to further strengthen the proposed framework and extend its applicability to a broader spectrum of ISAC tasks. 
+
+## REFERENCES 
+
+[1] C. de Lima, D. Belot, R. Berkvens, A. Bourdoux, D. Dardari, M. Guillaud, M. Isomursu, E.-S. Lohan, Y. Miao, A. N. Bar-reto, M. R. K. Aziz, J. Saloranta, T. Sanguanpuak, H. Saried-deen, G. Seco-Granados, J. Suutala, T. Svensson, M. Valkama, H. Wymeersch, and B. van Liempd, “6G white paper on local-ization and sensing,” Univ. of Oulu, Oulu, Finland, Tech. Rep. 12, Jun. 2020. [2] S. E. Trevlakis, A.-A. A. Boulogeorgos, D. Pliatsios, J. Querol, K. Ntontin, P. Sarigiannidis, S. Chatzinotas, and M. Di Renzo, “Localization as a key enabler of 6G wireless systems: A com-prehensive survey and an outlook,” IEEE Open J. Commun. Soc. ,vol. 4, pp. 2733–2801, Oct. 2023. [3] X. Wang, L. Gao, S. Mao, and S. Pandey, “CSI-based fingerprinting for indoor localization: A deep learning approach,” IEEE Trans. Veh. Technol. , vol. 66, no. 1, pp. 763–776, Jan. 2017. [4] Y. Wang, M. Liu, J. Yang, and G. Gui, “Data-driven deep learning for automatic modulation recognition in cognitive radios,” IEEE Trans. Veh. Technol. , vol. 68, no. 4, pp. 4074–4077, Apr. 2019. [5] R. Mendrzik, F. Meyer, G. Bauch, and M. Win, “Enabling situ-ational awareness in millimeter wave massive MIMO systems,” 
+
+IEEE J. Sel. Topics Signal Process. , vol. 13, no. 5, pp. 1196–1211, Aug. 2019. [6] D. K. Pin Tan, J. He, Y. Li, A. Bayesteh, Y. Chen, P. Zhu, and W. Tong, “Integrated sensing and communication in 6G: Motiva-tions, use cases, requirements, challenges and future directions,” in Proc. IEEE Int. Online Symp. Joint Commun. Sens. (JC&S) , Feb. 2021, pp. 1–6. [7] K. Wu, Z. Wang, S.-L. Chen, J. A. Zhang, and Y. J. Guo, “ISAC: From human to environmental sensing,” IEEE J. Selected Topics Electromag., Ant. Propag. (Early Access) , Sep. 2025. [8] A. Decurninge, L. G. Ord ´ o ˜ nez, P. Ferrand, G. He, B. Li, W. Zhang, and M. Guillaud, “CSI-based outdoor localization for massive MIMO: Experiments with a learning approach,” in Proc. Int. Symp. Wireless Commun. Syst. (ISWCS) , Aug. 2018, pp. 1–6. [9] M. Z. Win, Y. Shen, and W. Dai, “A theoretical foundation of network localization and navigation,” Proc. IEEE , vol. 106, no. 7, pp. 1136–1165, Jul. 2018. [10] M. Z. Win, W. Dai, Y. Shen, G. Chrisikos, and H. Vincent Poor, “Network operation strategies for efficient localization and navi-gation,” Proc. IEEE , vol. 106, no. 7, pp. 1224–1254, Jul. 2018. [11] Y. Shen, H. Wymeersch, and M. Z. Win, “Fundamental limits of wideband localization – Part II: Cooperative networks,” IEEE Trans. Inf. Theory , vol. 56, no. 10, pp. 4981–5000, Oct. 2010. [12] K. Rickard and G. Fredrik, “The future of automotive localization algorithms: Available, reliable, and scalable localization: Any-where and anytime,” IEEE Signal Process. Mag. , vol. 34, no. 2, pp. 60–69, Mar. 2017. [13] G. H. Sim, S. Klos, A. Asadi, A. Klein, and M. Hollick, “An online context-aware machine learning algorithm for 5g mmwave vehicular communications,” IEEE/ACM Trans. Networking , vol. 26, no. 6, pp. 2487–2500, Sep. 2018. [14] Z. Flavio and C. Andrea, “Inhomogeneous poisson sampling of finite-energy signals with uncertainties in Rd,” IEEE Trans. Signal Process. , vol. 64, no. 18, pp. 4679–4694, Apr. 2016. [15] D. Dardari, A. Conti, C. Buratti, and R. Verdone, “Mathematical evaluation of environmental monitoring estimation error through energy-efficient wireless sensor networks,” IEEE Trans. Mob. Com-put. , vol. 6, no. 7, pp. 790–802, May 2007. [16] I. Yaqoob, I. A. T. Hashem, Y. Mehmood, A. Gani, S. Mokhtar, and S. Guizani, “Enabling communication technologies for smart cities,” IEEE Commun. Mag. , vol. 55, no. 1, pp. 112–120, Jan. 2017. [17] A. R. Javed, F. Shahzad, S. ur Rehman, Y. B. Zikria, I. Razzak, Z. Jalil, and G. Xu, “Future smart cities: Requirements, emerging technologies, applications, challenges, and future aspects,” Cities ,vol. 129, p. 103794, Oct. 2022. [18] S. Maran ` o, W. M. Gifford, H. Wymeersch, and M. Z. Win, “NLOS identification and mitigation for localization based on UWB ex-perimental data,” IEEE J. Sel. Areas Commun. , vol. 28, no. 7, pp. 1026–1035, Sep. 2010. 17 
+
+[19] H. Wymeersch, S. Maran ` o, W. M. Gifford, and M. Z. Win, “A machine learning approach to ranging error mitigation for UWB localization,” IEEE Trans. Commun. , vol. 60, pp. 1719–1728, Apr. 2012. [20] Z. Xiao, H. Wen, A. Markham, A. Trigoni, P. Blunsom, and J. Fro-lik, “Identification and mitigation of non-line-of-sight conditions using received signal strength,” in Proc. IEEE Int. Conf. Wireless Mobile Comput., Netw. Commun. (WiMob) , Oct. 2013, pp. 667–674. [21] Y. Li, S. Mazuelas, and Y. Shen, “Deep generative model for simul-taneous range error mitigation and environment identification,” in Proc. IEEE Global Commun. Conf. (GLOBECOM) , Dec. 2021, pp. 1–6. [22] ——, “A deep learning approach for generating soft range in-formation from RF data,” in Proc. IEEE Global Commun. Conf. Workshop (GLOBECOM Workshop) , Dec. 2021, pp. 1–5. [23] S. Mazuelas, A. Conti, J. C. Allen, and M. Z. Win, “Soft range information for network localization,” IEEE Trans. Signal Process. ,vol. 66, no. 12, pp. 3155–3168, Jun. 2018. [24] C. T. Nguyen, N. Van Huynh, N. H. Chu, Y. M. Saputra, D. T. Hoang, D. N. Nguyen, Q.-V. Pham, D. Niyato, E. Dutkiewicz, and W.-J. Hwang, “Transfer learning for wireless networks: A comprehensive survey,” Proc. IEEE , vol. 110, no. 8, pp. 1073–1115, 2022. [25] N. Van Huynh and G. Y. Li, “Transfer learning for signal detection in wireless networks,” Wireless Commun. Lett. , vol. 11, no. 11, pp. 2325–2329, 2022. [26] C. Liu, Z. Wei, D. W. K. Ng, J. Yuan, and Y.-C. Liang, “Deep transfer learning for signal detection in ambient backscatter communica-tions,” IEEE Trans. Wireless Commun. , vol. 20, no. 3, pp. 1624–1638, 2021. [27] Z. Sun, Y. Chen, J. Qi, and J. Liu, “Adaptive localization through transfer learning in indoor Wi-Fi environment,” in Proc. IEEE Int. Conf. Mach. Learn. Appl. (ICMLA) , Dec. 2008, pp. 331–336. [28] S. J. Pan, V. W. Zheng, Q. Yang, and D. H. Hu, “Transfer learning for WiFi-based indoor localization,” in Proc. Assoc. Adv. Artif. Intell. Workshop (AAAI Wkshps) , vol. 6, Jul. 2008, pp. 43–48. [29] K. Liu, H. Zhang, J. K.-Y. Ng, Y. Xia, L. Feng, V. C. Lee, and S. H. Son, “Toward low-overhead fingerprint-based indoor localization via transfer learning: Design, implementation, and evaluation,” 
+
+IEEE Trans. Ind. Inf. , vol. 14, no. 3, pp. 898–908, 2017. [30] M. Akrout, A. Feriani, F. Bellili, A. Mezghani, and E. Hossain, “Domain generalization in machine learning models for wire-less communications: Concepts, state-of-the-art, and open issues,” 
+
+IEEE Commun. Surv. Tutorials , vol. 25, no. 4, pp. 3014–3037, 2023. [31] M. Wang, Y. Lin, Q. Tian, and G. Si, “Transfer learning promotes 6G wireless communications: Recent advances and future chal-lenges,” IEEE Trans. Reliab. , vol. 70, no. 2, pp. 790–807, 2021. [32] Y. Li, S. Mazuelas, and Y. Shen, “A variational learning approach for concurrent distance estimation and environmental identifica-tion,” IEEE Trans. Wireless Commun. , vol. 22, no. 9, pp. 6252–6266, 2023. [33] V. Alvarez, S. Mazuelas, and J. A. Lozano, “Minimax forward and backward learning of evolving tasks with performance guaran-tees,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 36, Dec. 2023, pp. 65 678–65 702. [34] J. I. Segovia-Mart´ ın, S. Mazuelas, and A. Liu, “Double-weighting for covariate shift adaptation,” in Proc. Int. Conf. Mach. Learn. (ICML) , vol. 202, Jul. 2023, pp. 30 439–30 457. [35] V. ´ Alvarez, S. Mazuelas, and J. A. Lozano, “Minimax classification under concept drift with multidimensional adaptation and per-formance guarantees,” in Proc. Int. Conf. Mach. Learn. (ICML) , vol. 162, Jul. 2022, pp. 486–499. [36] K. Bondugula, S. Mazuelas, and A. P´ erez, “Efficient learning of minimax risk classifiers in high dimensions,” in Proc. Conf. Uncertainty Artif. Intell. (UAI) , vol. 216, Aug. 2023, pp. 206–215. [37] L. Wang and S. Pasricha, “A framework for CSI-based indoor localization with ID convolutional neural networks,” in Proc. IEEE Int. Conf. Indoor Positioning Indoor Navig. (IPIN) , Sep. 2022, pp. 1–8. [38] X. Song, Y. Zhou, H. Qi, W. Qiu, and Y. Xue, “DuLoc: Dual-channel convolutional neural network based on channel state information for indoor localizationa,” IEEE Sensors J. , vol. 22, no. 9, pp. 8738– 8748, May 2022. [39] Y. Zhang, C. Qu, and Y. Wang, “An indoor positioning method based on CSI by using features optimization mechanism with LSTM,” IEEE Sensors J. , vol. 20, no. 9, pp. 4868–4878, May 2020. [40] W. Li, X. Meng, Z. Zhao, Z. Liu, C. Chen, and H. Wang, “LoT: A transformer-based approach based on channel state information for indoor localization,” IEEE Sensors J. , vol. 23, no. 22, pp. 28 205– 28 219, Nov. 2023. [41] X. Xu, F. Zhu, S. Han, Z. Yu, H. Zhao, B. Wang, and P. Zhang, “Swin-Loc: Transformer-based CSI fingerprinting indoor localiza-tion with mimo isac system,” IEEE Trans. Veh. Technol. , vol. 73, no. 8, pp. 11 664–11 679, Aug. 2024. [42] R. Wan, Y. Chen, S. Song, and Z. Wang, “CSI-based MIMO indoor positioning using attention-aided deep learning,” IEEE Commun. Lett. , vol. 28, no. 1, pp. 53–57, Jan. 2024. [43] Y. Ruan, L. Chen, X. Zhou, G. Guo, and R. Chen, “Hi-Loc: Hybrid indoor localization via enhanced 5G NR CSI,” IEEE Trans. Instrum. Meas. , vol. 71, pp. 1–15, 2022. [44] D. M. Blei, A. Kucukelbir, and J. D. McAuliffe, “Variational infer-ence: A review for statisticians,” J. Am. Statist. Assoc. , vol. 112, no. 518, pp. 859–877, 2017. [45] D. P. Kingma and M. Welling, “Auto-encoding variational bayes,” 
+
+arXiv preprint arXiv:1312.6114 , 2013. [46] I. J. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu, D. Warde-Farley, S. Ozair, A. C. Courville, and Y. Bengio, “Generative adversarial nets,” in NIPS , 2014. [47] F. Husz´ ar, “Variational inference using implicit distributions,” 
+
+arXiv preprint arXiv:1702.08235 , 2017. [48] A. Conti, S. Mazuelas, S. Bartoletti, W. Lindsey, and M. Win, “Soft information for localization-of-things,” Proc. IEEE , vol. 107, pp. 2240–2264, Sep. 2019. [49] S. Mazuelas and A. P´ erez, “General supervision via probabilistic transformations,” in Proc. Eur. Conf. Artif. Intell. (ECAI) , Aug. 2020, pp. 1348–1354. [50] S. Mazuelas, M. Romero, and P. Grunwald, “Minimax risk classi-fiers with 0-1 loss,” J. Mach. Learn. Res. , vol. 24, no. 208, pp. 1–48, 2023. [51] K. Bregar and M. Mohori, “Improving indoor localization using convolutional neural networks on computationally restricted de-vices,” IEEE Access , vol. 6, pp. 17 429–17 441, Mar. 2018. [52] S. Angarano, F. Salvetti, V. Mazzia, G. Fantin, and M. Chiaberge, “Deep UWB: A dataset for UWB ranging error mitigation in indoor environments.” Nov. 2020. [Online]. Available: https://doi.org/10.5281/zenodo.4290069

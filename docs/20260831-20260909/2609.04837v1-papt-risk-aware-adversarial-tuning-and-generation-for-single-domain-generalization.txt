@@ -1,0 +1,3111 @@
+Title: PAPT++: Risk-Aware Adversarial Tuning and Generation for Single Domain Generalization
+
+URL Source: https://arxiv.org/pdf/2609.04837v1
+
+Published Time: Mon, 07 Sep 2026 00:47:44 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+> IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 1
+
+# PAPT++: Risk-Aware Adversarial Tuning and Generation for Single Domain Generalization 
+
+Zhipeng Xu, De Cheng *, Xinyang Jiang, Lingfeng He, Huaijie Wang, Dongsheng Li, Nannan Wang, Senior Member, IEEE , and Xinbo Gao, Fellow, IEEE 
+
+Abstract —Single domain generalization (SDG) aims to learn a model from one labeled source domain that generalizes to unseen target domains. A common strategy is to enrich the source distribution with augmented or generated samples, and recent text-to-image (T2I) diffusion models provide a strong generative prior for this purpose. However, diversity alone is insufficient for robust generalization, because useful generated samples should also capture variations that the current classifier finds difficult. Motivated by distributionally robust optimization (DRO), we define a semantic ambiguity set in the class-conditional generative space of a pretrained T2I model and search it for samples with high classification loss under the current classifier. To this end, we introduce PAPT++, a risk-aware adversarial generation-training framework for SDG. PAPT++ first learns diverse semantic reference images for each class through image-text alignment and intra-class diversity regularization. These references then serve as denoising targets during classifier-guided diffusion synthesis, reducing semantic drift while guiding generation toward challenging variations. The generated samples are combined with the source data to update the classifier, and the updated classifier guides the next synthesis round in return. In this way, PAPT++ progressively exposes the classifier to challenging yet semantically consistent variations. Extensive experiments on standard SDG benchmarks demonstrate the superiority of the proposed PAPT++ method and the effectiveness of its main components. 
+
+Index Terms —Domain Generalization, Distributional Robust Learning, Adversarial Training, Generative model. 
+
+I. I NTRODUCTION 
+
+# DEEP neural networks (DNNs) are commonly trained and evaluated under the assumption that training and test data are independently and identically distributed ( i.i.d. ) [1]. In real-world applications, however, test data often deviate from the training distribution due to changes in style, background, viewpoint, image quality, or acquisition conditions. As a result, a model trained only on the source data may suffer a noticeable performance drop when deployed in unseen environments. To improve robustness under such distribution shifts, domain generalization (DG) [2], [3] aims to learn from available labeled source data and generalize to unseen target domains without accessing target data during training. Single domain generalization (SDG) is a more challenging setting of DG, where only one labeled source domain is available for training. To alleviate the lack of domain diversity, existing SDG methods usually expand or regularize the source 
+
+Zhipeng Xu, De Cheng, Lingfeng He, Huaijie Wang, Nannan Wang, and Xinbo Gao are with Xidian University, Xi’an, China. Xinyang Jiang and Dongsheng Li are with Microsoft Research Asia, Shanghai, China (e-mail: xinyangjiang@microsoft.com; dongsli@microsoft.com). 
+
+> *
+
+Corresponding author: De Cheng (e-mail: dcheng@xidian.edu.cn). Image Feature Space 
+
+> Style Transfer
+> (A) Existing Data Augmentation
+> (B) Diffusion Based Augmentation
+> Image Feature Space
+> Worst Searching
+> (C) Worst-case Searching Process
+
+Fig. 1. Comparison of data augmentation strategies for SDG. (A) Con-ventional augmentation expands the source distribution within predefined transformation spaces. (B) Diffusion-based augmentation provides broader semantic variations but is not explicitly guided by the current classifier. (C) PAPT++ searches the class-conditional T2I generative space for classifier-challenging samples while preserving class semantics. 
+
+distribution through data augmentation, adversarial perturba-tion, or normalization. Although these approaches improve robustness by introducing additional variations or regularizing the learned representation, augmentation- and perturbation-based methods often operate within predefined transformation spaces, such as perturbations of channel-wise feature statistics. Consequently, the resulting training distribution may still fail to cover complex unseen variations in style, background, viewpoint, or image quality. Recent text-to-image (T2I) diffusion models provide apromising way to further enrich the source distribution for SDG. Benefiting from large-scale image-text pretraining, these models contain rich generative priors and can synthesize diverse visual and semantic variations beyond predefined im-age transformations. However, simply increasing generation diversity does not necessarily lead to robust generalization. From the perspective of robust learning, useful generated sam-ples should not only be diverse, but also expose challenging variations that are not well covered by the source data and cannot be reliably handled by the current model. To guide the search for such variations, we build on distributionally robust optimization (DRO), which minimizes the worst-case risk over an ambiguity set around the source distribution. Rather than fitting only observed or augmented samples, DRO explicitly considers possible distributional per-turbations and focuses on those that yield high model risk. arXiv:2609.04837v1 [cs.CV] 4 Sep 2026 IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 2
+
+Applying this formulation to T2I diffusion models requires a suitable ambiguity set for high-risk sample search. Existing methods [4] have constructed such sets in feature spaces parameterized by CLIP or ResNet encoders. However, extend-ing feature-space risk search to the generative space of T2I diffusion models is non-trivial. Without semantic constraints, directly maximizing model risk may produce degenerate high-loss samples, such as artifact-dominated or texture-biased images, rather than meaningful variations that preserve core class semantics. Therefore, a key question naturally arises: 
+
+how can we use a T2I diffusion model to construct a semantic ambiguity set and search it for high-risk samples while preserving core class semantics? 
+
+Based on this motivation, we propose PAPT++, a risk-aware adversarial generation-training framework for SDG, as shown in Fig. 1. PAPT++ extends our previous PAPT [5] by moving from diversity-driven generation to risk-aware diffusion syn-thesis guided by the current classifier. Specifically, PAPT++ uses the class-conditional generative space of a pretrained T2I model to construct a semantic ambiguity set. Semantic refer-ences for each class constrain the search to reduce semantic drift, while the current classifier guides generation toward variations with high classification loss. PAPT++ alternates between difficult sample generation and classifier training, progressively exposing the classifier to challenging yet seman-tically consistent variations and improving its generalization to unseen domains. It consists of two modules: Class-Level Semantic Reference Learning (CSRL) and Classifier-Guided Adversarial Diffusion Synthesis (CADS). CSRL provides semantic constraints for subsequent adver-sarial synthesis. Without such constraints, classifier-guided generation may increase classification loss by drifting away from the target class. CSRL therefore first learns a set of semantic reference images for each class by adapting the diffusion model with two complementary objectives: image-text alignment and intra-class diversity regularization. The image-text alignment objective encourages generated images to follow their class prompts and preserve class-level seman-tics, including overall object appearance, shape, and other discriminative visual cues. However, this objective alone may cause the generator to favor a small set of high-scoring visual patterns. The intra-class diversity objective therefore penalizes feature similarity among images of the same class, encouraging more diverse visual appearances. The learned reference images are then fixed and used as denoising targets to regularize the subsequent classifier-guided synthesis. Using the semantic references learned by CSRL, CADS alternates between classifier-guided diffusion synthesis and classifier training. In each synthesis round, the current clas-sifier is fixed to provide classification-loss feedback, while the diffusion model is optimized to generate samples with high classification loss under this classifier. Meanwhile, the semantic references serve as denoising targets to constrain the diffusion optimization. This constraint discourages the generator from increasing classification loss through semantic drift or by introducing noise, distorted textures, and other visual artifacts. The generated challenging samples are then combined with the source data to update the classifier, and the updated classifier guides the next synthesis round. The main contributions are summarized as follows:  
+
+> •
+
+We propose PAPT++, a risk-aware adversarial generation-training framework for SDG that extends our previ-ous PAPT beyond diversity-driven prompt generation. PAPT++ formulates classifier-guided sample generation as a search over a class-conditional semantic ambiguity set and alternates between challenging sample generation and classifier training.  
+
+> •
+
+We develop two complementary modules for semantically constrained risk search. CSRL learns diverse semantic reference images through image-text alignment and intra-class diversity regularization, while CADS uses these references to regularize classifier-guided diffusion syn-thesis, generating challenging yet semantically consistent samples. We further introduce a progressive denoising optimization strategy to extend gradient guidance over the denoising trajectory and improve generation quality.  
+
+> •
+
+We establish a theoretical connection between PAPT++ and DRO. We show that the reference denoising objective controls an upper bound on the KL divergence between the smoothed reference and generated distributions. We further derive a target-domain risk bound that accounts for ambiguity-set coverage, the finite CADS search gap, and finite-sample estimation error.  
+
+> •
+
+Extensive experiments on SDG and multi-source DG benchmarks show that PAPT++ achieves state-of-the-art performance. Ablation studies verify the effectiveness of its main components, and additional experiments analyze the generation process from multiple perspectives. This article extends our CVPR 2025 conference paper PAPT [5] in three main aspects: (1) PAPT++ moves beyond the diversity-driven prompt generation of PAPT by using the current classifier to search for challenging variations in the T2I generative space. CSRL provides semantic references that con-strain this search, while CADS incorporates classifier feedback and progressive denoising into an iterative generation-training process. (2) We further formulate this risk-aware generation process from a DRO perspective. The analysis shows how reference denoising constrains distributional deviation and how the worst-case risk over the resulting semantic ambiguity set relates to target-domain risk, providing theoretical support for semantic preservation and high-risk search. (3) The empirical study is substantially expanded to examine both performance and the underlying generation mechanism. PAPT++ achieves state-of-the-art results on SDG and multi-source DG bench-marks, together with strong corruption generalization. II. R ELATED WORK 
+
+A. Data Augmentation for SDG 
+
+SDG aims to generalize a model trained on a single source domain to multiple unseen target domains. Existing methods commonly expand the training distribution through adversarial or style-based augmentation. ADA [6] and ME-ADA [7] generate adversarial virtual samples, while ESDA [8] searchs a predefined transformation space for model vulnerabilities. MixStyle [9] mixes channel-wise feature statistics, L2D [10] IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 3HPSv2 model  DINOv2 model   
+
+> Preserve core semantic Increase intra-class diversity
+
+Class-level Text Feature  dog  cat  bird 
+
+A photo of a [class]  Text Encoder  𝓕 𝑻  ∙
+
+⋯
+
+Condition 
+
+Generation Process 
+
+Sample a Mini-batch  
+
+> Clock 1
+> Clock 2
+> Image feature
+> Text feature
+> Alignment
+> Image feature
+> Clock
+> Cat
+> Punishment
+
+(A)  Class -Level Semantic Reference Learning       
+
+> Reference Images
+> Sample
+> Noise
+> ResBlock
+> MatMul
+> MatMul
+> QKV
+> Self-Attention
+> Cross-Attention
+> Add Noise
+> Unet Block ×N
+> Generation
+> Noise
+> Predict
+> Noise
+> Min 𝝐 − 𝝐 𝜽 (𝒙 𝒕 , 𝒄) 𝟐
+> 𝟐
+> Semantic Regulariz e
+> Challenge Images
+> Uncertainty Set
+> Domain-Invariant Direction
+
+Domain-Specific Direction   
+
+> High Loss Region 1 & 2
+> High Loss Region 3
+> 𝜽 𝒌
+> 𝜽 𝒌+𝟏
+> Semantic
+> Regulariz e
+> Worst Case
+> Searching
+> Downstream
+> model  𝝎 𝒌
+> Max 𝓛 𝝎
+> 𝑮 (𝝎 𝒌 )
+> Worst Case
+> Searching
+> Image
+> Generation
+
+𝝎 𝟎  𝜽 𝟏  𝝎 𝟏  𝜽 𝒌  𝝎 𝒌  𝜽 𝒌+𝟏  𝝎 𝒌+𝟏 
+
+⋯  
+
+> Adversarial Training - Generation
+> Noise Challenge Images
+> Generate
+> Source Domain
+> Downstrea
+> m model
+> 𝝎 𝒌
+> Min 𝓛 𝝎 𝑮+𝑺 (𝝎 𝒌 )
+> Training
+
+(B)  Classifier -Guided Adversarial Diffusion Synthesis    
+
+> Condition
+> Fig. 2. The framework of our proposed PAPT++. PAPT++ consists of two modules: (A) Class-Level Semantic Reference Learning (CSRL) and (B) Classifier-Guided Adversarial Diffusion Synthesis (CADS). CSRL learns diverse class-level semantic reference images by encouraging image-text alignment
+> and intra-class diversity . CADS uses these reference images as denoising targets to regularize the diffusion parameters during classifier-guided adversarial synthesis, encouraging the generation of high-risk samples with reduced semantic drift. The generated challenge images are combined with source-domain data to update the downstream model, and the updated model provides feedback for the next synthesis round.
+
+learns a style-complement module, and ASR-Norm [11] adapts normalization to features generated by ADA. Although effec-tive, these methods operate within predefined transformation spaces or feature statistics and may not cover complex shifts in style, background, and viewpoint. Our method instead leverages T2I generative priors to explore broader visual and semantic variations and searches for high-risk yet semantically valid samples rather than pursuing diversity alone [5]. Other works also make contributions [12]–[16]. 
+
+B. Text-to-Image Models 
+
+Text-to-image (T2I) generation has progressed rapidly with large-scale autoregressive models such as DALL-E [17] and diffusion models. Latent diffusion models [18] perform de-noising in the latent space of a pretrained autoencoder and use text embeddings to guide image generation. Recent studies further adapt diffusion models using human-preference super-vision [19] or parameter-efficient tuning. LoRA introduces low-rank weight updates, reducing the number of trainable parameters while keeping the pretrained backbone fixed. Our method uses the generative prior of a pretrained T2I model and optimizes only LoRA parameters to synthesize challenging yet semantically consistent samples for SDG. 
+
+C. Distributional Robust Optimization 
+
+Distributionally Robust Optimization (DRO) aims to learn models that perform well under worst-case distributional shifts within a predefined uncertainty set [20], [21]. Instead of minimizing the empirical risk only on observed samples, DRO optimizes the maximum risk over possible distributions around the training distribution, providing a principled ob-jective for robust learning under distributional perturbations. Existing DRO methods define uncertainty sets with different discrepancy measures, such as Wasserstein distance [4], [22], 
+
+f -divergences [23], and maximum mean discrepancy [24]. Among them, Wasserstein DRO has been widely studied due to the flexibility of Wasserstein balls in modeling distributional perturbations [22]. However, the practical effectiveness of DRO in domain generalization remains challenging [25]. A key difficulty lies in how to define an appropriate uncertainty set: an overly restricted set may fail to cover useful domain shifts, while an overly flexible set may include unrealistic or label-inconsistent samples. For example, [26] show that the over-flexibility of the uncertainty set can limit the effectiveness of Wasserstein DRO in classification tasks. To address this issue, some studies introduce additional constraints, such as unlabeled data [27], data geometry [28], or topology informa-tion [29], to construct more meaningful uncertainty sets. III. M ETHODOLOGY 
+
+Problem Definition. We formulate the single domain gener-alization problem as learning a classifier fθ : X → RC from one labeled source domain such that it generalizes to multiple unseen target domains that share the same label space. Here, IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 4
+
+fθ (x) denotes the C-class logits. The source-domain training set is denoted as DS = {(xsi , y si )}Ns
+
+> i=1
+
+, where xsi ∈ X is the 
+
+i-th source image, ysi ∈ { 1, . . . , C } is its class label, Ns is the total number of source samples, X denotes the image space, and C is the total number of categories. The target domains are represented by DT = {D T
+
+> m
+
+}Mm=1 , where DT 
+
+> m
+
+denotes the m-th target domain and M is the total number of target domains. All target-domain data are unavailable during training and are used only for evaluation. 
+
+Overall Framework. The overall framework of PAPT++ is shown in Fig. 2. PAPT++ consists of Class-Level Semantic Reference Learning (CSRL) and Classifier-Guided Adversarial Diffusion Synthesis (CADS). It searches the class-conditional generative space of a pretrained T2I model within a se-mantic ambiguity set defined by reference-based denoising, while the current classifier directs generation toward high-loss variations. Only lightweight LoRA [30]–[33] parameters are optimized, with the pretrained diffusion backbone kept fixed. CSRL learns diverse semantic reference images for each class through image–text alignment and intra-class diversity regularization (Fig. 2.A). The image–text alignment objec-tive preserves class semantics, whereas diversity regular-ization encourages complementary intra-class appearances. The learned references are then fixed and used as denoising targets to reduce semantic drift during adversarial synthesis. CADS alternates between classifier-guided diffusion synthesis and classifier training (Fig. 2.B). In each round, the fixed classifier guides generation toward high-loss samples, while the semantic references constrain denoising. The generated samples are combined with the source data to update the classifier, which then guides the next synthesis round. 
+
+A. Preliminaries 
+
+We employ a pretrained text-to-image latent diffusion model as the generative prior. The model consists of a variational autoencoder (VAE) [34], a CLIP text encoder [35], and a text-conditioned U-Net [36] denoiser. Given an image x, the VAE encoder maps it into the latent space as: 
+
+z0 = FE (x), (1) where FE (·) denotes the VAE encoder and z0 is the clean latent representation. The corresponding VAE decoder FD (·)
+
+maps a latent code back to the image space. For class k, we use a text template tck, e.g., “a photo of a [class]”, where the token [class] is then replaced by the class name. The prompt tck is encoded by the CLIP text encoder associated with the pretrained diffusion model: 
+
+Tck = τ ψ (tck), (2) where τ ψ (·) denotes the CLIP text encoder, and Tck ∈ RL×d
+
+denotes the text embedding sequence with token length L and feature dimension d. In this work, the text encoder is kept frozen to preserve the semantic knowledge learned from large-scale image-text pretraining. The forward diffusion process gradually corrupts the clean latent z0. At timestep t, the noisy latent is obtained by: 
+
+zt = √¯αtz0 + √1 − ¯αtϵ, ϵ ∼ N (0, I), (3) where ¯αt is the cumulative noise schedule coefficient and ϵ is Gaussian noise. The denoising network predicts the added noise ˆϵ condi-tioned on the noisy latent zt, the timestep t, and the text representation Tck:
+
+ˆϵ = ϵω,ϕ(zt, t, Tck), (4) where ϵω,ϕ(·) denotes the U-Net denoiser. Here, ω denotes the frozen pretrained U-Net parameters, and ϕ denotes the trainable LoRA parameters. In our implementation, ϕ denotes LoRA parameters inserted into the self-attention layers of the U-Net, while the pretrained diffusion backbone remains fixed. The textual condition interacts with the intermediate image features through the cross-attention layers of the U-net. Let 
+
+ht denote the intermediate image features at diffusion step t.The query, key, and value representations are defined as: 
+
+Q = htWQ, K = TckWK , V = TckWV , (5) and the resulting cross-attention is given by: 
+
+Attn( ht, Tck) = softmax 
+
+ QK ⊤
+
+√da
+
+
+
+V. (6) Here, WQ, WK , and WV denote the projection matrices, and 
+
+da denotes the dimension of the projected queries and keys. Through this interaction, the class prompt provides semantic guidance for the denoising process. In this work, we adapt the diffusion model by optimizing the self-attention LoRA parameters ϕ while keeping the pretrained backbone fixed. The denoising objective is formulated as: 
+
+LLDM = Ez0,t, ϵ
+
+h
+
+∥ϵ − ϵω,ϕ(zt, t, Tck)∥22
+
+i
+
+, (7) where the denoising network ϵω,ϕ predicts the Gaussian noise added to the clean latent at timestep t.For notational simplicity, we denote the complete text-to-image generation process as: 
+
+˜x = Gϕ(tck, η), (8) where η denotes the initial Gaussian noise latent. Specifically, starting from the initial noise latent η, the text-conditioned U-Net iteratively performs reverse denoising under the prompt representation Tck = τ ψ (tck), and the final latent is decoded by the VAE decoder FD (·) to obtain the generated image ˜x.These preliminaries define how the generator can be adapted through lightweight self-attention LoRA parameters. In the following sections, we use this adaptation interface for two purposes: first, to obtain class-level semantic reference images, and second, to synthesize classifier-guided high-risk variations under semantic reference constraints. 
+
+B. Class-Level Semantic Reference Learning 
+
+Review of PAPT: In our conference version [5], the first stage is Category Prompt Tuning, which learns class prompts to capture domain-invariant category information from the source domain. For the k-th class, PAPT defines a textual template: 
+
+tck = “ a photo of a ∗ ”, (9) IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 5
+
+where the placeholder ∗ is then replaced by a learnable category prompt Eck in the embedding space wck:
+
+wck = [ ε(ˆ tck, 1), · · · , ε (ˆ tck,M c ), Eck]. (10) The resulting condition Φ( wck) is then fed into the cross-attention layers of the diffusion model and optimized with the denoising objective. In this way, PAPT obtains category-level conditions that preserve class-discriminative semantics when generating images with different domain styles. 
+
+Motivation. Preserving class semantics is especially important in PAPT++, because the diffusion model is optimized using the classification risk of the current classifier. Although the class prompt provides semantic conditioning, it does not directly restrict changes in the diffusion parameters during risk-guided optimization. The generator may therefore increase the classification loss by drifting away from the target class instead of producing meaningful within-class variations. To provide a more direct semantic constraint, we extend the category-preserving mechanism of PAPT from prompt-level conditioning to image-level semantic references. CSRL adapts the generator to produce reference images that follow the class prompt while covering diverse visual appearances within each class. These images are then fixed and used as denoising targets during adversarial synthesis, regularizing the diffusion parameters and reducing semantic drift. Following the textual template in Eq. 9, for each class k,we define the class-level text prompt as: 
+
+tck, ref = “a photo of a [class]” , (11) where the token [class] is replaced by the class name of category k. The prompt tck, ref provides the textual condition for generating semantic reference images of class k.Given tck, ref , we first sample a batch of B candidate images from the diffusion generator: 
+
+xk,b = Gϕref (tck, ref , ηk,b ), b = 1 , . . . , B, (12) where Gϕref denotes the T2I diffusion generator with reference-learning LoRA parameters ϕref , ηk,b is the ran-dom generation noise for the b-th candidate, and xk,b is the generated candidate image. We optimize ϕref so that these candidates are semantically aligned with the class-level prompt while remaining diverse within the same class. Specifically, we use a HPSv2 [37] model to measure the alignment between each candidate and its corresponding class prompt. Since HPSv2 is trained with human-preference annotations, its score reflects prompt-image correspondence and perceptual quality. Maximizing this score encourages the candidates to follow the class prompt while discouraging low-quality generations. Let FHPS (xk,b , tck, ref ) denote the HPSv2 score between xk,b and tck, ref . The alignment loss is: 
+
+Lalign = − 1
+
+B
+
+> B
+
+X
+
+> b=1
+
+FHPS (xk,b , tck, ref ). (13) Minimizing Lalign encourages the generated candidates to better match the class-level textual condition. (A) Without Diversity Regularization (B) With Diversity Regularization  
+
+> Fig. 3. Visualization of images generated with and without diversity regular-ization. (A) Without diversity regularization, the generator tends to produce eyeglass images with similar front-view layouts, similar frame shapes, and colorful blurred backgrounds. (B) With diversity regularization, the generated references show richer intra-class variations, including different viewpoints, frame shapes, lens colors, backgrounds, and eyeglass types.
+
+Optimizing only image–text alignment may cause the gen-erator to favor a small set of high-scoring visual patterns. We therefore introduce a diversity loss in the DINOv2 [38] feature space. Because DINOv2 features encode high-level visual information, reducing their similarity promotes vari-ations in shape, structure, and appearance beyond low-level pixel differences. Fig. 3 compares the generated samples with and without diversity regularization. Specifically, we extract normalized image features with a frozen DINOv2 encoder 
+
+FDINO (·):
+
+hk,b = FDINO (xk,b )
+
+∥FDINO (xk,b )∥2
+
+, (14) where hk,b is the normalized feature of xk,b . We then define the diversity loss as the average pairwise feature similarity among same-class candidates: 
+
+Ldiv = 1
+
+B(B − 1) 
+
+> B
+
+X
+
+> b=1
+
+X 
+
+> b′̸=b
+
+h⊤
+
+> k,b
+
+hk,b ′ . (15) Minimizing Ldiv reduces the feature similarity among same-class candidates. This encourages the reference set to cover diverse object appearances within the same class. The overall objective for semantic reference learning is: 
+
+Lref = Lalign + λdiv Ldiv , (16) where λdiv is a hyper-parameter that balances class-level semantic alignment and intra-class diversity. By optimizing 
+
+ϕref with Eq. 16, the generator is adapted to produce class-consistent reference images with diverse visual appearances. After optimizing ϕref , we merge the LoRA parameters into the pretrained diffusion model ω and denote the resulting reference-adapted diffusion parameters as ¯ωref . The resulting diffusion model is then used to sample semantic reference images for each class: 
+
+Ak = {ak,m }Ma
+
+> m=1
+
+, (17) where ak,m denotes the m-th reference image of class k, and 
+
+Ma is the number of images per class. After construction, Ak
+
+is fixed, and its images are used as denoising targets in CADS to reduce semantic drift during high-risk sample search. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 6
+
+C. Classifier-Guided Adversarial Diffusion Synthesis 
+
+Review of PAPT. In our conference version PAPT [5], af-ter learning category prompts, Adversarial Domain Prompt Tuning module further learns domain prompts to expand the source distribution with diverse domain styles. Specifically, PAPT maintains a domain-specific prompt memory bank: 
+
+P = {Ed
+
+> 1
+
+, Ed
+
+> 2
+
+, · · · , EdN }, (18) where each domain prompt represents an abstract domain style. Given the category prompt Eck and the domain prompt 
+
+Edi , PAPT composes a category-domain textual template: 
+
+tc−dk,i = “a photo of a ∗ in the style of † ”, (19) where the placeholders ∗ and † are replaced by Eck and 
+
+Edi , respectively. The corresponding token embedding is then fed into the diffusion model to generate images of the k-th category under the i-th domain style. To learn a new domain prompt Edo , PAPT optimizes: 
+
+LPAPT = Lclass + λLdomain , (20) where Lclass preserves category consistency and Ldomain 
+
+encourages the newly generated domain to be different from existing domains in the memory bank. After optimization, the newly learned domain prompt is added to the memory bank: 
+
+P ← P ∪ { Edo }. (21) By iteratively adding newly learned domain prompts to the memory bank, PAPT enlarges the coverage of generated domain styles and alleviates the lack of diversity in SDG. 
+
+Motivation. Although this progressive prompt-based strategy expands the range of generated domain styles, its objective is mainly diversity-driven and independent of the current classifier. Specifically, PAPT encourages each newly generated domain to differ from those already stored in the memory bank, but it does not explicitly identify samples that the current classifier finds difficult. The generated samples may therefore improve visual diversity without providing the most effective supervision for the current classifier. To address this limitation, we extend PAPT from diversity-driven prompt generation to classifier-guided adversarial dif-fusion synthesis. Instead of searching only for novel domain styles, CADS uses classification loss as feedback to search the T2I generative space for high-risk samples. Meanwhile, the semantic references learned by CSRL serve as denoising targets to preserve class semantics and reduce noise, distorted textures, and other visual artifacts during risk-guided synthesis. Following the above motivation, we formulate CADS as an iterative adversarial synthesis process guided by the classifi-cation risk of the downstream model. We first warm up the downstream model on the source domain DS :
+
+θ(0) = arg min 
+
+> θ
+
+1
+
+NsNsX
+
+> i=1
+
+ℓCE (fθ (xsi ), y si ), (22) where θ(0) is the warmed-up downstream model parameter, xsi
+
+is the i-th source image, ysi is its corresponding label, and NsGradually Increased  
+
+> Regularization  Classifier Feedback
+> High-Risk Samples Non-semantic Artifacts
+> Training Epoch
+> Sample Images
+
+A.I A.II       
+
+> -0.051 -0.071 -0.188 -0.191
+> Fig. 4. Optimization dynamics of the risk term L(r)risk in Eq. 24 and the semantic-reference denoising loss L(r)den in Eq. 28. The risk term guides the generator toward samples with high classification loss, while the denoising loss discourages semantic drift and non-semantic artifacts. Their balance produces high-risk yet semantically consistent samples for classifier training.
+
+is the number of source samples. This warm-up stage provides the initial classifier for the subsequent risk-guided synthesis. At synthesis round r, the classifier fθ(r−1) is fixed. The LoRA parameters ϕ(r) are newly initialized when r = 1
+
+and initialized from the optimized LoRA parameters of the previous synthesis round when r > 1. For the k-th class, the 
+
+j-th generated sample is obtained by: 
+
+˜x(r) 
+
+> k,j
+
+= Gϕ(r) (tck, ref , η(r) 
+
+> k,j
+
+), (23) where tck, ref is the class prompt defined in Eq. 11, η(r) 
+
+> k,j
+
+is the random noise, and ˜x(r) 
+
+> k,j
+
+is the generated sample assigned to the k-th class. These samples are then evaluated by the fixed classifier to provide a classification-risk signal. The classification risk loss is defined as: 
+
+L(r)risk = 1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+ℓCE 
+
+
+
+fθ(r−1) (˜ x(r) 
+
+> k,j
+
+), k 
+
+
+
+, (24) where Mg is the number of generated samples per class, C is the total number of classes, and fθ(r−1) is the frozen classifier from the previous round. Maximizing L(r)risk encourages the generator to produce samples that incur high classification loss for the current classifier fθ(r−1) . When combined with the semantic-reference constraint introduced below, these samples represent challenging within-class variations. To preserve class semantics during risk-guided synthesis, we propose a semantic-reference denoising constraint. For the 
+
+k-th class, a semantic reference image ak,m is sampled from the reference set Ak and encoded by the VAE encoder: 
+
+zak,m = FE (ak,m ), (25) where zak,m is the clean latent representation of ak,m . The reference latent is then corrupted at timestep t according to: 
+
+zak,m,t = √¯αtzak,m + √1 − ¯αtϵ, (26) where zak,m,t is the noisy reference latent, and ϵ ∼ N (0, I) is sampled Gaussian noise. The denoising network predicts the added noise by: 
+
+bϵk,m,t = ϵϕ(r)
+
+ zak,m,t , t, Tk, ref 
+
+ , (27) IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 7
+
+where bϵk,m,t is the predicted noise, ϵϕ(r) (·) denotes the de-noising network at synthesis round r, and Tk, ref = τψ (tck, ref )
+
+is the text embedding of the k-th class prompt. The semantic-reference denoising loss is defined as: 
+
+L(r)den = Ek,m,t, ϵ
+
+h
+
+∥ϵ − bϵk,m,t ∥22
+
+i
+
+, (28) where the expectation is taken over class index k, reference index m, timestep t, and noise ϵ. Notably, Eq. 28 does not directly supervise each generated high-risk sample. Instead, it regularizes the LoRA parameters used for generation, prevent-ing risk maximization from moving the generator away from semantic references. The generation objective is: 
+
+min 
+
+> ϕ(r)
+
+L(r)gen = L(r)den − λrisk L(r)risk , (29) where λrisk controls the strength of classification-risk signal. The denoising term acts as a reference-based regularizer, while the risk term guides the generator toward samples with high classification loss under the current classifier. Together, these terms guide the diffusion model toward samples with high classification loss while keeping the class-conditional generated distribution close to the semantic references. After optimizing ϕ(r) by Eq. 29, we construct a class-balanced generated dataset for round r:
+
+D(r) 
+
+> g
+
+= {(˜ x(r) 
+
+> k,j
+
+, k ) | k = 1 , . . . , C, j = 1 , . . . , M g }, (30) where ˜x(r) 
+
+> k,j
+
+is the j-th generated image of class k, and Mg is the number of generated samples per class. The classifier is then updated using both source-domain data DS and current generated data D(r) 
+
+> g
+
+:
+
+D(r)train = DS ∪ D (r) 
+
+> g
+
+. (31) Starting from θ(r−1) , the classifier is optimized by: 
+
+L(r)clf = 1
+
+NsNsX
+
+> i=1
+
+ℓCE (fθ(r) (xsi ), y si )+ μ 1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+ℓCE 
+
+
+
+fθ(r) (˜ x(r) 
+
+> k,j
+
+), k 
+
+
+
+,
+
+(32) where μ controls the weight of generated-data supervision. The first term preserves supervision from real source samples, while the second term trains the classifier on generated high-risk samples. After this update, the resulting classifier fθ(r)
+
+provides feedback for the next synthesis round. 
+
+D. LoRA Optimization and Sampling Strategy 
+
+The objectives in Eq. 16 and Eq. 29 rely on feedback from external scoring and feature models as well as the current classifier. Backpropagating these signals to the trainable LoRA parameters through the full reverse denoising process is computationally expensive. PAPT therefore uses an efficient one-step approximation: it samples an intermediate low-noise timestep, predicts the clean image ˜x0, and backpropagates the loss through only this one-step denoising path. Although efficient, this strategy provides limited guidance along the full 
+
+Algorithm 1 Training pipeline of our proposed PAPT++ 
+
+Input: Source dataset DS = {(xsi , y si )}Ns
+
+> i=1
+
+; class prompts 
+
+{tck, ref }Ck=1 ; pretrained diffusion generator Gϕ; classifier 
+
+fθ ; number of reference images per class Ma; number of generated samples per class Mg ; generation-training rounds R; weights λdiv , λ risk , μ .
+
+Output: Robust classifier fθ(R) . 
+
+> 1:
+
+// Class-Level Semantic Reference Learning  
+
+> 2:
+
+repeat  
+
+> 3:
+
+Optimize the diffusion with two objectives by Eq. 16: 
+
+ϕref ← arg min 
+
+> ϕref
+
+{L align + λdiv Ldiv }. 
+
+> 4:
+
+until Lref converges  
+
+> 5:
+
+Merge ϕref into the pretrained diffusion backbone ω and obtain the reference-adapted backbone ¯ωref . 
+
+> 6:
+
+for each class k = 1 , . . . , C do  
+
+> 7:
+
+Sample reference images Ak using G¯ωref . 
+
+> 8:
+
+// Classifier-Guided Adversarial Diffusion Synthesis  
+
+> 9:
+
+Warm up the classifier on DS and obtain θ(0) by mini-mizing Eq. 22.  
+
+> 10:
+
+for round r = 1 , . . . , R do  
+
+> 11:
+
+if r = 1 then  
+
+> 12:
+
+Initialize a new LoRA adapter ϕ(1) ;;  
+
+> 13:
+
+else if r > 1 then  
+
+> 14:
+
+Initialize the diffusion ϕ(r) ← ϕ(r−1) ; 
+
+> 15:
+
+// Adversarial Training between ϕ(r) and fθ(r−1)  
+
+> 16:
+
+Fix the downstream classifier fθ(r−1) ; 
+
+> 17:
+
+repeat  
+
+> 18:
+
+Optimize the diffusion model by Eq. 29: 
+
+ϕ(r) ← arg min 
+
+> ϕ(r)
+
+{L (r)den − λrisk L(r)risk }; 
+
+> 19:
+
+until L(r)gen converges  
+
+> 20:
+
+Generate the class-balanced dataset D(r) 
+
+> g
+
+by Eq. 30.  
+
+> 21:
+
+Form the training set D(r)train = DS ∪ D (r) 
+
+> g
+
+. 
+
+> 22:
+
+Fix the diffusion model ϕ(r); 
+
+> 23:
+
+repeat  
+
+> 24:
+
+Update the downstream classifier with Eq. 32: 
+
+θ(r) ← arg min  
+
+> θ
+
+L(r)clf . 
+
+> 25:
+
+until L(r)clf converges denoising trajectory and may produce noisy or overly abstract images when the optimization signal becomes more complex. To improve generation quality and optimization stability, we adopt a progressive denoising optimization strategy. At the beginning of training, the loss is backpropagated through only the final denoising step, as shown in Fig. 5. As training proceeds, earlier denoising steps are gradually included in the backward path. Specifically, after every Nopt optimiza-tion steps, the number of denoising steps used for gradient propagation is increased by one. This schedule stabilizes early optimization while allowing the objective to guide a longer part of the denoising trajectory later in training, resulting in images with fewer artifacts. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 8𝒙 𝑻 𝒙 𝑻"𝟏 𝒙 𝒕 𝒙 𝒕"𝟏 𝒙 𝟎 
+
+> Random t (A) One-step Optimization (B) Progressive Optimization
+> Training Interval
+
+## ⋯ ⋯   
+
+> One-step Progressive Computation Cost Image Diversity Image Quality
+> Fig. 5. Comparison between the one-step denoising optimization used in PAPT and our progressive denoising optimization strategy. The proposed strat-egy gradually increases the number of denoising steps for back-propagation, providing longer trajectory-level guidance and improving image quality.
+
+During sampling, we further adopt CFG++ [39] for both semantic reference generation and high-risk sample genera-tion. CFG++ improves the visual quality of sampled images without changing the training objectives in Eq. 16 and Eq. 29. Together, the progressive denoising optimization and CFG++ sampling help produce more semantically faithful reference images and higher-quality high-risk samples for downstream classifier training. 
+
+E. Theoretical Analysis 
+
+We provide four theoretical results to connect CADS with Dis-tributionally Robust Optimization (DRO). Theorem 1 shows that the smoothed reference-denoising objective controls an upper bound on the KL divergence between the generated and smoothed reference latent distributions. Theorem 2 relates the worst-case risk over the resulting semantic ambiguity sets to the target-domain risk. Propositions 1 accounts for the finite class-wise search gaps of CADS, while Propositions 2 analyzes the use of a finite generated sample set. 
+
+Theorem 1 (Distributional proximity induced by ref-erence-based denoising regularization ). For class k, let 
+
+P kA denote the smoothed clean-latent distribution induced by the encoded reference images in Ak from Eq. 17. Let 
+
+P k 
+
+> ϕ
+
+denote the clean-latent distribution generated by the reverse diffusion process conditioned on Tk, ref .For class k, the reference denoising loss in Eq. 28 can be written as: 
+
+Lk
+
+> den
+
+(ϕ; Ak) = Eza   
+
+> 0∼PkA, t, ϵ
+
+h
+
+∥ϵ − ϵϕ(zat , t, T k, ref )∥22
+
+i
+
+,
+
+(33) 
+
+where zat is obtained from za 
+
+> 0
+
+by the forward diffusion process in Eq. 26. Let qkA,T denote the distribution obtained by adding Gaus-sian diffusion noise to za 
+
+> 0
+
+∼ P kA at step T . Assume that 
+
+DKL (qkA,T ∥pprior ) < ∞, where pprior = N (0, I), and that the reverse process uses the same fixed variance schedule as the forward process. Then there exist constants γk > 0
+
+and Ck, independent of ϕ, such that: 
+
+DKL (P kA∥P k 
+
+> ϕ
+
+) ≤ γkLk
+
+> den
+
+(ϕ; Ak) + Ck. (34) 
+
+For a semantic tolerance δsem , define: 
+
+Bk
+
+> sem
+
+(δsem ) = P kϕ Lk
+
+> den
+
+(ϕ; Ak) ≤ δsem . (35) 
+
+Then, for any P kϕ ∈ B k
+
+> sem
+
+(δsem ),
+
+DKL (P kA∥P kϕ ) ≤ γkδsem + Ck. (36) 
+
+Implication. The reference denoising loss controls an upper bound on the KL divergence between the smoothed reference distribution and the generated distribution. Thus, Eq. 29 can be interpreted as a penalized relaxation of searching for high-risk samples under a class-level seman-tic constraint. 
+
+Theorem 2 (Target-domain risk bound in the decoded latent space ). Consider an unseen target domain DT . For class k, let P kT denote its latent distribution and πkT denote its class prior. For any latent distribution P of class-
+
+k samples, we measure the risk of classifier fθ by the expected classification loss: 
+
+Rk(fθ ; P ) = Ez∼P [ℓCE (fθ (FD (z)) , k )] , (37) 
+
+where FD denotes the VAE decoder. The target-domain risk can be defined as: 
+
+RT (fθ ) = 
+
+> C
+
+X
+
+> k=1
+
+πkT Rk(fθ ; P kT ). (38) 
+
+For all classes k, assume that the classification loss is bounded as 0 ≤ ℓCE ≤ Lmax for samples from P kT and from any P ∈ B k
+
+> sem
+
+(δsem ). Suppose that each P kT has distance at most ρk to the semantic diffusion ambiguity set in Theorem 1: 
+
+inf  
+
+> P∈B k
+> sem (δsem )
+
+dTV (P kT , P ) ≤ ρk, (39) 
+
+where dTV (P kT , P ) = sup A |P kT (A) − P (A)| denotes the total variation distance. Then: 
+
+RT (fθ ) ≤
+
+> C
+
+X
+
+> k=1
+
+πkT sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk(fθ ; P )+ Lmax 
+
+> C
+
+X
+
+> k=1
+
+πkT ρk.
+
+(40) 
+
+Implication. The target risk is bounded by the worst-case risk over the semantic ambiguity set and the remaining coverage gap. Therefore, reducing the worst-case risk over the semantic ambiguity sets Bk
+
+> sem
+
+(δsem ) tightens the target-risk bound when the coverage gaps ρk are small. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 9
+
+This motivates training the classifier on high-risk samples searched within these sets. 
+
+Theorem 2 bounds the target-domain risk in terms of the class-wise worst-case risks over the semantic ambiguity sets. In CADS, the class-conditional distributions are generated jointly by optimizing the shared LoRA parameters in Eq. 29, while keeping the classifier fixed. Since all classes share the same LoRA parameters and the optimization is performed for a finite number of steps, the resulting distribution for a given class may not attain the corresponding worst-case risk. We describe this difference using a class-wise search gap. 
+
+Assumption 1 (Semantic constraint and class-wise search gap ). At synthesis round r, the classifier fθ(r−1) 
+
+is fixed. For each class k, we assume that the distribu-tion generated at synthesis round r satisfies the semantic constraint defined in Eq. 35, i.e., 
+
+P kϕ(r) ∈ B k
+
+> sem
+
+(δsem ). (41) 
+
+Under Eq. 41, we define the class-wise search gap as: 
+
+ε(r)adv ,k = sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk (fθ(r−1) ; P )
+
+− R k
+
+
+
+fθ(r−1) ; P kϕ(r)
+
+
+
+≥ 0.
+
+(42) 
+
+This gap is zero if the CADS-generated distribution attains the class-wise worst-case risk, and is positive otherwise. 
+
+Assumption 1 links the class-conditional distributions gen-erated by CADS to the semantic ambiguity sets and introduces 
+
+ε(r)adv ,k as the class-wise search gap. 
+
+Proposition 1 (Target-risk bound with class-wise search gaps ). Under Assumption 1, for any nonnegative class weights {πk}Ck=1 satisfying: PCk=1 πk = 1 , we have: 
+
+> C
+
+X
+
+> k=1
+
+πk sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk(fθ(r−1) ; P )=
+
+> C
+
+X
+
+> k=1
+
+πkRk(fθ(r−1) ; P kϕ(r) ) + 
+
+> C
+
+X
+
+> k=1
+
+πkε(r)adv ,k .
+
+(43) 
+
+In particular, taking πk = πkT and combining Eq. 43 with Theorem 2 gives: 
+
+RT (fθ(r−1) ) ≤
+
+> C
+
+X
+
+> k=1
+
+πkT Rk(fθ(r−1) ; P kϕ(r) )+
+
+> C
+
+X
+
+> k=1
+
+πkT ε(r)adv ,k + Lmax 
+
+> C
+
+X
+
+> k=1
+
+πkT ρk.
+
+(44) 
+
+For class-balanced risk πk = 1 /C , let: 
+
+R(r) 
+
+> g
+
+(fθ(r−1) ) := 1
+
+C
+
+> C
+
+X
+
+> k=1
+
+Rk
+
+
+
+fθ(r−1) ; P kϕ(r)
+
+
+
+, (45) 
+
+and define: 
+
+ε(r)adv = 1
+
+C
+
+> C
+
+X
+
+> k=1
+
+ε(r)adv ,k . (46) 
+
+Then Eq. 43 reduces to: 
+
+1
+
+C
+
+> C
+
+X
+
+> k=1
+
+sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk (fθ(r−1) ; P ) = R(r) 
+
+> g
+
+(fθ(r−1) )+ ε(r)adv .
+
+(47) 
+
+Proposition 2 (Finite-sample bound for generated risk ). Under Assumption 1, the class-balanced generated-distribution risk satisfies: 
+
+R(r) 
+
+> g
+
+(fθ ) ≤ 1
+
+C
+
+> C
+
+X
+
+> k=1
+
+sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk(fθ ; P ). (48) 
+
+For the generated dataset D(r) 
+
+> g
+
+, define the empirical gen-erated risk as: 
+
+bR(r) 
+
+> g
+
+(fθ ) = 1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+ℓCE 
+
+
+
+fθ (˜ x(r) 
+
+> k,j
+
+), k 
+
+
+
+. (49) 
+
+This is the generated-data loss in Eq. 32 before multipli-cation by μ.Conditioned on the distributions {P kϕ(r) }Ck=1 , assume that these distributions are fixed before constructing D(r) 
+
+> g
+
+. The 
+
+CM g latent samples are then drawn independently, with 
+
+Mg samples drawn from each P kϕ(r) , and decoded to obtain 
+
+{˜x(r) 
+
+> k,j
+
+}k,j . We further assume that: 
+
+0 ≤ ℓCE 
+
+
+
+fθ (˜ x(r) 
+
+> k,j
+
+), k 
+
+
+
+≤ Lmax (50) 
+
+for all fθ ∈ H .Let R(r) 
+
+> CM g
+
+(ℓCE ◦ H ) denote the expected Rademacher complexity of the loss class under this class-balanced sampling process. Then, with probability at least 1 − δ,for all fθ ∈ H ,
+
+R(r) 
+
+> g
+
+(fθ ) − bR(r) 
+
+> g
+
+(fθ ) ≤ 2R(r) 
+
+> CM g
+
+(ℓCE ◦ H )+ Lmax 
+
+s
+
+log(2 /δ )2CM g
+
+.
+
+(51) 
+
+For convenience, define: 
+
+∆(r) 
+
+> g
+
+(δ) = 2 R(r) 
+
+> CM g
+
+(ℓCE ◦ H ) + Lmax 
+
+s
+
+log(2 /δ )2CM g
+
+. (52) 
+
+On the same event, in the class-balanced setting, where 
+
+πkT = 1 /C , combining Proposition 1 with Eq. 51 gives: 
+
+RT (fθ(r−1) )
+
+| {z }
+
+> target risk
+
+≤ bR(r) 
+
+> g
+
+(fθ(r−1) )
+
+| {z }
+
+> empirical generated risk
+
++ ε(r)adv 
+
+|{z} 
+
+> search gap
+
++ Lmax 
+
+C
+
+> C
+
+X
+
+> k=1
+
+ρk
+
+| {z }
+
+> coverage gap
+
++ ∆(r) 
+
+> g
+
+(δ)
+
+| {z }
+
+> finite-sample gap
+
+. (53) IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 10 
+
+TABLE I SDG RESULTS (%) ON CIFAR-10-C WITH THE BACKBONE OF RES NET -18. E ACH LEVEL (NAME IN COLUMN ) IS VIEWED AS A TARGET DOMAIN , AND A HIGHER LEVEL DENOTES MORE SEVERE CORRUPTION . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue level1 level2 level3 level4 level5 Avg. 
+
+ResNet-18 
+
+DANN [40] IJCAI’16 75.40 ±0.40 72.60 ±0.30 69.70 ±0.20 65.60 ±0.00 59.60 ±0.20 68.60 CORAL [41] ICCV’16 76.00 ±0.40 72.90 ±0.20 69.90 ±0.00 65.80 ±0.10 59.60 ±0.10 68.80 MMD [42] ICCV’18 76.40 ±0.40 72.90 ±0.20 69.90 ±0.00 65.80 ±0.10 59.60 ±0.40 68.80 Mixup [43] - 76.30 ±0.30 73.20 ±0.20 70.20 ±0.20 66.10 ±0.10 60.10 ±0.10 69.20 GroupDRO [20] ICLR’20 76.00 ±0.10 72.90 ±0.10 69.80 ±0.20 65.50 ±0.30 59.50 ±0.50 68.70 RSC [44] ECCV’20 76.10 ±0.40 73.20 ±0.50 70.10 ±0.50 66.20 ±0.50 60.10 ±0.50 69.10 ARM [45] NeurIPS’21 75.70 ±0.10 72.90 ±0.10 69.90 ±0.20 65.90 ±0.20 59.80 ±0.30 68.80 VREx [46] ICML’21 76.00 ±0.20 73.00 ±0.20 70.00 ±0.20 66.00 ±0.10 60.00 ±0.20 69.00 ERM [47] ICLR’21 75.90 ±0.50 72.90 ±0.40 70.00 ±0.40 65.90 ±0.40 59.90 ±0.50 68.90 SAM [48] ICLR’21 79.00 ±0.30 76.00 ±0.30 72.90 ±0.30 68.70 ±0.20 62.50 ±0.30 71.80 SagNet [49] CVPR’21 76.60 ±0.20 73.60 ±0.30 70.50 ±0.40 66.40 ±0.40 60.10 ±0.40 69.50 Fishr [50] ICML’22 76.30 ±0.30 73.40 ±0.30 70.40 ±0.50 66.30 ±0.80 60.10 ±1.10 69.30 SAGM [51] CVPR’23 79.00 ±0.10 76.20 ±0.00 73.20 ±0.20 69.00 ±0.30 62.70 ±0.40 72.00 UDIM w/ SAM [52] ICLR’24 80.30 ±0.00 77.70 ±0.10 75.10 ±0.00 71.50 ±0.10 66.20 ±0.10 74.20 UDIM w/ SAGM [52] ICLR’24 80.10 ±0.10 77.50 ±0.10 74.80 ±0.10 71.20 ±0.20 65.90 ±0.20 73.90 UDIM w/ GAM [52] ICLR’24 81.40 ±0.10 78.90 ±0.00 76.30 ±0.00 72.80 ±0.10 67.40 ±0.10 75.30 PAPT [5] CVPR’25 83.02 ±0.09 78.82 ±0.31 75.51 ±0.13 70.13 ±0.20 63.05 ±0.35 74.11 PAPT++ (Ours) - 90.44 ±2.53 87.72 ±1.86 84.65 ±2.01 79.46 ±3.14 69.45 ±2.88 82.34 
+
+Implication. Eq. 51 shows that the generated-data loss in Eq. 32 is a finite-sample estimate of the classifier risk under the class-conditional distributions generated by CADS. For a fixed hypothesis class whose Rademacher complexity decreases with the sample size, this estimation gap decreases as Mg increases. 
+
+IV. E XPERIMENTS 
+
+A. Datasets and Evaluation Protocols 
+
+Benchmark Datasets. We conduct experiments on three widely used SDG benchmarks included in DomainBed [53], namely PACS [54], VLCS [54], and OfficeHome [55]. We further evaluate corruption generalization by training on clean CIFAR-10 [56] and testing on CIFAR-10-C [57]. PACS contains 9,991 images from seven categories dis-tributed across four domains: Art Painting, Cartoon, Photo, and Sketch. VLCS contains 10,729 images from five categories collected from four datasets: Caltech101, LabelMe, SUN09, and VOC2007. OfficeHome contains 15,588 images from 65 categories distributed across four domains: Art, Clipart, Product, and Real World. CIFAR-10 contains 50,000 training images and 10,000 test images from ten categories. CIFAR-10-C applies multiple common corruption types at five severity levels to the CIFAR-10 test images, providing a controlled benchmark for evaluating robustness to unseen corruptions. 
+
+Single-Domain Evaluation Protocol. For PACS, VLCS, and OfficeHome, each domain is used once as the sole labeled source domain, while all remaining domains are treated as un-seen target domains. The result for each source-domain setting is averaged over its corresponding unseen target domains, and the overall performance is averaged over all source-domain settings. Target-domain data are not used during training or model selection. Each experiment is repeated three times with different random seeds, and the mean accuracy is reported. 
+
+Corruption Evaluation Protocol. For CIFAR-10-C, the model is trained using only the clean CIFAR-10 training set 
+
+TABLE II SDG RESULTS (%) ON PACS WITH THE BACKBONE OF RES NET -18. O NE DOMAIN IS USED AS THE SOURCE DOMAIN AND THE OTHERS ARE USED AS THE TARGET DOMAIN . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue A C P S Avg. 
+
+ResNet-18 
+
+Augmix [58] ICLR’20 66.54 70.16 38.30 52.48 56.87 RSC [44] ECCV’20 73.40 75.90 41.60 56.20 61.80 L2D [10] ICCV’21 76.91 77.88 52.29 53.66 65.18 RSC+ASR [44] CVPR’21 76.70 79.30 54.60 61.60 68.10 pAdaIn [59] CVPR’21 64.96 65.24 33.66 32.04 49.98 ERM [47] ICLR’21 65.38 64.20 33.65 34.15 49.34 Mixstyle [9] ICLR’21 67.60 70.38 37.44 34.57 52.50 EFDMix [60] CVPR’22 63.20 73.90 42.50 38.10 54.40 DSU [61] ICLR’22 71.54 74.51 42.10 47.75 58.97 ACVC [62] CVPRW’22 73.68 77.39 48.05 55.30 63.61 MAD [63] CVPR’23 75.51 77.25 52.95 57.75 65.87 P-RC [64] CVPR’23 76.98 78.54 57.11 62.89 68.88 Meta-Casual [65] CVPR’23 77.13 80.14 59.60 62.55 69.86 ITTA [66] CVPR’23 78.40 79.80 56.50 60.70 68.80 Prompt-Driven [67] CVPR’24 78.77 82.69 60.09 62.94 71.12 UDIM [52] ICLR’24 80.49 80.28 60.94 65.64 71.83 StyDeSty [68] ICML’24 78.90 79.20 62.50 59.40 70.00 PSDG [69] KDD’24 78.20 78.30 62.10 63.00 70.40 ProMEA [70] IJCAI’25 82.58 81.43 61.09 62.52 71.91 MISA [71] TIST’26 79.20 78.50 62.30 64.20 71.10 PAPT [5] CVPR’25 69.84 78.57 62.12 80.34 72.72 PAPT++ (Ours) - 70.01 80.45 61.08 82.18 73.43 
+
+and is directly evaluated on CIFAR-10-C without adaptation. We report the average classification accuracy across corruption types at each severity level. CIFAR-10-C images are not used during training or model selection. 
+
+B. Implementation Details 
+
+Diffusion Optimization. We adopt Stable Diffusion v1.5 [18] as the pretrained text-to-image diffusion model. The pretrained U-Net backbone and text encoder are kept frozen, and only the LoRA parameters inserted into the self-attention layers of the U-Net are optimized. The LoRA rank is set to 4. We optimize the LoRA parameters using AdamW with a learning rate of 
+
+6 × 10 −4 and a batch size of 64. For CSRL module, the LoRA parameters are optimized for 80 gradient steps, after which we generate Ma = 32 
+
+semantic reference images for each class. For CADS module, IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 11 
+
+TABLE III SDG RESULTS (%) ON PACS WITH THE BACKBONE OF RES NET -50. O NE DOMAIN (NAME IN COLUMN ) IS USED AS THE SOURCE DOMAIN AND THE OTHERS ARE USED AS THE TARGET DOMAINS . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue A C P S Avg. 
+
+ResNet-50 
+
+DANN [40] IJCAI’16 79.00 76.50 48.70 57.90 65.50 CORAL [41] ICCV’16 76.30 79.20 45.90 57.00 64.60 MMD [42] ICCV’18 75.40 80.10 45.20 58.20 64.70 Mixup [43] - 77.40 80.00 47.30 58.20 65.70 GroupDRO [20] ICLR’20 79.00 79.00 42.00 60.80 65.20 ARM [45] NeurIPS’21 76.20 75.50 45.20 61.90 64.70 VREx [46] ICML’21 75.30 80.20 44.90 56.80 64.30 Mixstyle [9] ICLR’21 78.10 78.80 56.10 54.70 66.90 ERM [47] ICLR’21 79.90 79.90 48.10 59.60 66.90 SAM [48] ICLR’21 77.70 80.50 46.70 54.20 64.80 SagNet [49] CVPR’21 77.40 78.90 47.60 56.40 65.10 Fishr [50] ICML’22 75.90 81.10 46.90 57.20 65.30 RIDG [74] ICCV’23 76.20 80.00 48.50 54.80 64.90 SAGM [51] CVPR’23 78.90 79.80 44.70 55.60 64.80 ITTA [66] CVPR’23 78.40 79.80 56.50 60.70 68.80 UDIM [52] ICLR’24 82.40 84.20 68.80 64.00 74.90 FSAM [75] CVPR’24 79.23 82.55 48.83 60.40 67.75 Crafting-Shifts [76] WACV’24 81.14 78.34 60.59 68.13 72.05 StyDeSty [68] ICML’24 80.60 83.90 63.90 66.10 73.60 PSDG [69] KDD’24 81.10 83.40 63.40 63.60 72.90 GCSAM [77] TMM’25 78.00 82.84 50.35 57.50 67.17 SSESAM [78] AAAI’25 77.14 82.08 46.72 65.78 67.93 PhysAug [79] AAAI’25 79.04 81.28 57.45 62.16 69.98 SAML [80] ICLR’25 68.18 81.45 49.53 63.89 65.77 MISA [71] TIST’26 82.30 82.80 64.00 67.50 74.20 PAPT [5] CVPR’25 73.56 80.10 67.83 85.85 76.84 PAPT++ (Ours) - 79.21 82.07 74.49 81.72 79.37 
+
+we perform R = 8 generation-training rounds and optimize the LoRA parameters for 10 gradient steps in each round, resulting in 80 gradient steps in total. The progressive de-noising optimization interval Nopt is set to 16. The loss weights λdiv and λrisk are set to 0.02 and 0.002, respectively. After optimizing the LoRA parameters in the r-th round, we fix ϕ(r) and independently sample a fresh class-balanced set containing Mg = 16 high-risk images per class to construct 
+
+D(r)
+
+g . During both semantic reference generation and high-risk sample generation, we employ the DDIM [72] sampler with 50 denoising steps and CFG++ with a guidance scale of 0.6. 
+
+Backbone Training. We use ResNet-18 and ResNet-50 [73] as the downstream classifiers. Following common SDG settings, ResNet-18 is used for PACS, VLCS, and CIFAR-10 whereas ResNet-50 is used for OfficeHome. The classifier is optimized using SGD for 20 epochs in each classifier-update stage, with a batch size of 64 and an initial learning rate of 1 × 10 −3. The weight μ of the generated-data loss in Eq. 32 is set to 1.0. 
+
+C. Comparison with State-of-the-Art Methods 
+
+We compare PAPT++ with ERM [47] and a broad range of representative single-source DG methods, including data augmentation-based approaches [9], [58]–[63], domain-invariant representation learning approaches [40]–[42], [46], feature disentanglement and distributionally robust optimiza-tion methods [20], [49], gradient- and flatness-aware optimiza-tion methods [44], [50]–[52], [75], [77], [78], and recent SDG methods [5], [79], [80]. Following recent DG studies [63], [81], we adopt ResNet-18 on PACS and VLCS and ResNet-50 on OfficeHome. As reported in Tabs. II–V, PAPT++ achieves the highest average 
+
+TABLE IV SDG RESULTS (%) ON VLCS WITH THE BACKBONE OF RES NET -18. O NE DOMAIN IS USED AS THE SOURCE DOMAIN AND THE OTHERS ARE USED AS THE TARGET DOMAINS . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue V L C S Avg. 
+
+ResNet-18 
+
+Augmix [58] ICLR’20 75.25 59.52 45.90 57.43 59.53 ERM [47] ICLR’21 76.72 58.86 44.95 57.71 59.56 pAdaIn [59] CVPR’21 76.03 65.21 43.17 57.94 60.59 Mixstyle [9] ICLR’21 75.73 61.29 44.66 56.57 59.56 EFDMix [60] CVPR’22 72.35 61.41 52.34 63.28 62.33 DSU [61] ICLR’22 76.93 69.20 46.54 58.36 62.76 ACVC [62] CVPRW’22 76.15 61.23 47.43 60.18 61.25 MAD [63] CVPR’23 76.15 69.36 48.04 61.74 63.82 StyDeSty [68] ICML’24 76.87 62.87 53.73 65.41 64.72 ProMEA [70] IJCAI’25 79.07 71.97 59.02 59.94 67.50 PAPT [5] CVPR’25 73.16 74.69 69.66 75.96 73.37 PAPT++ (Ours) - 73.07 77.22 71.42 75.14 74.21 TABLE V SDG RESULTS (%) ON OFFICE HOME WITH THE BACKBONE OF 
+
+RES NET -50. O NE DOMAIN IS USED AS THE SOURCE DOMAIN AND THE OTHERS ARE USED AS THE TARGET DOMAINS . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue A C P R Avg. 
+
+ResNet-50 
+
+DANN [40] IJCAI’16 55.20 49.30 48.40 58.40 52.80 CORAL [41] ICCV’16 55.60 52.80 50.30 59.40 54.50 MMD [42] ICCV’18 55.10 52.00 50.30 59.30 54.20 Mixup [43] - 55.50 54.10 49.40 59.40 54.60 GroupDRO [20] ICLR’20 55.10 52.00 50.30 59.30 54.20 ARM [45] NeurIPS’21 55.00 51.60 47.30 59.30 53.30 VREx [46] ICML’21 55.50 52.60 49.10 59.30 54.10 Mixstyle [9] ICLR’21 44.30 29.80 33.60 48.50 39.00 ERM [47] ICLR’21 55.60 52.80 50.30 59.40 54.50 SAM [48] ICLR’21 56.90 53.80 50.90 61.50 55.80 SagNet [49] CVPR’21 56.90 53.40 50.80 61.20 55.60 Fishr [50] ICML’22 55.10 51.20 49.20 59.90 53.90 RIDG [74] ICCV’23 56.80 55.40 50.50 60.90 55.90 SAGM [51] CVPR’23 57.70 54.80 51.50 61.40 56.30 ITTA [66] CVPR’23 56.00 51.50 50.50 61.60 54.90 UDIM [52] ICLR’24 58.50 55.70 54.50 64.50 58.30 FSAM [75] CVPR’24 58.15 56.41 52.59 62.20 57.34 Crafting-Shifts [76] WACV’24 59.77 55.31 51.46 63.10 57.31 StyDeSty [68] ICML’24 59.09 57.78 54.73 65.02 59.16 ProMEA [70] IJCAI’25 62.52 56.98 56.02 65.64 60.29 GCSAM [77] TMM’25 56.86 56.45 53.06 62.24 57.15 SSESAM [78] AAAI’25 55.16 54.82 50.65 60.08 55.18 PhysAug [79] AAAI’25 54.30 52.43 49.57 60.10 54.10 SAML [80] ICLR’25 44.56 56.48 53.04 62.18 54.07 PAPT [5] CVPR’25 59.81 68.30 59.12 60.87 62.03 PAPT++ (Ours) - 64.72 70.91 61.94 63.87 65.36 
+
+accuracy on all three benchmarks, reaching 73.43%, 74.21%, and 65.36%, respectively. These results improve upon PAPT by 0.71, 0.84, and 3.33 pp, respectively. The gains are particu-larly pronounced when Cartoon and Sketch serve as the source domains on PACS and when LabelMe and Caltech serve as the source domains on VLCS. Consistent improvements are also observed across all four source-domain settings on Of-ficeHome. Overall, these results show that risk-aware synthesis improves generalization across diverse semantic domain shifts. Following the experimental setting of UDIM [52], we addi-tionally evaluate PAPT++ with ResNet-50 on PACS. As shown in Tab. III, PAPT++ achieves the highest average accuracy of 79.37%, surpassing PAPT and UDIM by 2.53 and 4.47 pp, respectively. Together with the ResNet-18 results, this comparison indicates that the gains of PAPT++ persist when scaling the backbone from ResNet-18 to ResNet-50. We further assess corruption generalization by training ResNet-18 on clean CIFAR-10 and directly evaluating it on CIFAR-10-C, following UDIM [52]. As reported in Tab. I, IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 12 
+
+TABLE VI MULTI -SOURCE DG RESULTS (%) ON OFFICE HOME WITH THE BACKBONE OF RES NET -50. O NE DOMAIN IS USED AS THE TARGET DOMAIN AND THE OTHERS ARE USED AS THE SOURCE DOMAINS . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue A C P R Avg. 
+
+ResNet-50 
+
+DANN [40] IJCAI’16 59.90 53.00 73.60 76.90 65.90 CORAL [41] ICCV’16 64.10 54.50 76.20 77.80 68.20 GroupDRO [20] ICLR’20 61.30 53.30 75.40 76.00 66.50 RSC [44] ECCV’20 60.70 51.40 74.80 75.10 65.50 VREx [46] ICML’21 60.70 53.00 75.30 76.60 66.40 Mixstyle [9] ICLR’21 51.10 53.20 68.20 69.20 60.40 ERM [47] ICLR’21 61.40 53.50 75.90 77.10 67.00 SAM [48] ICLR’21 62.20 55.90 77.00 78.80 68.50 SagNet [49] CVPR’21 62.30 51.70 75.40 78.10 66.90 Miro [1] ECCV’22 67.50 54.60 78.00 81.60 70.50 GSAM [82] ICLR’22 64.90 55.20 77.80 79.20 69.30 SAGM [51] CVPR’23 65.40 57.00 78.00 80.00 70.10 DomainDrop [81] ICCV’23 - - - - 68.70 XDomainMix [83] IJCAI’24 - - - - 68.10 GMDG [84] CVPR’24 68.90 56.20 79.90 82.00 70.70 RES [85] ECCV’24 - - - - 71.80 SFT [86] CVPR’25 65.80 58.80 78.30 80.60 70.90 GGA [87] CVPR’25 - - - - 67.00 SDK+SCA [88] IJCAI’25 70.20 59.50 78.50 81.20 72.30 CBD-Gen [89] NeurIPS’25 66.50 58.70 78.80 81.60 71.40 GUIDE [90] ICCV’25 - - - - 68.60 PAPT [5] CVPR’25 71.12 52.51 80.72 80.47 71.21 PAPT++ (Ours) - 72.77 53.26 80.84 82.55 72.36 TABLE VII MULTI -SOURCE DG RESULTS (%) ON VLCS WITH THE BACKBONE OF 
+
+RES NET -50. O NE DOMAIN IS USED AS THE TARGET DOMAIN AND THE OTHERS ARE USED AS THE SOURCE DOMAINS . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue V L C S Avg. 
+
+ResNet-50 
+
+DANN [40] IJCAI’16 51.10 65.10 99.00 73.10 78.60 CORAL [41] ICCV’16 77.50 66.10 98.30 73.40 78.80 MLDG [91] AAAI’18 75.30 65.20 97.40 71.00 77.20 GroupDRO [20] ICLR’20 76.70 63.40 97.30 69.50 76.70 RSC [44] ECCV’20 75.60 62.50 97.90 72.30 77.10 VREx [46] ICML’21 76.20 64.40 98.40 74.10 78.30 Mixstyle [9] ICLR’21 75.70 64.50 98.60 72.60 77.90 ERM [47] ICLR’21 75.20 64.70 98.00 71.40 77.30 SAM [48] ICLR’21 79.80 65.00 99.10 73.70 79.40 SagNet [49] CVPR’21 77.50 64.50 97.90 71.40 77.80 Miro [1] ECCV’22 77.80 64.70 98.30 75.30 79.00 GSAM [82] ICLR’22 78.50 64.90 98.70 74.30 79.10 CoOp [92] IJCV’22 82.53 60.85 100.0 76.14 79.88 SAGM [51] CVPR’23 80.70 65.20 99.00 75.10 80.00 DomainDrop [81] ICCV’23 - - - - 79.80 XDomainMix [83] IJCAI’24 - - - - 76.30 GMDG [84] CVPR’24 79.30 65.90 98.30 73.40 79.20 RES [85] ECCV’24 - - - - 79.80 SFT [86] CVPR’25 78.70 66.20 99.50 74.80 79.80 GGA [87] CVPR’25 77.40 65.40 98.40 73.80 78.70 SDK+SCA [88] IJCAI’25 79.40 69.60 98.00 74.50 80.40 CBD-Gen [89] NeurIPS’25 80.50 67.30 99.10 75.10 80.50 GUIDE [90] ICCV’25 - - - - 78.50 PAPT [5] CVPR’25 84.50 61.73 100.0 77.16 80.84 PAPT++ (Ours) - 81.64 67.01 100.0 77.42 81.52 
+
+PAPT++ achieves the highest accuracy at all five corruption severity levels, with an average accuracy of 82.34%. It out-performs PAPT and UDIM with GAM by 8.23 and 7.04 pp, respectively. The consistent gains across severity levels demonstrate the robustness of PAPT++ to unseen corruptions. 
+
+D. Results on Multi-Source Domain Generalization 
+
+We further evaluate PAPT++ in the multi-source domain generalization setting, where multiple labeled source domains 
+
+TABLE VIII MULTI -SOURCE DG RESULTS (%) ON TERRA INC WITH THE BACKBONE OF 
+
+RES NET -50. O NE DOMAIN IS USED AS THE TARGET DOMAIN AND THE OTHERS ARE USED AS THE SOURCE DOMAINS . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue L100 L38 L43 L46 Avg. 
+
+ResNet-50 
+
+DANN [40] IJCAI’16 51.10 40.60 57.40 37.70 46.70 CORAL [41] ICCV’16 51.60 42.20 57.00 39.80 47.70 GroupDRO [20] ICLR’20 41.20 38.60 56.70 36.40 43.20 RSC [44] ECCV’20 50.20 39.20 56.30 40.80 46.60 VREx [46] ICML’21 48.20 41.70 56.80 38.70 46.40 Mixstyle [9] ICLR’21 54.30 34.10 55.90 31.70 44.00 ERM [47] ICLR’21 49.80 42.10 56.90 35.70 46.10 SAM [48] ICLR’21 46.30 38.40 54.00 34.50 43.30 SagNet [49] CVPR’21 53.00 43.00 57.90 40.40 48.60 Miro [1] ECCV’22 61.10 43.90 56.90 39.60 50.40 GSAM [82] ICLR’22 50.80 39.30 59.60 38.20 47.00 SAGM [51] CVPR’23 54.80 41.40 57.70 41.30 48.80 DomainDrop [81] ICCV’23 - - - - 51.50 XDomainMix [83] IJCAI’24 - - - - 48.20 GMDG [84] CVPR’24 59.80 45.30 57.10 38.20 50.10 RES [85] ECCV’24 - - - - 51.40 SFT [86] CVPR’25 57.50 44.60 59.60 41.00 50.70 GGA [87] CVPR’25 - - - - 48.50 SDK+SCA [88] IJCAI’25 61.90 53.00 57.30 43.30 53.90 CBD-Gen [89] NeurIPS’25 56.40 45.00 59.60 41.00 50.50 GUIDE [90] ICCV’25 - - - - 51.30 PAPT [5] CVPR’25 64.15 48.93 55.27 48.74 54.27 PAPT++ (Ours) - 69.62 47.87 52.66 50.57 55.18 
+
+are available during training. We follow the standard leave-one-domain-out protocol: for each benchmark, one domain is held out as the unseen target domain, while the remaining domains are jointly used for training. We compare PAPT++ with representative multi-source DG methods spanning domain alignment and invariant representa-tion learning [40], [41], [46], [49], data and feature augmenta-tion [9], robust learning and representation regularization [20], [44], flatness-aware optimization [51], and recent multi-source DG approaches [81], [84], [85]. Following the evaluation protocol of GMDG [84], we conduct experiments on TerraInc, OfficeHome, and VLCS using ResNet-50. The results are reported in Tabs. VI–VIII. PAPT++ achieves the highest average accuracy on all three benchmarks, reaching 55.18%, 72.36%, and 81.52% on Ter-raInc, OfficeHome, and VLCS, respectively. Compared with PAPT, the corresponding improvements are 0.91, 1.15, and 0.68 pp. PAPT++ also outperforms SDK+SCA by 1.28 pp on TerraInc and CBD-Gen by 1.02 pp on VLCS, while slightly surpassing SDK+SCA on OfficeHome. At the domain level, particularly pronounced gains over PAPT are observed when L100 on TerraInc and LabelMe on VLCS are held out, with improvements of 5.47 and 5.28 pp, respectively. Moreover, PAPT++ consistently improves upon PAPT across all four target-domain settings on OfficeHome. These results show that the benefits of PAPT++ extend beyond the single-source setting. Even when multiple source domains already provide diverse visual variations, synthesizing challenging yet class-consistent samples can expose comple-mentary failure modes of the current classifier and further improve generalization to unseen domains. 
+
+E. Ablation Study 
+
+We conduct ablation studies on PACS and VLCS using ResNet-18 to study the contribution of each component in IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 13 
+
+TABLE IX ABLATION RESULTS (%) ON PACS AND VLCS WITH THE RES NET -18 BACKBONE .Idx Method PACS VLCS A C P S Avg. ∆ V L C S Avg. ∆
+
+1 Source Only 58.60 66.40 34.00 27.50 46.60 ↑ 26 .83 71.81 61.06 52.60 62.32 61.95 ↑ 12 .26 
+
+2 PAPT 69.84 78.57 62.12 80.34 72.72 ↑ 0.71 73.16 74.69 69.66 75.96 73.37 ↑ 0.84 
+
+3 w/o CSRL 72.42 79.39 60.40 70.63 70.71 ↑ 2.72 73.15 75.02 62.87 75.41 71.61 ↑ 2.60 
+
+4 w/o CADS 67.44 74.17 56.30 72.04 67.49 ↑ 5.94 73.57 73.93 67.95 70.21 71.42 ↑ 2.79 
+
+5 w/o Diversity ( λdiv = 0 ) 70.23 76.83 49.60 76.01 68.17 ↑ 5.26 73.23 76.99 62.35 75.53 72.03 ↑ 2.18 
+
+6 w/o Risk Guidance ( λrisk = 0 ) 71.73 78.92 61.53 78.50 72.67 ↑ 0.76 74.20 76.84 62.68 75.26 72.25 ↑ 1.96 
+
+7 w/o Reference Denoising ( Lden ) 73.02 74.37 58.98 75.82 70.65 ↑ 2.78 73.32 75.69 60.64 75.21 71.71 ↑ 2.50 
+
+8 PAPT++ 70.01 80.45 61.08 82.18 73.43 - 73.07 77.22 71.42 75.14 74.21 -0 10 20 30 40 50 60 70 80                         
+
+> CSRL optimization step
+> 0.24 0.26 0.28 0.30 0.32
+> HPSv2
+> Impact of Backprop Schedule on HPSv2 (PACS)
+> Progressive (PAPT++) fixed one-step (PAPT)
+> 010 20 30 40 50 60 70 80
+> CSRL optimization step
+> 0.24 0.26 0.28 0.30
+> HPSv2
+> Impact of Backprop Schedule on HPSv2 (VLCS)
+> Progressive (PAPT++) fixed one-step (PAPT)
+> 010 20 30 40 50 60 70 80
+> CSRL optimization step
+> 0.0 0.2 0.4 0.6
+> ImageReward
+> Impact of Backprop Schedule on ImageReward (PACS)
+> Progressive (PAPT++) fixed one-step (PAPT)
+> 010 20 30 40 50 60 70 80
+> CSRL optimization step
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> ImageReward
+> Impact of Backprop Schedule on ImageReward (VLCS)
+> Progressive (PAPT++) fixed one-step (PAPT)
+
+Fig. 6. Effect of the denoising backpropagation schedule in CSRL. Pro-gressive (PAPT++) and fixed one-step optimization (PAPT) are compared on PACS and VLCS using HPSv2 and ImageReward. 
+
+PAPT++. As reported in Tab. IX, rows 3 and 4 show the results after removing CSRL and CADS, respectively, while rows 5–7 study the main objectives within these two modules. Compared with Source Only, PAPT++ improves the average accuracy from 46.60% to 73.43% on PACS and from 61.95% to 74.21% on VLCS, corresponding to gains of 26.83 and 12.26 pp, respectively (rows 1 and 8). Although PAPT and PAPT++ both use a pretrained diffusion model to expand the training distribution, their generation mechanisms are different. PAPT learns category and domain prompts to generate diverse domain styles, whereas PAPT++ learns image-level semantic references and uses feedback from the current classifier to search for high-risk samples. As shown in rows 2 and 8, PAPT++ improves upon PAPT by 0.71 pp on PACS and 0.84 pp on VLCS. These results show that the risk-aware generation strategy of PAPT++ provides more useful training variations than diversity-oriented prompt generation on both benchmarks. 
+
+Effectiveness of CSRL. We first evaluate the overall contribu-tion of the CSRL module. Compared with the variant without CSRL, incorporating CSRL improves the average accuracy by 2.72 pp on PACS and 2.60 pp on VLCS (rows 3 and 8). CSRL learns image-level semantic references that guide subsequent high-risk synthesis. These references provide reliable class-level information, allowing CADS to explore new domain vari-ations while maintaining class consistency. The improvements show that semantic references are important for generating challenging yet class-consistent samples. We further study the diversity objective in CSRL by setting Effect of Accumulated CADS Rounds on VLCS 
+
++4.06% gain 
+
+Fig. 7. Effect of the number of accumulated CADS rounds R on VLCS. 
+
+λdiv = 0 . Compared with this setting, adding the diversity objective improves the accuracy by 5.26 pp on PACS and 2.18 pp on VLCS (rows 5 and 8). The alignment objective encourages the learned references to match their class prompts, but it does not explicitly encourage different references from the same class to capture different visual appearances. The di-versity objective encourages these references to represent com-plementary intra-class variations, providing a broader range of semantic references for subsequent high-risk synthesis. These results confirm the overall contribution of CSRL and the importance of the diversity objective within this module. We also study the progressive denoising backpropagation schedule in CSRL. To isolate the effect of this schedule, we conduct the comparison using CSRL alone without CADS and keep the other settings unchanged. As shown in Fig. 6, the progressive schedule achieves higher HPSv2 and Im-ageReward scores than the fixed one-step schedule during the later optimization steps on both PACS and VLCS. These results show that gradually increasing the number of denoising steps involved in backpropagation helps CSRL learn semantic references with better semantic alignment and visual quality. 
+
+Effectiveness of CADS. We next evaluate the contribution of CADS module. Compared with the variant without CADS, incorporating CADS improves the accuracy by 5.94 pp on PACS and 2.79 pp on VLCS (rows 4 and 8). While CSRL provides class-level semantic references, it does not consider IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 14                                                                                                                                          
+
+> TABLE X ANALYSIS OF GENERATED SAMPLES AND DOWNSTREAM PERFORMANCE FOR DIFFERENT CADS VARIANTS ON PACS. Idx Method Guide CE ↑Transfer CE ↑CLIP Cons. (%) ↑ImageReward ↑LPIPS ↑PACS Avg. (%) ↑
+> 1w/o CADS 0.76 3.76 90.3 0.42 0.67 67.49 2w/o Risk Guidance ( λrisk = 0 )0.78 6.05 93.1 0.78 0.59 72.67 3w/o Reference Denoising ( Lden )0.93 7.30 61.8 -1.47 0.60 70.65 4PAPT++ 0.79 6.70 87.5 -0.58 0.62 73.43
+> TABLE XI COMPARISON OF COMPUTATIONAL AND STORAGE OVERHEADS AND MULTI -SOURCE DG PERFORMANCE (%) AMONG DIFFUSION -BASED METHODS . T HE BEST RESULTS ARE IN RED AND THE SECOND HIGHEST RESULTS ARE IN BLUE .Method Venue Diffusion Diffusion Params GPU Usage (GB,BS=1) Trainable Params Extra Image Storage VLCS TerraInc OfficeHome Avg. Max. CDGA [93] –SD-v1.4 1.07B 5.0 6.0 23.50M 2.25 MiB 78.90 –68.20 DomainFusion [94] ECCV’24 SD-v1.4 1.07B 4.7 5.5 23.50M 0.29 MiB 79.20 51.10 72.40 Terra [95] NeurIPS’24 SDXL 3.50B 20.0 24.0 70.50M 0.75 MiB 78.25 –69.63 FDS-ERM [96] WACV’25 SD-v1.5 1.07B 13.5 16.0 883.5M 3.73 MiB 79.80 –71.10 TRIDENT [97] –SD-v2.1-unCLIP 1.93B 8.0 10.0 34.00M 3.38 MiB 77.80 –70.00 PAPT [5] CVPR’25 SD-v1.4 1.07B 8.0 10.5 23.55M 0.75 MiB 80.84 54.27 71.21 GUIDE [90] ICCV’25 SD-v2.1-base 1.29B 4.8 5.8 23.65M 077.00 51.30 68.60 PAPT++ (Ours) –SD-v1.5 1.07B 11.7 17.7 23.86M 0.75 MiB 81.52 55.18 72.36
+
+the weaknesses of the current classifier. CADS uses classifier feedback to search for high-risk variations around these ref-erences, allowing the synthesized samples to focus on cases that the classifier finds difficult. The improvements show that classifier-guided synthesis makes the learned semantic references more useful for improving generalization. We further study the two objectives in CADS. To evaluate the classifier-risk objective, we set λrisk = 0. Compared with this setting, adding the classifier-risk objective improves the average accuracy by 0.76 pp on PACS and 1.96 pp on VLCS (rows 6 and 8). We also evaluate the reference denoising loss by removing Lden . Adding this loss improves the average accuracy by 2.78 pp on PACS and 2.50 pp on VLCS (rows 7 and 8). The classifier-risk objective guides the synthesis process toward challenging variations that expose the weaknesses of the current classifier, while the reference denoising loss keeps the synthesized samples consistent with the class semantics of the learned references. These results show that the two objectives play complementary roles in balancing sample difficulty and class consistency, enabling CADS to generate challenging yet class-consistent samples for improving generalization to unseen domains. We finally study the effect of accumulating synthesized samples across CADS rounds. The samples generated in each round are retained and used together with those from previous rounds for subsequent classifier training. As shown in Fig. 7, the final-round accuracy is higher than the first-round accuracy on all four held-out domains of VLCS, with the largest improvement of 4.06 pp observed on LabelMe. As the classifier is updated, CADS uses its latest feedback to find new high-risk variations, while accumulating samples from different rounds provides a broader set of challenging training examples. These results show that iterative classifier-guided synthesis and cross-round sample accumulation jointly improve generalization to unseen domains. 
+
+F. Analysis of the CADS Generation Mechanism 
+
+The four settings in Tab. X correspond to w/o CADS , w/o Risk Guidance , w/o Reference Denoising , and the full PAPT++ in Tab. IX. For each generated image, Guide CE is the cross-entropy loss with respect to its conditioning label, computed using the source-trained ResNet-18 that guides CADS. Trans-fer CE is computed in the same manner using an independently ResNet-50 that is not involved in generation, thereby measur-ing whether sample difficulty transfers to another classifier. 
+
+CLIP Cons. is the percentage of generated images whose zero-shot CLIP prediction matches the conditioning class. ImageRe-ward is the average image–text alignment score between each generated image and its conditioning prompt. LPIPS [98] is computed between images conditioned on the same class and then averaged across classes to measure intra-class perceptual diversity. All metrics are averaged over the generated samples. For w/o CADS , they are computed directly on the semantic references learned by CSRL. The results show that Risk Guidance and Reference De-noising play complementary roles. Adding Risk Guidance in-creases Transfer CE from 6.05 to 6.70 and improves accuracy from 72.67% to 73.43%, showing that classifier feedback helps generate more challenging and useful samples. Without Ref-erence Denoising, Guide CE and Transfer CE reach 0.93 and 7.30, but the loss of semantic consistency limits the accuracy to 70.65%. Reference Denoising improves class consistency and ImageReward to 87.5% and -0.58 while maintaining a high Transfer CE of 6.70, enabling PAPT++ to achieve the best accuracy of 73.43%. Moreover, although the CSRL references in w/o CADS have the highest LPIPS, their lower Transfer CE and accuracy show that perceptual diversity alone does not necessarily produce useful domain variations. Overall, CADS balances sample difficulty and class consistency to generate informative samples for domain generalization. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 15 0 0.005 0.01 0.02 0.04 0.08  
+
+> Value of λdiv
+> 68.00 70.00 72.00 74.00 76.00
+> Accuracy (%)
+
+Impact of λdiv on PACS       
+
+> Avg-acc
+> 68.17 71.02 72.58 73.43 72.96 71.38 00.0005 0.001 0.002 0.004 0.008
+> Value of λrisk
+> 72.00 72.40 72.80 73.20 73.60 74.00
+> Accuracy (%)
+
+Impact of λrisk on PACS       
+
+> Avg-acc
+> 72.67 73.05 73.31 73.43 72.98 72.21 4816 32 64
+> Value of Ma
+> 71.20 72.00 72.80 73.60 74.40
+> Accuracy (%)
+
+Impact of Ma on PACS       
+
+> Avg-acc
+> 71.24 72.18 72.95 73.43 73.28 4816 32 64
+> Value of Mg
+> 70.50 72.00 73.50 75.00
+> Accuracy (%)
+
+Impact of Mg on PACS         
+
+> Avg-acc
+> 69.86 71.94 73.43 73.12 72.61 00.005 0.01 0.02 0.04 0.08
+> Value of λdiv
+> 72.00 72.80 73.60 74.40 75.20
+> Accuracy (%)
+
+Impact of λdiv on VLCS       
+
+> Avg-acc
+> 72.03 73.12 73.86 74.21 73.94 73.31 00.0005 0.001 0.002 0.004 0.008
+> Value of λrisk
+> 72.00 72.60 73.20 73.80 74.40 75.00
+> Accuracy (%)
+
+Impact of λrisk on VLCS      
+
+> Avg-acc
+> 72.25 73.24 73.87 74.21 73.66 72.89 4816 32 64
+> Value of Ma
+> 72.00 72.80 73.60 74.40 75.20
+> Accuracy (%)
+
+Impact of Ma on VLCS       
+
+> Avg-acc
+> 72.04 72.93 73.68 74.21 74.05 4816 32 64
+> Value of Mg
+> 72.00 72.80 73.60 74.40 75.20
+> Accuracy (%)
+
+Impact of Mg on VLCS  
+
+> Avg-acc
+> 72.13 73.35 74.21 73.92 73.48
+
+Fig. 8. Hyper-parameter analysis of λdiv , λrisk , Ma, and Mg on PACS and VLCS. TABLE XII IMPACT OF CFG/CFG++ ON VLCS (%) WITH RES NET -18 UNDER A HIGH RISK -GUIDANCE WEIGHT (λrisk = 0 .5). T HE BEST RESULTS ARE IN RED ,
+
+> AND THE SECOND
+
+-HIGHEST RESULTS ARE IN BLUE .Idx Method V L C S Avg. 1 CFG ( g = 1 ) 71.34 69.78 62.98 73.79 69.47 2 CFG ( g = 3 ) 72.50 70.77 65.66 72.85 70.44 3 CFG ( g = 5 ) 71.07 69.49 63.90 71.45 68.98 4 CFG++ ( λ = 0 .4) 70.77 70.93 64.36 72.43 69.62 5 CFG++ ( λ = 0 .6) 72.24 73.43 66.50 72.87 71.26 6 CFG++ ( λ = 0 .8) 71.91 71.32 62.78 73.01 69.76 
+
+G. Further Analysis 
+
+Computational cost. Tab. XI compares the efficiency and per-formance of diffusion-based DG methods. PAPT++ achieves the highest accuracies on VLCS (81.52%) and TerraInc (55.18%), and the second-highest accuracy on OfficeHome (72.36%). Its average and maximum GPU usage are 11.7 GB and 17.7 GB, respectively, which are higher than those of PAPT but lower than those of Terra. Despite using a 1.07B-parameter diffusion pipeline, PAPT++ updates only 23.86M parameters (2.23%). Compared with PAPT, it adds only 0.31M trainable parameters and retains the same storage overhead of 0.75 MiB per source sample, while improving accuracy by 0.68, 0.91, and 1.15 pp on the three benchmarks, respectively. Moreover, the diffusion pipeline is used only during training and introduces no additional inference cost. 
+
+Effect of CFG/CFG++ Guidance. We compare different CFG scales and CFG++ coefficients on VLCS in Tab. XII. For this controlled analysis, we set λrisk = 0 .5 to construct a more challenging synthesis setting. Under this stronger risk signal, the comparison focuses on how different guid-ance configurations balance semantic consistency and sample difficulty. Among the evaluated configurations, CFG++ with 
+
+λ = 0 .6 achieves the highest average accuracy of 71.26%, outperforming the best CFG configuration ( g = 3 ) by 0.82 pp. For both guidance methods, moderate guidance performs better than smaller or larger values, indicating a more effective balance between class consistency and challenging within-class variations. 
+
+Hyperparameter Analysis. We analyze the influence of λdiv ,
+
+λrisk , Ma, and Mg on PACS and VLCS. As shown in Fig. 8, increasing λdiv and λrisk initially improves accuracy, whereas overly large weights lead to performance degradation. For Ma
+
+and Mg , increasing the number of samples is beneficial within a moderate range. V. C ONCLUSION 
+
+In this work, we presented PAPT++, a diffusion-based frame-work for domain generalization that improves the seman-tic reliability and generalization value of synthesized sam-ples. PAPT++ first employs CSRL to construct semantically meaningful and diverse references from source-domain data. Based on these references, CADS explores challenging domain variations through classifier-guided risk maximization, while reference denoising preserves category-level semantics during synthesis. Extensive experiments demonstrate that PAPT++ consistently improves upon PAPT and achieves strong perfor-mance on standard DG benchmarks. These results highlight the importance of synthesizing challenging yet semantically reliable samples for generalization to unseen domains. Future work will explore more efficient high-risk synthesis strategies and extend PAPT++ to broader generalization settings with complex and evolving domain shifts. REFERENCES [1] J. Cha, K. Lee, S. Park, and S. Chun, “Domain generalization by mutual-information regularization with pre-trained models,” in ECCV , 2022, pp. 440–457. 1, 12 [2] D. Cheng, Z. Xu, X. Jiang, N. Wang, D. Li, and X. Gao, “Disentangled prompt representation for domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2024, pp. 23 595–23 604. 1 [3] Z. Xu, Z. Wang, X. Jiang, D. Li, D. Cheng, and N. Wang, “Reasoning-driven multimodal llm for domain generalization,” in The Fourteenth International Conference on Learning Representations , 2026. [Online]. Available: https://openreview.net/forum?id=psJiUopUt7 1 [4] D. Cheng, Z. Xu, X. Jiang, D. Li, N. Wang, and X. Gao, “Prompt disentanglement via language guidance and representation alignment for domain generalization,” IEEE Transactions on Pattern Analysis and Machine Intelligence , 2026. 2, 3 IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 16 
+
+[5] Z. Xu, D. Cheng, X. Jiang, N. Wang, D. Li, and X. Gao, “Adversarial domain prompt tuning and generation for single domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2025, pp. 18 584–18 595. 2, 3, 4, 6, 10, 11, 12, 14 [6] R. Volpi, H. Namkoong, O. Sener, J. C. Duchi, V. Murino, and S. Savarese, “Generalizing to unseen domains via adversarial data augmentation,” Advances in neural information processing systems ,vol. 31, 2018. 2 [7] L. Zhao, T. Liu, X. Peng, and D. Metaxas, “Maximum-entropy adversar-ial data augmentation for improved generalization and robustness,” Ad-vances in Neural Information Processing Systems , vol. 33, pp. 14 435– 14 447, 2020. 2 [8] R. Volpi and V. Murino, “Addressing model vulnerability to distribu-tional shifts over image transformation sets,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2019, pp. 7980–7989. 2 [9] K. Zhou, Y. Yang, Y. Qiao, and T. Xiang, “Domain generalization with mixstyle,” arXiv preprint arXiv:2104.02008 , 2021. 2, 10, 11, 12 [10] Z. Wang, Y. Luo, R. Qiu, Z. Huang, and M. Baktashmotlagh, “Learning to diversify for single domain generalization,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2021, pp. 834–843. 2, 10 [11] X. Fan, Q. Wang, J. Ke, F. Yang, B. Gong, and M. Zhou, “Adversarially adaptive normalization for single domain generalization,” in Proceedings of the IEEE/CVF conference on Computer Vision and Pattern Recogni-tion , 2021, pp. 8208–8217. 3 [12] H. Wang, D. Cheng, G. Li, Z. Xu, L. He, J. Li, N. Wang, and X. Gao, “Stpr: Spatiotemporal preservation and routing for exemplar-free video class-incremental learning,” in Proceedings of the Fourteenth International Conference on Learning Representations , 2026. [Online]. Available: https://openreview.net/forum?id=VAn2YVMuZC 3 [13] D. Cheng, M. Zeng, Z. Xu, D. Xu, N. Wang, and X. Gao, “Interference-isolated elastic weight consolidation and knowledge calibration for incremental object detection,” in Proceedings of the Fourteenth International Conference on Learning Representations , 2026. [Online]. Available: https://openreview.net/forum?id=VrXdmCjni4 3 [14] H. Wang, D. Cheng, L. He, Y. Li, J. Li, N. Wang, and X. Gao, “Ekpc: Elastic knowledge preservation and compensation for class-incremental learning: H. wang et al.” International Journal of Computer Vision , vol. 134, no. 5, p. 238, 2026. 3 [15] M. Zeng, D. Cheng, Z. Xu, H. Wang, N. Wang, and X. Gao, “Symbiosis-inspired knowledge distillation for incremental object detection,” in 
+
+Proceedings of the 43rd International Conference on Machine Learning ,2026. 3 [16] Y. Li, Y. Shi, K. Zhou, S. Zhang, D. He, D. Zhang, and J. Han, “Few-shot hybrid incremental learning: Continually learning under data scarcity and task uncertainty,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2026, pp. 32 334–32 344. 3 [17] A. Ramesh, M. Pavlov, G. Goh, S. Gray, C. Voss, A. Radford, M. Chen, and I. Sutskever, “Zero-shot text-to-image generation,” in International conference on machine learning . Pmlr, 2021, pp. 8821–8831. 3 [18] R. Rombach, A. Blattmann, D. Lorenz, P. Esser, and B. Ommer, “High-resolution image synthesis with latent diffusion models,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition ,2022, pp. 10 684–10 695. 3, 10 [19] J. Xu, X. Liu, Y. Wu, Y. Tong, Q. Li, M. Ding, J. Tang, and Y. Dong, “Imagereward: Learning and evaluating human preferences for text-to-image generation,” Advances in Neural Information Processing Systems ,vol. 36, 2024. 3 [20] S. Sagawa, P. W. Koh, T. B. Hashimoto, and P. Liang, “Distributionally robust neural networks for group shifts: On the importance of regular-ization for worst-case generalization,” arXiv preprint arXiv:1911.08731 ,2019. 3, 10, 11, 12 [21] X. Zhao, X. Jiang, Z. Xu, L. He, Z. Wang, D. Li, D. Cheng, and N. Wang, “Dual-branch cross-projection debiasing through diffusion-based disentanglement,” arXiv preprint arXiv:2606.24161 , 2026. 3 [22] A. Sinha, H. Namkoong, R. Volpi, and J. Duchi, “Certifying some distributional robustness with principled adversarial training,” arXiv preprint arXiv:1710.10571 , 2017. 3 [23] H. Namkoong and J. C. Duchi, “Stochastic gradient methods for distributionally robust optimization with f-divergences,” Advances in neural information processing systems , vol. 29, 2016. 3 [24] M. Staib and S. Jegelka, “Distributionally robust optimization and generalization in kernel methods,” Advances in Neural Information Processing Systems , vol. 32, 2019. 3 [25] J. Liu, Z. Shen, Y. He, X. Zhang, R. Xu, H. Yu, and P. Cui, “Towards out-of-distribution generalization: A survey,” arXiv preprint arXiv:2108.13624 , 2021. 3 [26] W. Hu, G. Niu, I. Sato, and M. Sugiyama, “Does distributionally robust supervised learning give robust classifiers?” in International Conference on Machine Learning . PMLR, 2018, pp. 2029–2037. 3 [27] C. Frogner, S. Claici, E. Chien, and J. Solomon, “Incorporating unlabeled data into distributionally robust learning,” arXiv preprint arXiv:1912.07729 , 2019. 3 [28] J. Liu, Z. Shen, P. Cui, L. Zhou, K. Kuang, and B. Li, “Distributionally robust learning with stable adversarial training,” IEEE Transactions on Knowledge and Data Engineering , vol. 35, no. 11, pp. 11 288–11 300, 2022. 3 [29] F. Qiao and X. Peng, “Topology-aware robust optimization for out-of-distribution generalization,” arXiv preprint arXiv:2307.13943 , 2023. 3 [30] E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang, and W. Chen, “LoRA: Low-rank adaptation of large language models,” in International Conference on Learning Representations , 2022. 4 [31] L. He, D. Cheng, H. Wang, X. Zhu, X. Yang, N. Wang, and X. Gao, “Task-driven subspace decomposition for knowledge sharing and iso-lation in lora-based continual learning,” in Forty-third International Conference on Machine Learning , 2026. 4 [32] L. He, D. Cheng, D. Xu, H. Wang, and N. Wang, “Harnessing textual semantic priors for knowledge transfer and refinement in clip-driven continual learning,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 26, 2026, pp. 21 645–21 653. 4 [33] L. He, D. Cheng, Z. Ma, H. Wang, D. Zhang, N. Wang, and X. Gao, “Ckaa: Cross-subspace knowledge alignment and aggregation for robust continual learning,” arXiv preprint arXiv:2507.09471 , 2025. 4 [34] D. P. Kingma and M. Welling, “Auto-encoding variational bayes,” arXiv preprint arXiv:1312.6114 , 2013. 4 [35] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark et al. , “Learning transferable visual models from natural language supervision,” in International conference on machine learning . PMLR, 2021, pp. 8748–8763. 4 [36] O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks for biomedical image segmentation,” in Medical image computing and computer-assisted intervention–MICCAI 2015: 18th international con-ference, Munich, Germany, October 5-9, 2015, proceedings, part III 18 .Springer, 2015, pp. 234–241. 4 [37] X. Wu, Y. Hao, K. Sun, Y. Chen, F. Zhu, R. Zhao, and H. Li, “Human preference score v2: A solid benchmark for evaluating human pref-erences of text-to-image synthesis,” arXiv preprint arXiv:2306.09341 ,2023. 5 [38] M. Oquab, T. Darcet, T. Moutakanni, H. Vo, M. Szafraniec, V. Khalidov 
+
+et al. , “DINOv2: Learning robust visual features without supervision,” 
+
+Transactions on Machine Learning Research , 2024. 5 [39] H. Chung, J. Kim, G. Y. Park, H. Nam, and J. C. Ye, “Cfg++: Manifold-constrained classifier free guidance for diffusion models,” in 
+
+International Conference on Learning Representations , vol. 2025, 2025, pp. 30 824–30 850. 8 [40] Y. Ganin, E. Ustinova, H. Ajakan, P. Germain, H. Larochelle, F. Lavi-olette, M. March, and V. Lempitsky, “Domain-adversarial training of neural networks,” Journal of machine learning research , vol. 17, no. 59, pp. 1–35, 2016. 10, 11, 12 [41] B. Sun and K. Saenko, “Deep coral: Correlation alignment for deep domain adaptation,” in Computer Vision–ECCV 2016 Workshops: Ams-terdam, The Netherlands, October 8-10 and 15-16, 2016, Proceedings, Part III 14 . Springer, 2016, pp. 443–450. 10, 11, 12 [42] Y. Li, M. Gong, X. Tian, T. Liu, and D. Tao, “Domain generalization via conditional invariant representations,” in Proceedings of the AAAI conference on artificial intelligence , vol. 32, no. 1, 2018. 10, 11 [43] S. Yan, H. Song, N. Li, L. Zou, and L. Ren, “Improve unsupervised do-main adaptation with mixup training,” arXiv preprint arXiv:2001.00677 ,2020. 10, 11 [44] Z. Huang, H. Wang, E. P. Xing, and D. Huang, “Self-challenging im-proves cross-domain generalization,” in Computer vision–ECCV 2020: 16th European conference, Glasgow, UK, August 23–28, 2020, proceed-ings, part II 16 . Springer, 2020, pp. 124–140. 10, 11, 12 [45] M. Zhang, H. Marklund, N. Dhawan, A. Gupta, S. Levine, and C. Finn, “Adaptive risk minimization: Learning to adapt to domain shift,” Ad-vances in Neural Information Processing Systems , vol. 34, pp. 23 664– 23 678, 2021. 10, 11 [46] D. Krueger, E. Caballero, J.-H. Jacobsen, A. Zhang, J. Binas, D. Zhang, R. Le Priol, and A. Courville, “Out-of-distribution generalization via risk extrapolation (rex),” in International conference on machine learning .PMLR, 2021, pp. 5815–5826. 10, 11, 12 IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 17 
+
+[47] V. Vapnik, The nature of statistical learning theory . Springer science & business media, 2013. 10, 11, 12 [48] P. Foret, A. Kleiner, H. Mobahi, and B. Neyshabur, “Sharpness-aware minimization for efficiently improving generalization,” in International Conference on Learning Representations , 2021. 10, 11, 12 [49] H. Nam, H. Lee, J. Park, W. Yoon, and D. Yoo, “Reducing domain gap by reducing style bias,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2021, pp. 8690–8699. 10, 11, 12 [50] A. Rame, C. Dancette, and M. Cord, “Fishr: Invariant gradient variances for out-of-distribution generalization,” in International Conference on Machine Learning . PMLR, 2022, pp. 18 347–18 377. 10, 11 [51] P. Wang, Z. Zhang, Z. Lei, and L. Zhang, “Sharpness-aware gradient matching for domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2023, pp. 3769–3778. 10, 11, 12 [52] S. Shin, H. Bae, B. Na, Y.-Y. Kim, and I.-C. Moon, “Unknown domain inconsistency minimization for domain generalization,” in International Conference on Learning Representations , 2024. 10, 11 [53] I. Gulrajani and D. Lopez-Paz, “In search of lost domain generalization,” 
+
+arXiv preprint arXiv:2007.01434 , 2020. 10 [54] D. Li, Y. Yang, Y.-Z. Song, and T. M. Hospedales, “Deeper, broader and artier domain generalization,” in ICCV , 2017, pp. 5542–5550. 10 [55] H. Venkateswara, J. Eusebio, S. Chakraborty, and S. Panchanathan, “Deep hashing network for unsupervised domain adaptation,” in CVPR ,2017, pp. 5018–5027. 10 [56] A. Krizhevsky, “Learning multiple layers of features from tiny images,” University of Toronto, Tech. Rep., 2009. 10 [57] D. Hendrycks and T. Dietterich, “Benchmarking neural network ro-bustness to common corruptions and perturbations,” arXiv preprint arXiv:1903.12261 , 2019. 10 [58] D. Hendrycks, N. Mu, E. D. Cubuk, B. Zoph, J. Gilmer, and B. Lak-shminarayanan, “Augmix: A simple data processing method to improve robustness and uncertainty,” arXiv preprint arXiv:1912.02781 , 2019. 10, 11 [59] O. Nuriel, S. Benaim, and L. Wolf, “Permuted adain: Reducing the bias towards global statistics in image classification,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2021, pp. 9482–9491. 10, 11 [60] Y. Zhang, M. Li, R. Li, K. Jia, and L. Zhang, “Exact feature distribution matching for arbitrary style transfer and domain generalization,” in 
+
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2022, pp. 8035–8045. 10, 11 [61] X. Li, Y. Dai, Y. Ge, J. Liu, Y. Shan, and L.-Y. Duan, “Uncer-tainty modeling for out-of-distribution generalization,” arXiv preprint arXiv:2202.03958 , 2022. 10, 11 [62] I. Cugu, M. Mancini, Y. Chen, and Z. Akata, “Attention consistency on visual corruptions for single-source domain generalization,” in Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2022, pp. 4165–4174. 10, 11 [63] S. Qu, Y. Pan, G. Chen, T. Yao, C. Jiang, and T. Mei, “Modality-agnostic debiasing for single domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2023, pp. 24 142–24 151. 10, 11 [64] S. Choi, D. Das, S. Choi, S. Yang, H. Park, and S. Yun, “Progressive random convolutions for single domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recogni-tion , 2023, pp. 10 312–10 322. 10 [65] J. Chen, Z. Gao, X. Wu, and J. Luo, “Meta-causal learning for single domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2023, pp. 7683–7692. 10 [66] L. Chen, Y. Zhang, Y. Song, Y. Shan, and L. Liu, “Improved test-time adaptation for domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2023, pp. 24 172–24 182. 10, 11 [67] D. Li, A. Wu, Y. Wang, and Y. Han, “Prompt-driven dynamic object-centric learning for single domain generalization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2024, pp. 17 606–17 615. 10 [68] S. Liu, X. Jin, X. Yang, J. Ye, and X. Wang, “Stydesty: Min-max stylization and destylization for single domain generalization,” arXiv preprint arXiv:2406.00275 , 2024. 10, 11 [69] S. Yang, Z. Zhang, and L. Gu, “Practical single domain generalization via training-time and test-time learning,” in Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining ,2024, pp. 3794–3805. 10, 11 [70] Y. Wang, Y. Guo, X. Liu, and S. Chen, “ProMEA: Prompt-driven expansion and alignment for single domain generalization,” in Proceed-ings of the Thirty-Fourth International Joint Conference on Artificial Intelligence , 2025, pp. 2018–2026. 10, 11 [71] S. Yang, Z. Zhang, K. Yu, L. Gu, and X. Wu, “Mutual information-guided style augmentation for single domain generalization,” ACM Transactions on Intelligent Systems and Technology , vol. 17, no. 3, pp. 1–32, 2026. 10, 11 [72] J. Song, C. Meng, and S. Ermon, “Denoising diffusion implicit models,” in International Conference on Learning Representations , 2021. 11 [73] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image recognition,” in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition , 2016, pp. 770–778. 11 [74] L. Chen, Y. Zhang, Y. Song, A. Van Den Hengel, and L. Liu, “Domain generalization via rationale invariance,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2023, pp. 1751–1760. 11 [75] T. Li, P. Zhou, Z. He, X. Cheng, and X. Huang, “Friendly sharpness-aware minimization,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2024, pp. 5631–5640. 11 [76] N. Efthymiadis, G. Tolias, and O. Chum, “Crafting distribution shifts for validation and training in single source domain generalization,” in 
+
+2025 IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) . IEEE, 2025, pp. 1883–1892. 11 [77] L. Liu, N. Wang, D. Zhou, D. Liu, X. Yang, X. Gao, and T. Liu, “Generalizable prompt learning via gradient constrained sharpness-aware minimization,” IEEE Transactions on Multimedia , vol. 27, pp. 1100–1113, 2024. 11 [78] X. Lyu, Q. Xu, Z. Yang, S. Lyu, and Q. Huang, “Sse-sam: balancing head and tail classes gradually through stage-wise sam,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 39, no. 18, 2025, pp. 19 278–19 286. 11 [79] X. Xu, J. Yang, W. Shi, S. Ding, L. Luo, and J. Liu, “Physaug: A physical-guided and frequency-based data augmentation for single-domain generalized object detection,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 39, no. 20, 2025, pp. 21 815– 21 823. 11 [80] Z. Zhou, M. Wang, Y. Mao, B. Li, and J. Yan, “Sharpness-aware minimization efficiently selects flatter minima late in training,” in 
+
+International Conference on Learning Representations , vol. 2025, 2025, pp. 20 949–20 980. 11 [81] J. Guo, L. Qi, and Y. Shi, “Domaindrop: Suppressing domain-sensitive channels for domain generalization,” in Proceedings of the IEEE/CVF international conference on computer vision , 2023, pp. 19 114–19 124. 11, 12 [82] J. Zhuang, B. Gong, L. Yuan, Y. Cui, H. Adam, N. Dvornek, S. Tatikonda, J. Duncan, and T. Liu, “Surrogate gap minimization improves sharpness-aware training,” arXiv preprint arXiv:2203.08065 ,2022. 12 [83] Y. Liu, Y. Zou, R. Qiao, F. Liu, M. L. Lee, and W. Hsu, “Cross-domain feature augmentation for domain generalization,” arXiv preprint arXiv:2405.08586 , 2024. 12 [84] Z. Tan, X. Yang, and K. Huang, “Rethinking multi-domain generaliza-tion with a general learning objective,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 23 512–23 522. 12 [85] W. Huang, Y. Shi, Z. Xiong, and X. X. Zhu, “Representation enhancement-stabilization: Reducing bias-variance of domain general-ization,” in European Conference on Computer Vision . Springer, 2024, pp. 108–125. 12 [86] A. Li, L. Zhuang, X. Long, M. Yao, and S. Wang, “Seeking con-sistent flat minima for better domain generalization via refining loss landscapes,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2025, pp. 15 349–15 359. 12 [87] A. Ballas and C. Diou, “Gradient-guided annealing for domain gener-alization,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2025, pp. 20 558–20 568. 12 [88] W. Wei, Z. Li, J. Yan, M. Shao, and L. Li, “Indirect alignment and rela-tionship preservation for domain generalization,” in Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence ,2025, pp. 2054–2062. 12 [89] Z. Wang, L. Zhang, W. Huang, Z. Zhang, and Z. Wang, “Rethinking out-of-distribution detection and generalization with collective behavior dynamics,” in Advances in Neural Information Processing Systems ,vol. 38, 2025, pp. 88 401–88 450. 12 [90] X. Thomas and D. Ghadiyaram, “What’s in a latent? leveraging diffusion latent space for domain generalization,” in Proceedings of the IEEE/CVF IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 18 
+
+International Conference on Computer Vision , 2025, pp. 2183–2194. 12, 14 [91] D. Li, Y. Yang, Y.-Z. Song, and T. Hospedales, “Learning to generalize: Meta-learning for domain generalization,” in Proceedings of the AAAI conference on artificial intelligence , vol. 32, no. 1, 2018. 12 [92] K. Zhou, J. Yang, C. C. Loy, and Z. Liu, “Learning to prompt for vision-language models,” International Journal of Computer Vision , vol. 130, no. 9, pp. 2337–2348, 2022. 12 [93] S. Hemati, M. Beitollahi, A. H. Estiri, B. A. Omari, X. Chen, and G. Zhang, “Cross domain generative augmentation: Domain general-ization with latent diffusion models,” arXiv preprint arXiv:2312.05387 ,2023. 14 [94] Y. Huang, Y. Chen, Y. Liu, X. Zhang, W. Dai, H. Xiong, and Q. Tian, “Domainfusion: Generalizing to unseen domains with latent diffusion models,” in European Conference on Computer Vision . Springer, 2024, pp. 480–498. 14 [95] Z. Zhuang, Y. Zhang, X. Wang, J. Lu, Y. Wei, and Y. Zhang, “Time-varying lora: Towards effective cross-domain fine-tuning of diffusion models,” in Advances in Neural Information Processing Systems , vol. 37, 2024, pp. 73 920–73 951. 14 [96] M. Noori, M. Cheraghalikhani, A. Bahri, G. A. Vargas Hakim, D. Os-owiechi, M. Yazdanpanah, I. Ben Ayed, and C. Desrosiers, “FDS: Feedback-guided domain synthesis with multi-source conditional diffu-sion models for domain generalization,” in Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision , 2025, pp. 8504– 8514. 14 [97] Y. Choi, G. Yu, and H. Hwang, “TRIDENT: Text-free data augmentation using image embedding decomposition for domain generalization,” IEEE Access , vol. 13, pp. 139 816–139 830, 2025. 14 [98] R. Zhang, P. Isola, A. A. Efros, E. Shechtman, and O. Wang, “The unreasonable effectiveness of deep features as a perceptual metric,” in 
+
+Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition , 2018, pp. 586–595. 14 
+
+Zhipeng Xu received the B.Eng. and M.Eng. de-grees in Information and Communication Engineer-ing from Xidian University, Xi’an, China, in 2023 and 2026, respectively. He is currently pursuing the Ph.D. degree at The Hong Kong University of Science and Technology. His research interests include domain generalization, parameter-efficient adaptation of foundation models, multimodal large language models, and AI agents. 
+
+De Cheng is an associate professor with the School of Telecommunications Engineering, Xidian Univer-sity, China. He received the B.S. and Ph.D. degrees from Xi’an Jiaotong University, Xi’an, China, in 2011 and 2017, respectively. From 2015 to 2017, he was a visiting scholar at Carnegie Mellon University, Pittsburgh, USA. His research interests include pat-tern recognition, machine learning, and multimedia analysis. 
+
+Xinyang Jiang received B.E. from Zhejiang Uni-versity in 2012 and Ph.D. from Zhejiang University in 2017. He is currently a researcher at Microsoft Research Asia. Before joining MSRA, he was a researcher from Tencent Youtu Lab. His main re-search field is computer vision, including person Re-identification, vector graphics recognition and medical image understanding. 
+
+Lingfeng He received the B.Sc. and M.Eng degree from Xidian University, Xi’an, China, in 2023 and 2026, respectively. He is currently pursuing his Ph.D. degree in Electronic and Computer Engineer-ing in the Hong Kong University of Science and Technology. His research interests include continual learning, parameter-efficient fine-tuning and person ReID. 
+
+Huaijie Wang received the B.Sc. degree from Xid-ian University, Xi’an, China, in 2024. He is currently pursuing his Ph.D. degree in School of Electronic Engineering in Xidian University. His research in-terest is continual learning. 
+
+Dongsheng Li received B.E. from University of Science and Technology of China in 2007 and Ph.D. from Fudan University in 2012. He is now a principal research manager with Microsoft Research Asia (MSRA) since February 2020. Before joining MSRA, he was a research staff member with IBM Research – China since April 2015. He is also an adjunct professor with School of Computer Science, Fudan University, Shanghai, China. His research interests include recommender systems and machine learning applications. His work on cognitive recom-mendation engine won the 2018 IBM Corporate Award. 
+
+Nannan Wang (Senior Member, IEEE) received the B.Sc. degree in information and computation science from the Xi’an University of Posts and Telecommunications in 2009 and the Ph.D. degree in information and telecommunications engineering from Xidian University in 2015. From September 2011 to September 2013, he was a Visiting Ph.D. Student with the University of Technology, Sydney, NSW, Australia. He is currently a Professor with the State Key Laboratory of Integrated Services Networks, Xidian University. He has published over 100 articles in refereed journals and proceedings, including IEEE T-PAMI, IJCV, CVPR, ICCV, etc. His current research interests include computer vision and machine learning. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 19           
+
+> Xinbo Gao (M’02-SM’07-F’24) received the B.Eng., M.Sc. and Ph.D. degrees in electronic en-gineering, signal and information processing from Xidian University, Xi’an, China, in 1994, 1997, and 1999, respectively. From 1997 to 1998, he was a research fellow at the Department of Computer Sci-ence, Shizuoka University, Shizuoka, Japan. From 2000 to 2001, he was a post-doctoral research fellow at the Department of Information Engineering, the Chinese University of Hong Kong, Hong Kong. Since 1999, he has been at the School of Elec-tronic Engineering, Xidian University and now he is a Professor of Pattern Recognition and Intelligent System of Xidian University. Since 2020, he has been also a Professor of Computer Science and Technology of Chongqing University of Posts and Telecommunications. His current research interests include computer vision, machine learning and pattern recognition. He has published seven books and around 300 technical articles in refereed journals and proceedings. Prof. Gao is on the Editorial Boards of several journals, including Signal Processing (Elsevier) and Neurocomputing (Elsevier). He served as the General Chair/Co-Chair, Program Committee Chair/Co-Chair, or PC Member for around 30 major international conferences. He is a Fellow of the IEEE, IET, AAIA, CIE, CCF, and CAAI.
+
+APPENDIX ATHEORETICAL ANALYSIS 
+
+A. Notation and Regularity Conditions 
+
+Before presenting the proofs, we collect the distributional ob-jects and regularity conditions used in the theoretical analysis. Unless otherwise specified, all notation follows Secs. III-A, and III-C. 
+
+SDG setting and diffusion notation. PAPT++ is trained on labeled samples from the source domain, DS = {(xsi , y si )}Ns
+
+> i=1
+
+.
+
+We evaluate the learned model on an unseen target domain 
+
+DT . Consistent with the single-domain generalization setting, no data from DT are used during training. Let Z ⊆ Rdz
+
+denote the latent space of the pretrained VAE. As defined in Sec. III-A, FE and FD denote the frozen VAE encoder and decoder, respectively. For an input image x, z0 = FE (x)
+
+denotes its latent representation before noise is added in the forward diffusion process. For class k, the class-level text prompt and its corresponding text embedding are defined as: 
+
+tck, ref = “a photo of a [class]” , Tk, ref = τ ψ (tck, ref ),
+
+(54) consistent with Eq. 11. After CSRL, the reference-learning LoRA parameters ϕref are merged into the pretrained U-Net backbone to obtain the fixed reference-adapted backbone ¯ωref .During CADS, ¯ωref and the text-encoder parameters ψ remain frozen, and only the self-attention LoRA parameters ϕ are optimized. The LoRA parameters used in synthesis round r
+
+are denoted by ϕ(r). For simplicity, we write: 
+
+ϵϕ = ϵ¯ωref ,ϕ (55) throughout the following analysis. Let T denote the total number of diffusion steps. Given the variance schedule {βt}Tt=1 , we define αt = 1 − βt and 
+
+¯αt = Qts=1 αs. The forward diffusion process progressively adds Gaussian noise to the clean latent z0 according to: 
+
+q(zt | zt−1) = N (zt; √αt zt−1, β tI) . (56) As shown in Eq. 3, the noisy latent at any diffusion step t can be sampled directly from z0 as: 
+
+zt = √¯αt z0 + √1 − ¯αt ϵ, ϵ ∼ N (0, I). (57) Equivalently, 
+
+q(zt | z0) = N  zt; √¯αt z0, (1 − ¯αt)I . (58) 
+
+Reference and generated latent distributions. For class 
+
+k, let Ak = {ak,m }Ma 
+
+> m=1
+
+denote the semantic reference set constructed in Eq. 17. Following Eq. 25, we encode each reference image as: 
+
+zak,m = FE (ak,m ), (59) where zak,m is the latent representation of the m-th reference image before forward noising. The encoded reference set defines the empirical class-conditional measure: 
+
+bP kA = 1
+
+MaMaX
+
+> m=1
+
+δzak,m , (60) where δz denotes the Dirac probability measure at z.For a given LoRA parameter ϕ ∈ Φ, the text-conditioned reverse diffusion process defines the trajectory density: 
+
+pk
+
+> ϕ
+
+(z0: T ) = pprior (zT )
+
+> T
+
+Y
+
+> t=1
+
+pϕ (zt−1 | zt, Tk, ref ) , (61) where 
+
+pprior (zT ) = N (zT ; 0, I) . (62) Under the fixed variance reverse process parameterization considered in the analysis, each reverse transition is given by: 
+
+pϕ (zt−1 | zt, Tk, ref )= N  zt−1; μϕ (zt, t, Tk, ref ) , σ 2 
+
+> t
+
+I , σ2 
+
+> t
+
+> 0, (63) where the reverse mean μϕ is parameterized through the noise-prediction network ϵϕ. We define P k 
+
+> ϕ
+
+as the z0-marginal distribution of Eq. 61. Its density is: 
+
+pk
+
+> ϕ
+
+(z0) = 
+
+Z
+
+pk
+
+> ϕ
+
+(z0: T ) d z1: T . (64) Thus, P k 
+
+> ϕ
+
+is the class-conditional latent distribution generated by the LoRA-adapted diffusion model under the text condition 
+
+Tk, ref . The distributions attainable by varying the LoRA pa-rameters form the generator-induced class-conditional family: 
+
+Pk 
+
+> Φ
+
+= P k 
+
+> ϕ
+
+: ϕ ∈ Φ . (65) Because the reverse transitions in Eq. 63 have nondegen-erate Gaussian covariances, P k 
+
+> ϕ
+
+is absolutely continuous with respect to the Lebesgue measure. In particular, it assigns zero probability to every individual latent point. By contrast, bP kA
+
+assigns positive probability to each encoded reference latent. Therefore, bP kA is not absolutely continuous with respect to P k 
+
+> ϕ
+
+,and DKL 
+
+ bP kA P k
+
+> ϕ
+
+
+
+= + ∞.
+
+To remove this discrete–continuous support mismatch from the distributional comparison used in the analysis, we intro-duce the Gaussian-smoothed reference distribution: 
+
+P kA = bP kA ∗ N (0, σ 2
+
+> A
+
+I)= 1
+
+MaMaX
+
+> m=1
+
+N  zak,m , σ 2
+
+> A
+
+I , σA > 0, (66) IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 20 
+
+where ∗ denotes convolution and σA > 0 is a fixed smoothing bandwidth that controls the spread of each Gaussian compo-nent around the corresponding reference latent. As σA ↓ 0,
+
+P kA converges weakly to the empirical reference measure bP kA.Equivalently, a latent za 
+
+> 0
+
+∼ P kA can be generated by sampling: 
+
+M ∼ Unif {1, . . . , M a}, ξ ∼ N (0, σ 2
+
+> A
+
+I), (67) independently, and setting: 
+
+za 
+
+> 0
+
+= zak,M + ξ. (68) Based on the smoothed reference distribution P kA, we define the following class-wise denoising objective as: 
+
+Lk
+
+> den
+
+(ϕ; Ak) = Eza    
+
+> 0∼PkA, t ∼ν, ϵ∼N (0,I)
+
+h
+
+∥ϵ − ϵϕ (zat , t, Tk, ref )∥22
+
+i
+
+,
+
+(69) where ν is the timestep-sampling distribution used during training and: 
+
+zat = √¯αt za 
+
+> 0
+
++ √1 − ¯αt ϵ. (70) The implemented round-wise loss L(r)den in Eq. 28 samples encoded reference latents from the empirical measure bP kA.For the distributional analysis, we instead use its Gaussian-smoothed counterpart P kA in Eq. 69. This smoothing removes the discrete–continuous support mismatch and makes the KL comparison well-defined. Thus, Eq. 69 is a smoothed analyt-ical counterpart of the implemented reference-denoising ob-jective, while the actual optimization continues to use Eq. 28. Starting from z0 ∼ P kA, the forward diffusion process defines the reference trajectory density: 
+
+qkA(z0: T ) = pkA(z0)
+
+> T
+
+Y
+
+> t=1
+
+q(zt | zt−1). (71) For the proof of Theorem 1, we consider the trajectory-level KL divergence: 
+
+Kk
+
+> traj
+
+(ϕ) = DKL 
+
+ qkA(z0: T ) pk
+
+> ϕ
+
+(z0: T ) . (72) By construction, P kA and P k 
+
+> ϕ
+
+are the z0-marginals of qkA(z0: T )
+
+and pk
+
+> ϕ
+
+(z0: T ). Since marginalizing out the intermediate states 
+
+z1: T cannot increase the KL divergence, we obtain: 
+
+DKL 
+
+ P kA P k
+
+> ϕ
+
+ ≤ K k
+
+> traj
+
+(ϕ). (73) This is an application of the data-processing inequality to the projection π0(z0: T ) = z0.
+
+Generator-induced semantic ambiguity set. For a semantic tolerance δsem > 0, we first define the class-wise feasible LoRA parameter set as: 
+
+Φk
+
+> sem
+
+(δsem ) = ϕ ∈ Φ Lk
+
+> den
+
+(ϕ; Ak) ≤ δsem . (74) The corresponding generator-induced semantic ambiguity set can be defined as: 
+
+Bk
+
+> sem
+
+(δsem ) = P k 
+
+> ϕ
+
+: ϕ ∈ Φk
+
+> sem
+
+(δsem ) ⊆ P k
+
+> Φ
+
+. (75) Because CADS uses a single shared LoRA parameter across all classes, we assume that the joint feasible parameter set is nonempty: C\
+
+> k=1
+
+Φk
+
+> sem
+
+(δsem )̸ = ∅. (76) Eq. 75 defines a distribution-valued set obtained by mapping the semantically feasible LoRA parameters to their induced class-conditional clean-latent distributions. Thus, although the elements of the set are distributions, semantic feasibility is im-posed at the generator-parameter level through the reference-based denoising objective. From this perspective, CADS can be interpreted as a model-restricted, DRO-inspired search for high-risk class-conditional distributions induced by semanti-cally feasible LoRA parameters. The semantic regularization term in Eq. 29 provides an empirical penalized counterpart of the hard feasibility constraint in Eq. 74. 
+
+Target-domain risk and ambiguity-set coverage. Let PT
+
+denote the joint distribution of images and labels in the unseen target domain DT , and let: 
+
+πkT = PT (Y = k) (77) denote the target-domain prior of class k. We use P kT to rep-resent the corresponding class-conditional latent distribution. More specifically, for every measurable set E ⊆ Z ,
+
+P kT (E) = PT (FE (X) ∈ E | Y = k) . (78) For convenience, define the class-wise loss function: 
+
+gθ,k (z) = ℓCE (fθ (FD (z)) , k ) . (79) For any class-k latent distribution P , the corresponding clas-sification risk is: 
+
+Rk(fθ ; P ) = Ez∼P [gθ,k (z)] . (80) The overall risk on the unseen target domain is then given by 
+
+RT (fθ ) = 
+
+> C
+
+X
+
+> k=1
+
+πkT Rk(fθ ; P kT ). (81) This is the target-domain risk considered in Theorem 2. To quantify the discrepancy between each unseen class-conditional distribution and the semantic ambiguity set, we use the total variation distance: 
+
+dTV (P, Q ) = sup 
+
+> E∈B(Z)
+
+|P (E) − Q(E)|, (82) where P and Q are distributions on Z, and B(Z) denotes the Borel σ-algebra. For each class k, we define the residual coverage gap as: 
+
+ρk = inf  
+
+> P∈B k
+> sem (δsem )
+
+dTV (P kT , P ). (83) Thus, ρk can be seen as the smallest remaining mismatch between the unseen class-conditional distribution P kT and the distributions covered by the semantic ambiguity set. A smaller 
+
+ρk indicates that the ambiguity set provides better coverage of the corresponding target-domain shift. 
+
+Regularity conditions. The subsequent proofs use the follow-ing conditions. 
+
+A1. Fixed-variance noise-prediction parameterization. The forward schedule satisfies βt ∈ (0 , 1) for all t = 1 , . . . , T . For IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 21 
+
+t = 2 , . . . , T , the forward posterior and the reverse transition are Gaussian with the same fixed covariance: 
+
+q(zt−1 | zt, z0) = N
+
+eμt, eβtI
+
+
+
+, (84) 
+
+pϕ(zt−1 | zt, Tk, ref ) = N
+
+
+
+μϕ,t , eβtI
+
+
+
+, (85) where 
+
+eβt = 1 − ¯αt−1
+
+1 − ¯αt
+
+βt > 0. (86) The reverse mean follows the standard noise-prediction pa-rameterization through ϵϕ.The reconstruction distribution pϕ(z0 | z1, Tk, ref ) has co-variance σ21 I, with 0 < σ 21 < ∞, and its mean is parameterized through the same noise predictor. Under this parameterization, the reconstruction term at t = 1 and each transition KL term for t ≥ 2 can be expressed as a finite, strictly positive, timestep-dependent coefficient multiplying the corresponding squared noise-prediction error, plus a term independent of ϕ.The timestep distribution ν has full support: ν(t) > 0 for every t ∈ { 1, . . . , T }. Since T is finite, if wt denotes the coefficient of the squared noise-prediction error at timestep t,it follows that: 
+
+Cν = max 
+
+> 1≤t≤T
+
+wt
+
+ν(t) < ∞. (87) Thus, the weighted noise-prediction terms arising from the variational decomposition can be controlled by the denoising objective in Eq. 69. Since P kA is a finite Gaussian mixture and 
+
+pprior = N (0, I), the terminal term satisfies: 
+
+Ez0∼P kA [DKL (q(zT | z0) ∥ pprior )] < ∞. (88) We additionally assume that the squared noise-prediction errors in Eq. 69 are integrable for every ϕ ∈ Φ considered in the analysis. 
+
+A2. Uniformly bounded classification loss. Let H denote the hypothesis class of classifiers. We assume that there exists a constant Lmax < ∞, independent of the classifier and the class index, such that, for every fθ ∈ H and every class k,
+
+0 ≤ ℓCE (fθ (FD (z)) , k ) ≤ Lmax (89) holds P kT -almost surely and P -almost surely for every P ∈Bk
+
+> sem
+
+(δsem ). For the standard cross-entropy loss used in the classifier objective, this condition amounts to assuming that the predicted probability assigned to the labeled class is uniformly bounded below by exp( −Lmax ) over the distributions above. Under this assumption, for any such distribution P ,
+
+Rk(fθ ; P kT ) − R k(fθ ; P ) ≤ Lmax dTV (P kT , P ). (90) 
+
+A3. Round-wise semantic feasibility. At synthesis round r,the generator parameters are optimized while the classifier 
+
+fθ(r−1) is held fixed, as in Eq. 29. As part of Assumption 1, we assume that the resulting shared LoRA parameter is semantically feasible for every class: 
+
+ϕ(r) ∈
+
+> C
+
+\
+
+> k=1
+
+Φk
+
+> sem
+
+(δsem ). (91) By the definition of the generator-induced semantic ambiguity set, this implies: 
+
+P k 
+
+> ϕ(r)
+
+∈ B k
+
+> sem
+
+(δsem ) for every k ∈ { 1, . . . , C }. (92) Given this round-wise feasibility, we define the class-wise search gap as: 
+
+ε(r)adv ,k = sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk (fθ(r−1) ; P )
+
+− R k
+
+
+
+fθ(r−1) ; P k
+
+> ϕ(r)
+
+
+
+.
+
+(93) Since P k 
+
+> ϕ(r)
+
+belongs to the ambiguity set, ε(r)adv ,k ≥ 0.The only additional assumption here is the round-wise fea-sibility condition in Eq. 91, which requires the shared LoRA parameter obtained at round r to satisfy the semantic constraint for every class. Under this condition, Eq. 93 simply defines the approximation error of the CADS search. Specifically, 
+
+ε(r)adv ,k is the difference between the largest class-k risk allowed by the semantic ambiguity set and the risk achieved by the distribution generated at round r. Therefore, ε(r)adv ,k = 0
+
+means that CADS reaches the class-wise worst case, whereas a positive value indicates that it does not fully reach this worst case. Such a gap can occur because the same LoRA parameter is optimized for all classes and may not maximize every class-wise risk simultaneously. It may also result from the finite-step and non-convex optimization used in CADS. 
+
+A4. Conditional class-balanced sampling. At synthesis round r, the optimized generator parameter ϕ(r) is held fixed while constructing the generated dataset D(r) 
+
+> g
+
+. The finite-sample analysis below therefore focuses on the randomness introduced by sampling from the resulting class-conditional distributions. For each class k, we independently draw Mg latent samples from the generator-induced distribution P k 
+
+> ϕ(r)
+
+:
+
+z(r) 
+
+> k,j
+
+| ϕ(r) ind 
+
+∼ P k 
+
+> ϕ(r)
+
+, k = 1 , . . . , C, j = 1 , . . . , M g .
+
+(94) The resulting indexed class-balanced latent-label sample is 
+
+Sr =
+
+n 
+
+z(r) 
+
+> k,j
+
+, k 
+
+
+
+: k = 1 , . . . , C, j = 1 , . . . , M g
+
+o
+
+. (95) The corresponding image-space samples are obtained by de-coding the latent samples: 
+
+˜x(r) 
+
+> k,j
+
+= FD
+
+
+
+z(r)
+
+> k,j
+
+
+
+, k = 1 , . . . , C, j = 1 , . . . , M g ,
+
+as in Eq. 30. Drawing Mg samples for every class yields the class-balanced sampling scheme used by CADS. The class-balanced risk induced by the generator is: 
+
+R(r) 
+
+> g
+
+(fθ ) = 1
+
+C
+
+> C
+
+X
+
+> k=1
+
+Rk
+
+
+
+fθ ; P k
+
+> ϕ(r)
+
+
+
+, (96) and its empirical estimate is given by: 
+
+bR(r) 
+
+> g
+
+(fθ ) = 1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+ℓCE 
+
+
+
+fθ (˜ x(r) 
+
+> k,j
+
+), k 
+
+
+
+. (97) IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 22 
+
+For every fixed fθ ∈ H , the empirical risk is conditionally unbiased: 
+
+E
+
+h bR(r) 
+
+> g
+
+(fθ ) ϕ(r)i
+
+= R(r) 
+
+> g
+
+(fθ ). (98) Equation 97 is precisely the generated-data term in Eq. 32 before multiplication by μ.Finally, define the induced loss class: 
+
+ℓCE ◦ H = {(z, k ) 7 → ℓCE (fθ (FD (z)) , k ) : fθ ∈ H} . (99) Under the conditionally independent class-balanced sampling scheme in Eq. 94, the expected Rademacher complexity of the induced loss class is defined as: 
+
+R(r) 
+
+> CM g
+
+(ℓCE ◦ H )= ESr ,σ
+
+ sup  
+
+> fθ∈H
+
+1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+σk,j 
+
+× ℓCE 
+
+
+
+fθ (FD (z(r) 
+
+> k,j
+
+)) , k 
+
+ . (100) where the expectation over Sr is taken according to the conditionally independent sampling scheme in Eq. 94, and the σk,j are independent Rademacher random variables that are independent of Sr .
+
+B. Proof of Theorem 1 
+
+We first state a technical lemma that upper-bounds the trajectory-level KL divergence in terms of the semantic-reference denoising loss. 
+
+Lemma 1 (Control of trajectory-level KL divergence by the denoising loss) . Under Condition A1, for each class 
+
+k, there exist constants γk > 0 and Ck, both independent of ϕ, such that: 
+
+Kk
+
+> traj
+
+(ϕ) ≤ γkLk 
+
+> den
+
+(ϕ; Ak) + Ck. (101) 
+
+Proof of Lemma 1 : For a fixed class k, let qkA(z0: T ) and 
+
+pk
+
+> ϕ
+
+(z0: T ) denote the reference forward and parameterized reverse trajectory distributions, respectively. Using the reverse-time factorization of the conditional forward process, we have: 
+
+Kk
+
+> traj
+
+(ϕ) = − h(P kA)+ Eza  
+
+> 0∼PkA
+
+"
+
+DKL q(zT | za 
+
+> 0
+
+) pprior 
+
+!# 
+
++ EqkA(z0,z1)
+
+h
+
+− log pϕ(z0 | z1, Tk, ref )
+
+i
+
++
+
+> T
+
+X
+
+> t=2
+
+EqkA(z0,zt)
+
+"
+
+DKL q(zt−1 | zt, z0)
+
+pϕ(zt−1 | zt, Tk, ref )
+
+!# 
+
+.
+
+(102) Here, h(P kA) denotes the differential entropy of the ab-solutely continuous reference latent distribution P kA. Un-der Condition A1, the entropy term and the expected terminal conditional KL term are finite and independent of the trainable LoRA parameters ϕ. The third term is the reconstruction negative log-likelihood at t = 1 , and the summation contains the transition KL divergences for 
+
+t = 2 , . . . , T .We first consider the transition terms for t = 2 , . . . , T . For the forward Gaussian diffusion process, q(zt−1 | zt, z0)
+
+is a Gaussian conditional distribution. Under the fixed reverse variance schedule, the reverse transition pϕ(zt−1 |
+
+zt, Tk, ref ) uses the same covariance as the corresponding forward diffusion posterior. Thus, for each t = 2 , . . . , T ,
+
+q(zt−1 | zt, z0) = N
+
+eμt, eβtI
+
+
+
+, (103) 
+
+pϕ(zt−1 | zt, Tk, ref ) = N
+
+
+
+μϕ,t , eβtI
+
+
+
+. (104) Here, eμt and μϕ,t are the corresponding mean vectors. Because the two Gaussian distributions use the same covariance, their KL divergence is: 
+
+DKL (q(zt−1 | zt, z0) ∥ pϕ(zt−1 | zt, Tk, ref )) = 12 eβt
+
+eμt − μϕ,t  
+
+> 22
+
+. (105) Let αt denote the one-step noise schedule coefficient, so that ¯αt = Qts=1 αs, and let βt = 1 − αt. Using the noise-prediction parameterization in Eq. 3 and 4, together with the reverse transition in Eq. 61, the reverse mean can be expressed as: 
+
+μϕ = 1
+
+√αt
+
+
+
+zt − βt
+
+√1 − ¯αt
+
+ϵϕ(zt, t, Tk, ref )
+
+
+
+. (106) Using the forward noising relation: 
+
+zt = √¯αtz0 + √1 − ¯αtϵ, (107) where ϵ ∼ N (0, I), the mean of the forward diffusion posterior can be written as: 
+
+μq = 1
+
+√αt
+
+
+
+zt − βt
+
+√1 − ¯αt
+
+ϵ
+
+
+
+. (108) Therefore, 
+
+μq − μϕ = βt
+
+√αt
+
+√1 − ¯αt
+
+(ϵϕ(zt, t, Tk, ref ) − ϵ) . (109) Substituting this relation into Eq. 105, we obtain: 
+
+DKL (q(zt−1 | zt, z0) ∥ pϕ(zt−1 | zt, Tk, ref )) = β2
+
+> t
+
+2 eβtαt(1 − ¯αt) ∥ϵ − ϵϕ(zt, t, Tk, ref )∥22 . (110) Thus, by defining: 
+
+at = β2
+
+> t
+
+2 eβtαt(1 − ¯αt) , t = 2 , . . . , T. (111) we have: 
+
+DKL (q(zt−1 | zt, z0) ∥ pϕ(zt−1 | zt, Tk, ref )) = at ∥ϵ − ϵϕ(zt, t, Tk, ref )∥22 . (112) IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 23 
+
+Here, at > 0 depends only on the forward diffusion schedule and the fixed reverse variance schedule, and is independent of ϕ.For t = 1 , the conditional distribution q(z0 | z1, z0) is degenerate; hence, the transition-KL identity in Eq. 112 does not apply. The corresponding term in Eq. 102 is instead the reconstruction negative log-likelihood. Under the fixed-covariance Gaussian reconstruction kernel and the same noise-prediction mean parameterization, we have: 
+
+za 
+
+> 0
+
+− μϕ(za 
+
+> 1
+
+, 1, Tk, ref )= β1
+
+√α1
+
+√1 − ¯α1
+
+(ϵϕ(za 
+
+> 1
+
+, 1, Tk, ref ) − ϵ) . (113) Consequently, the reconstruction negative log-likelihood satisfies: 
+
+EqkA(z0,z1)
+
+h
+
+− log pϕ(z0 | z1, Tk, ref )
+
+i
+
+= b1 + a1Eza  
+
+> 0∼PkA,ϵ
+
+"
+
+∥ϵ − ϵϕ(za 
+
+> 1
+
+, 1, Tk, ref )∥22
+
+#
+
+,
+
+(114) where 
+
+a1 = β21
+
+2σ21 α1(1 − ¯α1) (115) and b1 is the normalization constant of the fixed Gaussian reconstruction kernel. Both a1 and b1 are independent of 
+
+ϕ.Combining Eq. 102, Eq. 112, and Eq. 114, we obtain: 
+
+Kk
+
+> traj
+
+(ϕ) = Ck
+
++
+
+> T
+
+X
+
+> t=1
+
+atEza  
+
+> 0∼PkA,ϵ
+
+"
+
+∥ϵ − ϵϕ(zat , t, Tk, ref )∥22
+
+#
+
+,
+
+(116) where 
+
+Ck = − h(P kA) + b1
+
++ Eza  
+
+> 0∼PkA
+
+"
+
+DKL q(zT | za 
+
+> 0
+
+) pprior 
+
+!# 
+
+. (117) By the conditions of Lemma 1, Ck is finite and indepen-dent of ϕ.Since the timestep distribution ν satisfies ν(t) > 0 for every t = 1 , . . . , T , we have 
+
+> T
+
+X
+
+> t=1
+
+atEza  
+
+> 0∼PkA,ϵ
+
+"
+
+∥ϵ − ϵϕ(zat , t, Tk, ref )∥22
+
+#
+
+=
+
+> T
+
+X
+
+> t=1
+
+at
+
+ν(t) ν(t)Eza  
+
+> 0∼PkA,ϵ
+
+"
+
+∥ϵ − ϵϕ(zat , t, Tk, ref )∥22
+
+#
+
+≤ γkTX
+
+> t=1
+
+ν(t)Eza  
+
+> 0∼PkA,ϵ
+
+"
+
+∥ϵ − ϵϕ(zat , t, Tk, ref )∥22
+
+#
+
+,
+
+(118) where 
+
+γk = max 
+
+> 1≤t≤T
+
+at
+
+ν(t) > 0. (119) By the definition of the class-wise denoising loss in Eq. 69, it follows that 
+
+Kk
+
+> traj
+
+(ϕ) ≤ γkLk
+
+> den
+
+(ϕ; Ak) + Ck. (120) This completes the proof. 
+
+Proof of Theorem 1 : Fix a class k and a parameter ϕ.Since P kA and P k 
+
+> ϕ
+
+are the z0-marginals of qkA(z0: T ) and 
+
+pk
+
+> ϕ
+
+(z0: T ), respectively, the data-processing inequality for KL divergence gives: 
+
+DKL 
+
+ P kA P k
+
+> ϕ
+
+ ≤ K k
+
+> traj
+
+(ϕ). (121) Applying Lemma 1, we obtain: 
+
+DKL 
+
+ P kA P k
+
+> ϕ
+
+ ≤ γkLk 
+
+> den
+
+(ϕ; Ak) + Ck. (122) This proves Eq. 34. For Eq. 36, take any: 
+
+P ∈ B k
+
+> sem
+
+(δsem ).
+
+By Eq. 74 and 75, there exists: 
+
+eϕ ∈ Φk
+
+> sem
+
+(δsem )
+
+such that: 
+
+P = P k 
+
+> eϕ
+
+, Lk
+
+> den
+
+eϕ; Ak
+
+
+
+≤ δsem . (123) Applying the preceding bound to eϕ gives: 
+
+DKL 
+
+ P kA P  = DKL 
+
+
+
+P kA P k
+
+> eϕ
+
+
+
+≤ γkLk
+
+> den
+
+eϕ; Ak
+
+
+
++ Ck
+
+≤ γkδsem + Ck.
+
+(124) Thus, Eq. 36 follows. 
+
+C. Proof of Theorem 2 
+
+Proof of Theorem 2 : Fix a classifier fθ ∈ H and a class 
+
+k. By the definition of ρk in Eq. 83, for every η > 0, there exists: 
+
+Pk,η ∈ B k
+
+> sem
+
+(δsem )
+
+such that: 
+
+dTV (P kT , P k,η ) ≤ ρk + η. (125) Applying Eq. 90 gives: 
+
+Rk(fθ ; P kT ) ≤ R k(fθ ; Pk,η ) + Lmax dTV (P kT , P k,η )
+
+≤ sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk(fθ ; P ) + Lmax (ρk + η).
+
+(126) Letting η ↓ 0, we obtain: 
+
+Rk(fθ ; P kT ) ≤ sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk(fθ ; P ) + Lmax ρk. (127) IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 24 
+
+Finally, applying Eq. 127 to each class and using Eq. 81, we have: 
+
+RT (fθ ) = 
+
+> C
+
+X
+
+> k=1
+
+πkT Rk(fθ ; P kT )
+
+≤
+
+> C
+
+X
+
+> k=1
+
+πkT sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk(fθ ; P ) + Lmax 
+
+> C
+
+X
+
+> k=1
+
+πkT ρk.
+
+(128) 
+
+D. Proof of Proposition 1 
+
+Proof of Proposition 1 : Fix a synthesis round r. By the definition of the class-wise search gap in Eq. 93, for each class k,
+
+sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk (fθ(r−1) ; P )= Rk
+
+
+
+fθ(r−1) ; P k
+
+> ϕ(r)
+
+
+
++ ε(r)adv ,k .
+
+(129) Let {πk}Ck=1 be nonnegative class weights satisfying 
+
+PCk=1 πk = 1 . Multiplying Eq. 129 by πk and summing over k gives: 
+
+> C
+
+X
+
+> k=1
+
+πk sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk (fθ(r−1) ; P )=
+
+> C
+
+X
+
+> k=1
+
+πkRk
+
+
+
+fθ(r−1) ; P k
+
+> ϕ(r)
+
+
+
++
+
+> C
+
+X
+
+> k=1
+
+πkε(r)adv ,k .
+
+(130) This proves Eq. 43. Taking πk = πkT in Eq. 130 and applying Theorem 2, we obtain: 
+
+RT (fθ(r−1) ) ≤
+
+> C
+
+X
+
+> k=1
+
+πkT Rk
+
+
+
+fθ(r−1) ; P k
+
+> ϕ(r)
+
+
+
++
+
+> C
+
+X
+
+> k=1
+
+πkT ε(r)adv ,k + Lmax 
+
+> C
+
+X
+
+> k=1
+
+πkT ρk.
+
+(131) Thus, Eq. 44 follows. Finally, setting πk = 1/C in Eq. 130 and using the definitions of R(r) 
+
+> g
+
+and ε(r)adv , we obtain: 
+
+1
+
+C
+
+> C
+
+X
+
+> k=1
+
+sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk (fθ(r−1) ; P ) = R(r) 
+
+> g
+
+(fθ(r−1) )+ ε(r)adv .
+
+(132) This proves Eq. 47. 
+
+E. Proof of Proposition 2 
+
+Proof of Proposition 2 : Fix a synthesis round r. By the round-wise feasibility condition in Eq. 92, for every class 
+
+k,
+
+P k 
+
+> ϕ(r)
+
+∈ B k
+
+> sem
+
+(δsem ).
+
+Therefore, for any fθ ∈ H ,
+
+R(r) 
+
+> g
+
+(fθ ) = 1
+
+C
+
+> C
+
+X
+
+> k=1
+
+Rk
+
+
+
+fθ ; P k
+
+> ϕ(r)
+
+
+
+≤ 1
+
+C
+
+> C
+
+X
+
+> k=1
+
+sup  
+
+> P∈B k
+> sem (δsem )
+
+Rk (fθ ; P ) .
+
+(133) Thus, Eq. 48 follows. For the finite-sample claim, condition on ϕ(r), and let Sr
+
+be the class-balanced latent-label sample defined in Eq. 95. By Eq. 94, the elements of Sr are independent conditional on ϕ(r). All subsequent probabilities and expectations are taken with respect to this conditional sampling distribution. Let 
+
+G = ℓCE ◦ H 
+
+be the loss class defined in Eq. 99, and define 
+
+Φ( Sr ) = sup  
+
+> fθ∈H
+
+R(r) 
+
+> g
+
+(fθ ) − bR(r) 
+
+> g
+
+(fθ ) . (134) Equivalently, by Eq. 96 and 97, 
+
+Φ( Sr ) = sup 
+
+> h∈G
+
+1
+
+C
+
+> C
+
+X
+
+> k=1
+
+Ez∼P k
+
+> ϕ(r)
+
+[h(z, k )] 
+
+− 1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+h(z(r) 
+
+> k,j
+
+, k ) .
+
+(135) By Condition A2 and Eq. 92, every h ∈ G takes values in [0 , L max ] almost surely under each generated class-conditional distribution. Consequently, replacing one el-ement of Sr can change Φ( Sr ) by at most Lmax /(CM g ).McDiarmid’s inequality therefore implies that, with prob-ability at least 1 − δ conditional on ϕ(r),
+
+Φ( Sr ) ≤ ESr [Φ( Sr )] + Lmax 
+
+s
+
+log(2 /δ )2CM g
+
+. (136) Let S′ 
+
+> r
+
+be a conditionally independent copy of Sr , and let {σk,j } be independent Rademacher variables. The standard symmetrization argument yields: 
+
+ESr [Φ( Sr )] ≤ ESr ,S′
+
+> r
+
+"
+
+sup 
+
+> h∈G
+
+1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+h
+
+h(z′(r) 
+
+> k,j
+
+, k )
+
+− h(z(r) 
+
+> k,j
+
+, k )
+
+i #
+
+= ESr ,S′ 
+
+> r,σ
+
+"
+
+sup 
+
+> h∈G
+
+1
+
+CM gCX
+
+> k=1
+> Mg
+
+X
+
+> j=1
+
+σk,j 
+
+h
+
+h(z′(r) 
+
+> k,j
+
+, k )
+
+− h(z(r) 
+
+> k,j
+
+, k )
+
+i #
+
+≤ 2R(r) 
+
+> CM g
+
+(ℓCE ◦ H ).
+
+(137) Here, the equality follows from the coordinate-wise ex-changeability of each original–ghost sample pair, and the IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 25                                                             
+
+> Fig. 9. Class-wise and average ImageReward scores over CADS synthesis rounds on PACS under different CFG scales gand CFG++ coefficients λ. Each class panel shows the score trajectory for one class, whereas “Avg” shows the mean across the seven classes. Higher scores indicate stronger agreement with human preferences for prompt-conditioned image generation. TABLE XIII IMPACT OF CFG/CFG++ ON PACS (%) WITH RES NET -18 UNDER A HIGH RISK -GUIDANCE WEIGHT (λrisk = 0 .5). T HE BEST RESULTS ARE IN RED ,
+> AND THE SECOND -HIGHEST RESULTS ARE IN BLUE .Idx Method ACPSAvg. 1CFG ( g= 1 )67.12 77.77 60.00 78.04 70.73 2CFG ( g= 3 )68.70 77.42 60.19 79.30 71.40 3CFG ( g= 5 )71.43 77.95 65.55 74.68 72.40 4CFG++ ( λ= 0 .4)70.64 82.08 62.56 77.32 73.15 5CFG++ ( λ= 0 .6)73.02 81.54 67.79 78.88 75.31 6CFG++ ( λ= 0 .8)73.61 78.02 64.56 77.15 73.34
+
+final inequality follows from the triangle inequality and Eq. 100. Combining Eq. 136 and 137, we obtain, with conditional probability at least 1 − δ,
+
+sup  
+
+> fθ∈H
+
+R(r) 
+
+> g
+
+(fθ ) − bR(r) 
+
+> g
+
+(fθ ) ≤ 2R(r) 
+
+> CM g
+
+(ℓCE ◦ H )+ Lmax 
+
+s
+
+log(2 /δ )2CM g
+
+.
+
+(138) Consequently, on the same event, for every fθ ∈ H ,
+
+R(r) 
+
+> g
+
+(fθ ) − bR(r) 
+
+> g
+
+(fθ ) ≤ 2R(r) 
+
+> CM g
+
+(ℓCE ◦ H )+ Lmax 
+
+s
+
+log(2 /δ )2CM g
+
+.
+
+(139) Thus, Eq. 51 follows. APPENDIX BFURTHER ANALYSIS 
+
+Fig. 9 and Fig. 10 show the class-wise and average ImageRe-ward scores over CADS synthesis rounds on PACS and VLCS, respectively. For this analysis, we use a high risk-guidance weight of λrisk = 0 .5 to strengthen classifier feedback and create a more challenging synthesis setting. The ImageReward trajectories vary across classes and are often non-monotonic because the classifier is updated after each round, changing the variations that remain difficult for the current model. A higher ImageReward does not necessarily lead to better do-main generalization performance. Strong CFG guidance often improves ImageReward, especially in the early rounds, by encouraging the generated images to closely follow their class prompts. However, it may also keep the generated samples close to typical and relatively easy class appearances, thereby limiting the effect of classification-risk guidance. Conversely, insufficient semantic guidance may allow risk maximization to produce visually degraded or non-semantic images that are difficult for the classifier but provide limited training value. CFG++ provides a better balance between these two cases. In particular, λ = 0 .6 maintains adequate prompt alignment and visual quality while allowing CADS to discover challenging within-class variations without relying on non-semantic arti-facts to increase classification loss. As shown in Tab. XII and Tab. XIII, this setting achieves the highest average accuracy among all evaluated CFG and CFG++ configurations on both VLCS and PACS, outperforming the best CFG configuration by 0.82 and 2.91 pp, respectively. These results indicate that effective guidance should preserve sufficient semantic quality without suppressing the challenging variations targeted by CADS. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 26     
+
+> Fig. 10. Class-wise and average ImageReward scores over CADS synthesis rounds on VLCS under different CFG scales gand CFG++ coefficients λ. Each class panel shows the score trajectory for one class, whereas “Avg” shows the mean across the five classes. Higher scores indicate stronger agreement with human preferences for prompt-conditioned image generation.
+
+APPENDIX CNOTATION SUMMARY 
+
+For ease of reference, Tab. XIV summarizes the principal notation used in the theoretical development and the accompa-nying proofs. For clarity, the symbols are grouped according to their roles in semantic ambiguity set construction, target-domain risk analysis, adversarial search, and finite-sample generalization. Throughout, ( k), ( t), and ( r) index the class, diffusion timestep, and synthesis round, respectively. Note that (T ) denotes the total number of diffusion steps, whereas the subscript ( T ) in target-domain quantities such as ( P kT ) and (πkT ) identifies the target domain. 
+
+A. Qualitative Analysis Across PAPT++ Generation–Training Rounds 
+
+To further examine the evolution of the generated samples, Fig. 11 and Fig. 12 visualize dog-class examples produced using CFG++ with λ = 0.6 over eight CADS synthesis rounds. The early rounds mainly contain clean and canonical dog appearances. As the classifier is updated and provides new feedback, the later rounds explore less typical within-class variations in style, texture, shape, and composition, accompanied by a general decrease in the mean ImageReward of the displayed samples. Importantly, a lower ImageReward is not itself the objective, since samples that lose class se-mantics would provide limited training value. Instead, many of the visualized samples retain recognizable dog-related cues while moving beyond typical and relatively easy appearances. Together with the quantitative results in Tab. XIII and Tab. XII and Fig. 9 and Fig. 10, these examples further demonstrate that CFG++ with λ = 0 .6 helps CADS balance semantic fidelity and sample difficulty, thereby generating challenging yet class-consistent samples for improving generalization to unseen domains. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 27 
+
+TABLE XIV PRINCIPAL NOTATION USED IN THE THEORETICAL ANALYSIS .
+
+Symbol Description Basic setting and diffusion notation 
+
+C, k Number of classes and class index, respectively, with k = 1 , . . . , C .
+
+T, t, r Total number of diffusion steps, diffusion timestep, and synthesis-round index, respectively. The subscript T
+
+in target-domain quantities such as P kT and πkT denotes the target domain rather than a diffusion timestep. 
+
+Ma, M g Numbers of semantic reference images and generated high-risk samples per class, respectively. 
+
+Z, FE , FD Latent space and the frozen VAE encoder and decoder, respectively. 
+
+z0, zt, ϵ Clean latent, noisy latent at diffusion timestep t, and Gaussian noise sampled from N (0, I), respectively. 
+
+Tk, ref Text embedding of the class-level reference prompt for class k.
+
+ϕ, Φ, ϕ(r) Trainable self-attention LoRA parameters, their admissible parameter space, and the optimized LoRA parameters at synthesis round r, respectively. 
+
+ϵϕ(zt, t, Tk, ref ) Noise predictor of the LoRA-adapted diffusion model under the class-level text condition. 
+
+Reference distributions and semantic ambiguity sets 
+
+Ak Semantic reference image set for class k, containing Ma reference images. 
+
+bP kA, P kA, σ A Empirical distribution of the encoded reference latents, its Gaussian-smoothed counterpart, and the corre-sponding smoothing bandwidth, respectively. 
+
+qkA(z0: T ), p k
+
+> ϕ
+
+(z0: T ) Reference forward trajectory distribution initialized from P kA and class-conditional reverse generative trajectory distribution, respectively. 
+
+P k 
+
+> ϕ
+
+, P k 
+
+> ϕ(r)
+
+Clean-latent marginals generated by the reverse diffusion process under parameters ϕ and ϕ(r), respectively. 
+
+Pk 
+
+> Φ
+
+Generator-induced family of all class-k latent distributions attainable by varying ϕ ∈ Φ.
+
+Lk
+
+> den
+
+(ϕ; Ak ), ν (t) Smoothed class-wise semantic-reference denoising loss and its timestep-sampling distribution, respectively. 
+
+Kk
+
+> traj
+
+(ϕ) Trajectory-level KL divergence from qkA(z0: T ) to pk
+
+> ϕ
+
+(z0: T ).
+
+γk , C k Constants in the trajectory-KL upper bound Kk 
+
+> traj
+
+≤ γk Lk 
+
+> den
+
++ Ck ; both are independent of ϕ.
+
+Φk
+
+> sem
+
+(δsem ) Set of class-k LoRA parameters whose semantic-reference denoising loss does not exceed δsem .
+
+Bk
+
+> sem
+
+(δsem ), δ sem Generator-induced semantic ambiguity set for class k and the semantic tolerance controlling its feasible parameter set, respectively. 
+
+Target-domain risk and adversarial search 
+
+PT , P kT Joint image-label distribution in the unseen target domain and its class-k conditional latent distribution, respectively. 
+
+πk , π kT Generic class weight and target-domain prior probability of class k, respectively. 
+
+fθ , H Classifier parameterized by θ and its hypothesis class, respectively. 
+
+gθ,k (z), L max Classification loss ℓCE (fθ (FD (z)) , k ) and its uniform upper bound used in the analysis. 
+
+Rk (fθ ; P ) Class-wise risk of classifier fθ under a class-k latent distribution P .
+
+RT (fθ ) Overall target-domain risk of classifier fθ .
+
+dTV (P, Q ), ρ k Total variation distance and the residual coverage gap between P kT and Bk
+
+> sem
+
+(δsem ), respectively. 
+
+ε(r)adv ,k , ε (r)adv Class-wise CADS search gap at round r and its class-balanced average, where ε(r)adv = C−1 PCk=1 ε(r)adv ,k .
+
+Generated data and finite-sample analysis 
+
+z(r) 
+
+> k,j
+
+, ˜x(r) 
+
+> k,j
+
+The j-th generated latent sample of class k at round r and its decoded image, respectively. 
+
+Sr , D(r) 
+
+> g
+
+Class-balanced latent-label sample and the corresponding decoded generated dataset at synthesis round r,respectively. 
+
+R(r) 
+
+> g
+
+(fθ ), bR(r) 
+
+> g
+
+(fθ ) Population risk over the generated class-conditional distributions and its empirical estimate on D(r) 
+
+> g
+
+,respectively. 
+
+G ≡ ℓCE ◦ H Loss class induced by the classifier hypothesis class and the cross-entropy loss. 
+
+R(r) 
+
+> CM g
+
+(ℓCE ◦ H ) Expected Rademacher complexity of the generated loss class under the conditional class-balanced sampling scheme at round r.
+
+∆(r) 
+
+> g
+
+(δ) Finite-sample deviation term 2R(r) 
+
+> CM g
+
+(ℓCE ◦ H ) + Lmax 
+
+plog(2 /δ )/(2 CM g ), where δ is the confidence parameter. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 28 
+
+Fig. 11. Qualitative visualization of challenging samples conditioned on the dog class during PAPT++ generation–training rounds 1–4 using CFG++ with 
+
+λ = 0 .6. Each row corresponds to one round, and the mean ImageReward (IR) of the displayed samples is reported above the row. IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE 29 
+
+Fig. 12. Qualitative visualization of challenging samples conditioned on the dog class during PAPT++ generation–training rounds 5–8 using CFG++ with 
+
+λ = 0 .6. Each row corresponds to one round, and the mean ImageReward (IR) of the displayed samples is reported above the row.

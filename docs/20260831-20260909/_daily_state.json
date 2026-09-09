@@ -1,0 +1,153 @@
+{
+  "date": "20260831-20260909",
+  "date_label": "2026-08-31 ~ 2026-09-09",
+  "generated_at": "2026-09-09 09:35:00 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2609.04837v1",
+      "route": "20260831-20260909/2609.04837v1-papt-risk-aware-adversarial-tuning-and-generation-for-single-domain-generalization",
+      "title": "PAPT++: Risk-Aware Adversarial Tuning and Generation for Single Domain Generalization",
+      "section": "deep",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 8.0,
+      "evidence": "单源域泛化从一个有标注源域学习并面向未见目标域，无需微调即可泛化，符合针对未见域泛化的需求；但不涉及少样本。",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.06131v1",
+      "route": "20260831-20260909/2609.06131v1-iins-vae-a-robust-transfer-learning-framework-for-environmental-identification-in-wireless-sensing",
+      "title": "IIns-VAE+: A Robust Transfer Learning Framework for Environmental Identification in Wireless Sensing",
+      "section": "deep",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 8.0,
+      "evidence": "结合IIns-VAE与极小极大风险分类器以应对跨环境域偏移下的分类器退化",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.02299v1",
+      "route": "20260831-20260909/2609.02299v1-domain-shift-robust-object-detection-with-genai-image-editing",
+      "title": "Domain shift-robust object detection with GenAI image editing",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "目标检测器因域偏移而性能下降；用生成式图像编辑在训练中模拟受控域偏移",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.00282v1",
+      "route": "20260831-20260909/2609.00282v1-lightweight-adaptation-of-eeg-foundation-models-for-stroke-motor-imagery-decoding-domain-shift-and-subject-level-robustness",
+      "title": "Lightweight Adaptation of EEG Foundation Models for Stroke Motor Imagery Decoding: Domain Shift and Subject-Level Robustness",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "利用LoRA将预训练脑电基础模型从健康域适配到卒中病态域以进行运动想象分类，处理分布差异但并非少样本分类。",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.03505v1",
+      "route": "20260831-20260909/2609.03505v1-an-adversarial-zero-shot-learning-approach-for-anomaly-detection-in-multivariate-iot-traffic-data",
+      "title": "An Adversarial Zero-Shot Learning Approach for Anomaly Detection in Multivariate IoT Traffic Data",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "用域不变潜在表示与适配层对齐跨环境特征分布，实现零样本域适应",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.03655v1",
+      "route": "20260831-20260909/2609.03655v1-pl-scea-reconfiguring-pretrained-attention-for-few-shot-industrial-anomaly-detection",
+      "title": "PL-SCEA: Reconfiguring Pretrained Attention for Few-Shot Industrial Anomaly Detection",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "在只有少量样本的少样本异常检测中重配置预训练注意力",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.05864v1",
+      "route": "20260831-20260909/2609.05864v1-hierarchical-prompt-injector-for-domain-generalization-segmentation",
+      "title": "Hierarchical Prompt Injector for Domain Generalization Segmentation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "以层次提示达成无需微调的跨域泛化，但面向语义分割任务",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.06406v1",
+      "route": "20260831-20260909/2609.06406v1-hierarchical-wasserstein-merging-for-multi-domain-multi-task-learning-from-specialists-to-a-generalist",
+      "title": "Hierarchical Wasserstein Merging for Multi-Domain Multi-Task Learning: From Specialists to a Generalist",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "通过表示级Wasserstein合并构建多域多任务通用模型以处理分布偏移",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    },
+    {
+      "paper_id": "2609.08526v1",
+      "route": "20260831-20260909/2609.08526v1-transfer-learning-with-heterogeneous-feature-spaces-in-linear-regression",
+      "title": "Transfer Learning with Heterogeneous Feature Spaces in Linear Regression",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "few-shot"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "通过投影插补与重要性加权实现异构特征空间的源到目标迁移",
+      "first_seen_at": "2026-09-09 09:35:00 UTC",
+      "updated_at": "2026-09-09 09:35:00 UTC"
+    }
+  ]
+}
