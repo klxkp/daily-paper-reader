@@ -1,0 +1,2137 @@
+{
+  "top_k": 200,
+  "generated_at": "2026-09-09T09:21:11.488503+00:00",
+  "papers": [
+    {
+      "id": "aaai-2026-39486",
+      "source": "AAAI-2026-Accepted",
+      "title": "HAP: Harmonized Amplitude Perturbation for Cross-Domain Few-Shot Learning",
+      "abstract": "Cross-Domain Few-Shot Learning (CD-FSL) remains a significant challenge due to substantial distribution shifts between source and target domains. While prior approaches primarily focus on spatial alignment, they often overlook discrepancies in the frequency domain. In this paper, we reveal frequency band discretization as a key phenomenon, characterized by intra-domain low-frequency dominance, inter-domain amplitude divergence, and limited high-frequency variation. This spectral disharmony biases models toward low-frequency components, leading to spectral collapse. We quantify spectral collapse via the effective rank, a principled measure of spectral diversity. To mitigate spectral collapse, we propose Harmonized Amplitude Perturbation (HAP), a frequency-domain augmentation strategy that perturbs the amplitude spectrum via frequency-aware gains sampled from Harmonized Distributions, while fixing the phase spectrum to maintain semantic integrity. Extensive experiments on both Cross-Domain Few-Shot Image Classification and Object Detection benchmarks demonstrate that HAP effectively increases spectral diversity and consistently improves generalization, outperforming state-of-the-art methods without introducing extra model complexity.",
+      "authors": [
+        "Wenqian Li",
+        "Pengfei Fang",
+        "Hui Xue"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 28",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 28"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39486",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39486/43447",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-39519",
+      "source": "AAAI-2026-Accepted",
+      "title": "EfficientFSL: Enhancing Few-Shot Classification via Query-Only Tuning In Vision Transformers",
+      "abstract": "Large models such as Vision Transformers (ViTs) have demonstrated remarkable superiority over smaller architectures like ResNet in few-shot classification, owing to their powerful representational capacity. However, fine-tuning such large models demands extensive GPU memory and prolonged training time, making them impractical for many real-world low-resource scenarios. To bridge this gap, we propose EfficientFSL, a query-only fine-tuning framework tailored specifically for few-shot classification with ViT, which achieves competitive performance while significantly reducing computational overhead. EfficientFSL fully leverages the knowledge embedded in the pre-trained model and its strong comprehension ability, achieving high classification accuracy with an extremely small number of tunable parameters. Specifically, we introduce a lightweight trainable Forward Block to synthesize task-specific queries that extract informative features from the intermediate representations of the pre-trained model in a query-only manner. We further propose a Combine Block to fuse multi-layer outputs, enhancing the depth and robustness of feature representations. Finally, a Support-Query Attention Block mitigates distribution shift by adjusting prototypes to align with the query set distribution.  With minimal trainable parameters, EfficientFSL achieves state-of-the-art performance on four in-domain few-shot datasets and six cross-domain datasets, demonstrating its effectiveness in real-world applications.",
+      "authors": [
+        "Wenwen Liao",
+        "Hang Ruan",
+        "Jianbo Yu",
+        "Bing Song",
+        "Yuansong Wang",
+        "Xiaofeng Yang"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 28",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 28"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39519",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39519/43480",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "openreview-icml-2026-qjwfbn77kx",
+      "source": "ICML-2026-Accepted",
+      "title": "FiSeR: Fine-Grained Source Representations for Cross-Domain AI Image Detection",
+      "abstract": "Real-world synthetic image detectors often generalize poorly under domain shift despite strong in-domain performance. Using unsupervised UMAP projections, we find that natural and synthetic features remain partially separable on unseen datasets, yet performance still drops, suggesting that the classification head overfits to training-domain artifacts.\nTherefore, the key is to learn more transferable representations so that the decision criterion is more stable and robust to domain shifts. Based on the structural fact that synthetic images are produced by diverse generators, we propose a hierarchical contrastive learning framework that improves the separability between natural and synthetic images while preserving generator identity information. It jointly optimizes (i) a coarse contrastive objective between natural and synthetic images and (ii) a fine contrastive objective among synthetic images using generator identities.\nTrained on WildFake, our method achieves an average AUROC gain of +10.22 on cross-domain evaluation over Chameleon, AIGIBench, Community Forensics, and GenImage under the same settings as the strong baseline DIRE. For few-shot adaptation, we freeze the backbone and fit an SVM head on 10 labeled samples per class, improving AUROC by +10.64 on AIGIBench and +17.41 on Chameleon, averaged over 12 widely used detectors. Our code is publicly available at: https://github.com/heyongxin233/FiSeR.",
+      "authors": [
+        "Shan Zhang",
+        "Yongxin He",
+        "Mingming Zhang",
+        "Huiwen Tian",
+        "Lei Ma"
+      ],
+      "primary_category": "AI-generated image detection; representation learning; cross-domain generalization; contrastive learning;",
+      "categories": [
+        "AI-generated image detection; representation learning; cross-domain generalization; contrastive learning;"
+      ],
+      "published": "2026-04-30T19:08:40.354+00:00",
+      "link": "https://openreview.net/forum?id=qjwFbN77kx",
+      "pdf_url": "https://openreview.net/pdf/9e76dc58ad80ab020de1935bd9a69f89c1d00268.pdf",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "anthology-2026.acl-long.973",
+      "source": "ACL-2026-Long",
+      "title": "SAME: Signer-Aware Mixture-of-Experts for Test-Time Adaptation in Sign Language Translation",
+      "abstract": "Sign language translation (SLT) is essential for bridging communication between the deaf and hearing communities, but real-world deployment suffers from domain shift such as signer variability, lighting, and background changes. Supervised fine-tuning is impractical due to limited labeled data, and existing unsupervised adaptation methods require batch statistics or long adaptation. We introduce Test-Time Adaptation (TTA) for SLT, enabling rapid adaptation to domain shift without the need for labeled data. To the best of our knowledge, this is the first study to explore TTA in SLT. Existing TTA methods predominantly focus on image classification tasks and lack a comprehensive strategy for handling domain shift in SLT. In response, we introduce SAME, a plug-and-play, signer-aware Mixture-of-Experts (MoE) TTA architecture for SLT. SAME inserts lightweight MoE modules after multiple encoder layers. Gates are conditioned on signer features and stabilized with unsupervised regularizers, effectively decoupling domain shift across encoder depths while enabling personalized adaptation. Experiments show that SAME outperforms existing TTA methods and can enhance the capabilities of multiple SLT models.",
+      "authors": [
+        "Lujia Yang",
+        "Weicai Yan",
+        "Yongbo He",
+        "Qifei Zhang",
+        "Tao Jin",
+        "Jinshan Zhang",
+        "Meng Xi",
+        "Jianwei Yin"
+      ],
+      "primary_category": "ACL-2026-Long",
+      "categories": [
+        "ACL-2026-Long"
+      ],
+      "published": "2026-07-01T00:00:00+00:00",
+      "link": "https://aclanthology.org/2026.acl-long.973/",
+      "pdf_url": "https://aclanthology.org/2026.acl-long.973.pdf",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-38220",
+      "source": "AAAI-2026-Accepted",
+      "title": "Decompose and Attribute: Boosting Generalizable Open-Set Object Detection via Objectness Score",
+      "abstract": "Open-set object detection (OSOD) aims to recognize known object categories while localizing previously unseen instances. However, real-world scenarios often involve co-occurring domain shifts and novel object categories. Existing OSOD methods typically overlook domain shifts, relying on source-trained representations that entangle domain-specific style with semantic content, thereby hindering generalization to both unseen domains and novel categories. To address this challenge, we propose a unified framework, termed DecOmpose and ATtribute (DOAT), which disentangles domain-specific style from semantic structure, thereby facilitating generalizable object detection. DOAT employs wavelet-based feature decomposition to separate style information from high-frequency structural details, thus enabling an explicit separation of domain and category shifts. To account for domain shift, the low-frequency components are perturbed within a style subspace to simulate diverse domain appearances. For unknown object discovery, the high-frequency components are utilized to estimate objectness scores via an attribution mechanism that fuses wavelet energy with semantic distance to known-category prototypes. Extensive experiments on standard open-set benchmarks have demonstrated the superior generalization performance of DOAT.",
+      "authors": [
+        "Yuxuan Yuan",
+        "Lichen Wei",
+        "Luyao Tang",
+        "Chaoqi Chen",
+        "Zheyuan Cai",
+        "Yue Huang",
+        "Xinghao Ding"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 15",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 15"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/38220",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/38220/42182",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "anthology-2026.acl-long.187",
+      "source": "ACL-2026-Long",
+      "title": "CTTA-T: Continual Test-Time Adaptation for Text Understanding via Teacher-Student with a Domain-aware and Generalized Teacher",
+      "abstract": "Text understanding application often suffers from domain shifts. To handle testing domains, domain adaptation (DA) is trained to adapt to a fixed and observed testing domain; a more challenging paradigm, test-time adaptation (TTA), cannot access the testing domain during training and online adapts to the testing samples during testing, where the samples are from a fixed domain. We aim to explore a more practical and underexplored scenario, continual test-time adaptation (CTTA) for text understanding, which involves a sequence of testing (unobserved) domains in testing. Current CTTA methods struggle in reducing error accumulation over domains and enhancing generalization to handle unobserved domains: 1) Noise-filtering reduces accumulated errors but discards useful information, and 2) accumulating historical domains enhances generalization, but it is hard to achieve adaptive accumulation. In this paper, we propose a CTTA-T (continual test-time adaptation for text understanding) framework adaptable to evolving target domains: CTTA-T adopts a teacher-student framework, where the teacher is equipped with domain awareness and generalization for evolving domains. To improve teacher predictions, we propose a refine-then-filter based on dropout-driven consistency, which calibrates predictions and removes unreliable guidance. For the adaptation–generalization trade-off, we construct a domain-aware teacher by dynamically accumulating cross-domain semantics via incremental PCA, which continuously tracks domain shifts. Experiments show CTTA-T excels baselines.",
+      "authors": [
+        "Tianlun Liu",
+        "Zhiliang Tian",
+        "Zhen Huang",
+        "Xingzhi Zhou",
+        "Wanlong Yu",
+        "Tianle Liu",
+        "Feng Liu",
+        "Dongsheng Li"
+      ],
+      "primary_category": "ACL-2026-Long",
+      "categories": [
+        "ACL-2026-Long"
+      ],
+      "published": "2026-07-01T00:00:00+00:00",
+      "link": "https://aclanthology.org/2026.acl-long.187/",
+      "pdf_url": "https://aclanthology.org/2026.acl-long.187.pdf",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-39535",
+      "source": "AAAI-2026-Accepted",
+      "title": "TRUST: Leveraging Text Robustness for Unsupervised Domain Adaptation",
+      "abstract": "Recent unsupervised domain adaptation (UDA) methods have shown great success in addressing classical domain shifts (e.g., synthetic-to-real), but they still suffer under complex shifts (e.g. geographical shift), where both the background and object appearances differ significantly across domains. Prior works showed that the language modality can help in the adaptation process, exhibiting more robustness to such complex shifts. In this paper, we introduce TRUST, a novel UDA approach that exploits the robustness of the language modality to guide the adaptation of a vision model. TRUST generates pseudo-labels for target samples from their captions and introduces a novel uncertainty estimation strategy that uses normalised CLIP similarity scores to estimate the uncertainty of the generated pseudo-labels. Such estimated uncertainty is then used to reweight the classification loss, mitigating the adverse effects of wrong pseudo-labels obtained from low-quality captions. To further increase the robustness of the vision model, we propose a multimodal soft-contrastive learning loss that aligns the vision and language feature spaces, by leveraging captions to guide the contrastive training of the vision model on target images. In our contrastive loss, each pair of images acts as both a positive and a negative pair and their feature representations are attracted and repulsed with a strength proportional to the similarity of their captions. This solution avoids the need for hardly determining positive and negative pairs, which is critical in the UDA setting. Our approach outperforms previous methods, setting the new state-of-the-art on classical (DomainNet) and complex (GeoNet) domain shifts. The code is available at https://github.com/MattiaLitrico/TRUST-Leveraging-Text-Robustness-for-Unsupervised-Domain-Adaptation.",
+      "authors": [
+        "Mattia Litrico",
+        "Mario Valerio Giuffrida",
+        "Sebastiano Battiato",
+        "Devis Tuia"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 28",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 28"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39535",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39535/43496",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "openreview-icml-2026-jpcg6vvked",
+      "source": "ICML-2026-Accepted",
+      "title": "Parameter-Masked Decoupled Optimization for Cross-Domain Class-Incremental Learning",
+      "abstract": "Cross-domain class-incremental learning (CD-CIL) requires models to continuously acquire new classes across shifting domains while retaining previously learned knowledge. Existing approaches often entangle what to update with how to update, resulting in unstable adaptation and severe forgetting under domain shifts.\nInspired by the hippocampal learning mechanism that separates rapid adaptation from stable consolidation, we propose Parameter-Masked Decoupled Optimization (PMDO) that disentangles what knowledge is adapted from how learning proceeds in cross-domain class-incremental learning. \nWe introduce a domain-aware knowledge decoupler that selectively adapts domain-relevant shared parameters, constraining incremental updates while preserving prior representations.\nTo regulate how learning proceeds, we further design a stability-aware trajectory regulation that guides optimization along transferable and stable optimization trajectories, thereby reducing interference across domain transitions.\nPMDO enables effective cross-domain adaptation while mitigating catastrophic forgetting and maintaining long-term learnability. \nExtensive experiments across multiple benchmarks demonstrate the effectiveness of PMDO and its superiority over state-of-the-art methods.",
+      "authors": [
+        "Ziqi Gu",
+        "Chunyan Xu",
+        "Yangguang Liu",
+        "Wenxuan Fang",
+        "Baotong Su",
+        "Tong Zhang",
+        "Dan Wang",
+        "Zhen Cui"
+      ],
+      "primary_category": "Cross-domain class incremental learning; parameter decoupler",
+      "categories": [
+        "Cross-domain class incremental learning; parameter decoupler"
+      ],
+      "published": "2026-04-30T19:13:10.257+00:00",
+      "link": "https://openreview.net/forum?id=JPcg6VVKeD",
+      "pdf_url": "https://openreview.net/pdf/9ee79657016cbdd81f197c8d7e5ea3ccdf7628bd.pdf",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-39125",
+      "source": "AAAI-2026-Accepted",
+      "title": "Active Multi-source Domain Adaptation for Multimodal Fake News Detection",
+      "abstract": "Multimodal fake news detection plays a crucial role in combating online misinformation. The inherent domain diversity of news in the real world has driven the development of cross-domain detection methods. However, these detection methods either suffer from significant performance degradation due to semantic and deception pattern shifts between the training (source) and test (target) domains or heavily rely on annotated labels. To address the problems, we propose ADOSE, an active multi-source domain adaptation framework for multimodal fake news detection which actively annotates a small subset of target samples to improve detection performance. Specifically, for domain shifts, we design a multi-expert classifier network based on refined features to comprehensively capture and adapt to the semantic space and deception patterns of news across different domains. To maximize adaptation performance with limited annotation cost, we propose a least-disagree uncertainty selector equipped with a diversity calculator for selecting the most informative samples. The selector leverages the uncertainty of inconsistent predictions before and after perturbations by multiple classifiers as an indicator of unfamiliar samples. It further incorporates diversity scores derived from multi-view features to ensure the chosen samples achieve maximal coverage of target domain features. The extensive experiments on multiple datasets show that ADOSE outperforms existing domain adaptation methods by 2.45% ~ 9.1%, indicating the superiority of our model.",
+      "authors": [
+        "Yanping Chen",
+        "Weijie Shi",
+        "Mengze Li",
+        "Yue Cui",
+        "Jiaming Li",
+        "Ruiyuan Zhang",
+        "Hao Chen",
+        "Hanghui Guo",
+        "Shimin Di",
+        "Ziyi Liu",
+        "Jia Zhu",
+        "Jiajie Xu"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 24",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 24"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39125",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39125/43087",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-37432",
+      "source": "AAAI-2026-Accepted",
+      "title": "Less Is Better: Sparse Instance Learning for Cross-Domain Few-Shot Object Detection",
+      "abstract": "Cross-Domain Few-Shot Object Detection (CD-FSOD) is an extremely challenging task due to the inherent data scarcity and substantial domain shift between the source and target domains. Existing methods often suffer from overfitting and noisy feature representations, which hinder the construction of discriminative class prototypes in the target domain. In this paper, we propose a novel framework with sparse instance learning (SI-ViTO) for CD-FSOD, which leverages instance sparsity to achieve a better detection with less representation. SI-ViTO adopts a dual-stage sparsity module, consisting of instance feature sparsity not only on the few-shot support images but also on the query images. This dual sparsity enables the model to effectively preserve salient foreground semantics and simultaneously to filter out redundant or noisy information. Furthermore, a new prototype calibration strategy is also used to dynamically refine the class prototypes with query instances to accelerate prototype adaptation. Extensive experimental results on CD-FSOD benchmarks show that SI-ViTO outperforms the state-of-the-art methods, demonstrating that less discriminative representations yield better cross-domain few-shot object detection performance than more abundant ones.",
+      "authors": [
+        "Yali Huang",
+        "Jie Mei",
+        "Ziyi Wu",
+        "Yiming Yang",
+        "Hongru Zhao",
+        "Mingyuan Jiu",
+        "Hichem Sahbi"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 7",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 7"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/37432",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/37432/41394",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-40089",
+      "source": "AAAI-2026-Accepted",
+      "title": "Prototype-Driven Active Domain Adaptation with Density Consideration",
+      "abstract": "Active domain adaptation (ADA) aims to select a small set of target samples for annotation and use them for training to maximally boost the adaptation performance. However, most existing ADA methods only rely on the original output of the model, without considering the relationship between the source and target domain features, which may lead to selecting uninformative samples. In this paper, we propose an effective ADA framework: Prototype-Driven Active Domain Adaptation with density consideration (PDADA). It selects the most valuable target samples in the presence of domain shift through two criteria: Density-Conscious Domainness (DCD) and Prototype-Driven Informativeness (PDI). Furthermore, considering the class imbalance and cluster looseness issues in sample selection and domain adaptation, we develop a Class Balanced Expansion (CBE) algorithm and the Adversarial Active Domain Adaptation via Protecting Structured Information (AADA-PSI). Extensive experiments demonstrate that under the cooperation of the above components, PDADA outperforms previous methods on several challenging benchmarks and can be generalized to multi-source active domain adaptation setting.",
+      "authors": [
+        "Zeyu Zhang",
+        "Chun Shen",
+        "Qiang Ma",
+        "Meng Kang",
+        "Shuai Lü"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 34",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 34"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/40089",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/40089/44050",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-38306",
+      "source": "AAAI-2026-Accepted",
+      "title": "Simulating Distribution Dynamics: Liquid Temporal Feature Evolution for Single-Domain Generalized Object Detection",
+      "abstract": "In this paper, we focus on Single-Domain Generalized Object Detection (Single-DGOD), aiming to transfer a detector trained on one source domain to multiple unknown domains.\nExisting methods for Single-DGOD typically rely on discrete data augmentation or static perturbation methods to expand data diversity, thereby mitigating the lack of access to target domain data. However, in real-world scenarios such as changes in weather or lighting conditions, domain shifts often occur continuously and gradually. \nDiscrete augmentations and static perturbations fail to effectively capture the dynamic variation of feature distributions, thereby limiting the model's ability to perceive fine-grained cross-domain differences.\nTo this end, we propose a new method, i.e., Liquid Temporal Feature Evolution, which simulates the progressive evolution of features from the source domain to simulated latent distributions by incorporating temporal modeling and liquid neural network–driven parameter adjustment. Specifically, we introduce controllable Gaussian noise injection and multi-scale Gaussian blurring to simulate initial feature perturbations, followed by temporal modeling and a liquid parameter adjustment mechanism to generate adaptive modulation parameters, enabling a smooth and continuous adaptation across domains.\nBy capturing progressive cross-domain feature evolution and dynamically regulating adaptation paths, our method bridges the source-unknown domain distribution gap, significantly boosting generalization and robustness to unseen shifts.\nSignificant performance improvements on the Diverse Weather dataset and Real-to-Art benchmark demonstrate the superiority of our method.",
+      "authors": [
+        "Zihao Zhang",
+        "Yang Li",
+        "Aming Wu",
+        "Yahong Han"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 15",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 15"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/38306",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/38306/42268",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-38160",
+      "source": "AAAI-2026-Accepted",
+      "title": "StyleProto: Style-Augmented Prototype Learning for Cross-Domain Few-Shot Object Detection",
+      "abstract": "Cross-Domain Few-Shot Object Detection (CD-FSOD) faces significant challenges due to the dual issues of domain shift and limited labeled samples. One major challenge is style bias, caused by limited support samples that fail to represent the target domain’s style diversity. Another is feature confusion, which stems from distribution shifts and limited supervision, manifesting as both object-background ambiguity and object-object confusion. To address these challenges, we propose Style-Augmented Prototype Learning (StyleProto), which constructs style-aware prototypes from support samples with diverse visual styles, and refines them via spatial weighting and discriminative fusion. Specifically, our StyleProto consists of three components: (1) Style Generation Augmentation (SGA); (2) Semantic-Focused Prototype Construction (SPC); (3) Hierarchical Prototype Fusion Aggregator (HPFA). SGA synthesizes style-diverse yet semantically consistent training samples by recombining style statistics from the support set, thus improving robustness to unseen styles. SPC aggregates support features using spatial attention to highlight object semantics and suppress background noise, yielding cleaner and more distinctive class prototypes. HPFA leverages query-guided attention to integrate discriminative support features, enhancing prototype representations with richer class-specific details. Extensive experiments on multiple benchmarks demonstrate that StyleProto consistently outperforms existing state-of-the-art methods.",
+      "authors": [
+        "Xi Yang",
+        "Quantao Xie"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 14",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 14"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/38160",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/38160/42122",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "openreview-icml-2026-iqxzdud36x",
+      "source": "ICML-2026-Accepted",
+      "title": "Rethinking the Flow-based Gradual Domain Adaptation: A Semi-Dual Optimal Transport Perspective",
+      "abstract": "Gradual domain adaptation (GDA) aims to mitigate domain shift by progressively adapting models from the source domain to the target domain via intermediate domains. However, real intermediate domains are often unavailable or ineffective, necessitating the synthesis of intermediate samples. Flow-based models have recently been used for this purpose by interpolating between source and target distributions. Notably, their training typically relies on sample-based log-likelihood estimation, which can discard useful information and thus degrade GDA performance. The key to addressing this limitation is constructing the intermediate domains via samples directly. To this end, we propose an $\\underline{\\text{E}}$ntropy-regularized $\\underline{\\text{S}}$emi-dual $\\underline{\\text{U}}$nbalanced $\\underline{\\text{O}}$ptimal $\\underline{\\text{T}}$ransport (E-SUOT) framework to construct intermediate domains. Specifically, we reformulate flow-based GDA as a Lagrangian dual problem and derive an equivalent semi-dual objective that circumvents the need for likelihood estimation. However, the dual problem leads to an unstable min–max training procedure. To alleviate this issue, we further introduce the entropy regularization to convert it into a more stable sequential optimization procedure. Based on this, we propose a novel GDA training framework and provide theoretical analysis in terms of stability and generalization. Finally, extensive experiments are conducted to demonstrate the efficacy of the E-SUOT framework.",
+      "authors": [
+        "Zhichao Chen",
+        "Zhan Zhuang",
+        "Yunfei Teng",
+        "Hao Wang",
+        "Fangyikang Wang",
+        "Zhengnan Li",
+        "Tianqiao Liu",
+        "Haoxuan Li",
+        "Zhouchen Lin"
+      ],
+      "primary_category": "Gradual Domain Adaption",
+      "categories": [
+        "Gradual Domain Adaption",
+        "Optimal Transport",
+        "Gradient Flow",
+        "Semi-Dual Transport",
+        "Convex Optimization"
+      ],
+      "published": "2026-04-30T19:11:03.043+00:00",
+      "link": "https://openreview.net/forum?id=iqXzDUd36x",
+      "pdf_url": "https://openreview.net/pdf/80183c65651f06969943f9119a5971ef2c0cdeb9.pdf",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-39508",
+      "source": "AAAI-2026-Accepted",
+      "title": "Fair Domain Generalization: An Information-Theoretic View",
+      "abstract": "Domain generalization (DG) and algorithmic fairness are two key challenges in machine learning. However, most DG methods focus solely on minimizing expected risk in the unseen target domain, without considering algorithmic fairness. Conversely, fairness methods typically do not account for domain shifts, so the fairness achieved during training may not generalize to unseen test domains. In this work, we bridge these gaps by studying the problem of Fair Domain Generalization (FairDG), which aims to minimize both expected risk and fairness violations in unseen target domains. We derive novel mutual information-based upper bounds for expected risk and fairness violations in multi-class classification tasks with multi-group sensitive attributes. These bounds provide key insights for algorithm design from an information-theoretic perspective. Guided by these insights, we propose a practical method that solves the FairDG problem through Pareto optimization. Experiments on real-world vision and language datasets show that our method achieves superior utility–fairness trade-offs compared to existing approaches.",
+      "authors": [
+        "Tangzheng Lian",
+        "Guanyu Hu",
+        "Dimitrios Kollias",
+        "Xinyu Yang",
+        "Oya Celiktutan"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 28",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 28"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39508",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39508/43469",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "openreview-icml-2026-hhhsqmuwsu",
+      "source": "ICML-2026-Accepted",
+      "title": "Return of Frustratingly Easy Unsupervised Video Domain Adaptation",
+      "abstract": "Unsupervised video domain adaptation (UVDA) is a practical but under-explored problem.\nIn this paper, we propose a frustratingly easy UVDA method, called \\emph{MetaTrans}.\nSpecifically, \\emph{MetaTrans} adopts a concise learning objective that contains only two fundamental loss terms.\nDespite the simplicity of the learning objective, \\emph{MetaTrans} embodies an advanced UVDA idea, that is, handling the spatial and temporal divergence of cross-domain videos separately, through a subtle model architecture design.\nBy implementing a temporal-static subtraction module, \\emph{MetaTrans} effectively removes spatial and temporal divergence.\nExtensive empirical evaluations, particularly on various cross-domain action recognition tasks, show substantial absolute adaptation performance enhancement and significantly superior relative performance gain compared with state-of-the-art UVDA baselines.",
+      "authors": [
+        "Pengfei Wei",
+        "Yiqun Sun",
+        "zhiqiang xu",
+        "Yiping Ke",
+        "Lawrence B. Hsieh"
+      ],
+      "primary_category": "Unsupervised video domain adaptation",
+      "categories": [
+        "Unsupervised video domain adaptation",
+        "Spatial and temproal divergence",
+        "temporal-static subtraction module"
+      ],
+      "published": "2026-04-30T19:14:03.43+00:00",
+      "link": "https://openreview.net/forum?id=hhhsqmUWsU",
+      "pdf_url": "https://openreview.net/pdf/f74c60b1a3b2e5d4ce77e526fc81cd89ccb7e9cb.pdf",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-38263",
+      "source": "AAAI-2026-Accepted",
+      "title": "Unified Interaction Consistency Learning for Single-Source Domain-Generalized Object Detection in Urban Scene",
+      "abstract": "Domain generalization remains a critical challenge for deploying neural networks, particularly in out-of-distribution object detection. The distributional discrepancy between training (e.g., daytime-sunny) and the realistic condition (e.g., night-rainy) inevitably produces imprecise localization and wrong classification. To address these issues, we propose a unified interaction consistency learning (UICL) framework, a novel single-source domain-generalized method designed to learn intra-class domain-invariant representations. Specifically, we put forth a cross-domain interaction mechanism to exchange region proposals between original and augmented pipelines, enriching the diversity of instance-level representations. Building upon this, we propose prediction-guided consistency learning to unify the interaction mechanism and harmonize the cross-domain representations, contributing to a discriminative prediction distribution under domain shift. In addition, we devise a cyclic interaction resilient detection strategy, which mitigates inaccurate predictions suffering from partial occlusion and ambiguous boundaries among different domains. Extensive experiments evidence that UICL significantly improves the robustness of detectors over several target domains, achieving state-of-the-art generalization performance on the diverse weather benchmark.",
+      "authors": [
+        "Peng Zhang",
+        "Xiang Yuan",
+        "Gong Cheng"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 15",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 15"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/38263",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/38263/42225",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-37338",
+      "source": "AAAI-2026-Accepted",
+      "title": "Divide-and-Conquer Decoupled Network for Cross-Domain Few-Shot Segmentation",
+      "abstract": "Cross-domain few-shot segmentation (CD-FSS) aims to tackle the dual challenge of recognizing novel classes and adapting to unseen domains with limited annotations. However, encoder features often entangle domain-relevant and category-relevant information, limiting both generalization and rapid adaptation to new domains. To address this issue, we propose a Divide-and-Conquer Decoupled Network (DCDNet). In the training stage, to tackle feature entanglement that impedes cross-domain generalization and rapid adaptation, we propose the Adversarial-Contrastive Feature Decomposition (ACFD) module. It decouples backbone features into category-relevant private and domain-relevant shared representations via contrastive learning and adversarial learning. Then, to mitigate the potential degradation caused by the disentanglement, the Matrix-Guided Dynamic Fusion (MGDF) module adaptively integrates base, shared, and private features under spatial guidance, maintaining structural coherence. In addition, in the fine-tuning stage, to enhanced model generalization, the Cross-Adaptive Modulation (CAM) module is placed before the MGDF, where shared features guide private features via modulation ensuring effective integration of domain-relevant information. Extensive experiments on four challenging datasets show that DCDNet outperforms existing CD-FSS methods, setting a new state-of-the-art for cross-domain generalization and few-shot adaptation.",
+      "authors": [
+        "Runmin Cong",
+        "Anpeng Wang",
+        "Bin Wan",
+        "Cong Zhang",
+        "Xiaofei Zhou",
+        "Wei Zhang"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 5",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 5"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/37338",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/37338/41300",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-38010",
+      "source": "AAAI-2026-Accepted",
+      "title": "Fine-Grained Generalization via Structuralizing Concept and Feature Space into Commonality, Specificity and Confounding",
+      "abstract": "Fine-Grained Domain Generalization (FGDG) presents greater challenges than conventional domain generalization due to the subtle inter-class differences and relatively pronounced intra-class variations inherent in fine-grained recognition tasks. Under domain shifts, the model becomes overly sensitive to fine-grained cues, leading to the suppression of critical features and a significant drop in performance. \nCognitive studies suggest that humans classify objects by leveraging both common and specific attributes, enabling accurate differentiation between fine-grained categories. However, current deep learning models have yet to incorporate this mechanism effectively. Inspired by this mechanism, we propose Concept-Feature Structuralized Generalization (CFSG). This model explicitly disentangles both the concept and feature spaces into three structured components: common, specific, and confounding segments. \nTo mitigate the adverse effects of varying degrees of distribution shift, we introduce an adaptive mechanism that dynamically adjusts the proportions of common, specific, and confounding components. \nIn the final prediction, explicit weights are assigned to each pair of components. \nExtensive experiments on three single-source benchmark datasets demonstrate that CFSG achieves an average performance improvement of 9.87% over baseline models and outperforms existing state-of-the-art methods by an average of 3.08%. Additionally, explainability analysis validates that CFSG effectively integrates multi-granularity structured knowledge and confirms that feature structuralization facilitates the emergence of concept structuralization.",
+      "authors": [
+        "Zhen Wang",
+        "Jiaojiao Zhao",
+        "Qilong Wang",
+        "Yongfeng Dong",
+        "Wenlong Yu"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 12",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 12"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/38010",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/38010/41972",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "anthology-2026.findings-acl.822",
+      "source": "ACL-2026-Findings",
+      "title": "Structured Confidence–Guided Online Adaptation for LLM-based Multi-Label Classification",
+      "abstract": "Large language models (LLMs) enable zero-shot and few-shot multi-label text classification via in-context learning, yet most approaches perform static inference and degrade under streaming test data due to distribution shift and long-tail labels. We study online test-time adaptation for LLM-based multi-label generation without any parameter updates, and identify two bottlenecks: (1) standard generation probabilities provide unreliable confidence because they ignore label competition at key decoding branches; (2) naive confidence-based caching overfits to frequent and easy examples, reducing label coverage and diversity. We propose SCOTTA, a structured confidence-guided online adaptation framework. SCOTTA introduces Label-set Local Likelihood Ratio (L3R), a label-level confidence measure that compares a target label against its valid competitors at critical decision positions. Using L3R as a unified signal, SCOTTA maintains an in-context exemplar cache via streaming submodular maximization, balancing label coverage, semantic diversity, and sample quality under a fixed context budget. Across four benchmarks, SCOTTA consistently improves Micro-F1 and Macro-F1 over strong LLM and non-LLM baselines, with the largest gains on long-tail labels.",
+      "authors": [
+        "Pengyu Xu",
+        "JingRen Hou",
+        "Liping Jing (景丽萍)",
+        "Jian Yu (于剑)"
+      ],
+      "primary_category": "ACL-2026-Findings",
+      "categories": [
+        "ACL-2026-Findings"
+      ],
+      "published": "2026-07-01T00:00:00+00:00",
+      "link": "https://aclanthology.org/2026.findings-acl.822/",
+      "pdf_url": "https://aclanthology.org/2026.findings-acl.822.pdf",
+      "tags": [
+        "keyword:few-shot"
+      ]
+    },
+    {
+      "id": "openreview-icml-2026-5m6gcvcqdo",
+      "source": "ICML-2026-Accepted",
+      "title": "Regularized Discriminative Alignment for Deep Representations under Label Shift",
+      "abstract": "Label shift refers to the distribution shift scenario where the marginal label distribution changes while the class-conditional distribution remains invariant. To address this challenge in complex real-world settings, we propose **Regularized Discriminative Alignment for Label Shift (RDALS)**, a novel framework that adapts to target domains by aligning distributions within the deep latent space. By shifting the focus from raw inputs to learned representations, RDALS effectively operates under a weaker and more practical invariance assumption. Specifically, we construct a moment-matching linear system using Linear Discriminant Analysis (LDA) and show that this choice maximizes numerical stability. We further provide rigorous theoretical analysis, establishing finite-sample error bounds for the importance weight estimation and the generalization bounds for the adapted classifier. Extensive experiments on standard benchmarks demonstrate that RDALS significantly outperforms state-of-the-art baselines, achieving superior robustness and accuracy in both data-scarce and extreme-shift regimes.",
+      "authors": [
+        "Hengchao Shi",
+        "Boen Jiang",
+        "Guanhua Fang",
+        "Wen Yu",
+        "Ming Zheng"
+      ],
+      "primary_category": "Label Shift",
+      "categories": [
+        "Label Shift",
+        "Domain Adaptation",
+        "Importance Weight",
+        "Representation Learning",
+        "Generalization Bounds",
+        "Linear Discriminant Analysis"
+      ],
+      "published": "2026-04-30T19:14:31.435+00:00",
+      "link": "https://openreview.net/forum?id=5m6GcVcqDO",
+      "pdf_url": "https://openreview.net/pdf/77f70df3c2a483772324fd9cbbd9c7f5f6e83c8d.pdf",
+      "tags": [
+        "keyword:few-shot",
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-37879",
+      "source": "AAAI-2026-Accepted",
+      "title": "Bridging Granularity Gaps: Hierarchical Semantic Learning for Cross-domain Few-shot Segmentation",
+      "abstract": "Cross-domain Few-shot Segmentation (CD-FSS) aims to segment novel classes from target domains that are not involved in training and have significantly different data distributions from the source domain, using only a few annotated samples, and recent years have witnessed significant progress on this task. However, existing CD-FSS methods primarily focus on style gaps between source and target domains while ignoring segmentation granularity gaps, resulting in insufficient semantic discriminability for novel classes in target domains. Therefore, we propose a Hierarchical Semantic Learning (HSL) framework to tackle this problem. Specifically, we introduce a Dual Style Randomization (DSR) module and a Hierarchical Semantic Mining (HSM) module to learn hierarchical semantic features, thereby enhancing the model's ability to recognize semantics at varying granularities. DSR simulates target domain data with diverse foreground-background style differences and overall style variations through foreground and global style randomization respectively, while HSM leverages multi-scale superpixels to guide the model to mine intra-class consistency and inter-class distinction at different granularities. Additionally, we also propose a Prototype Confidence-modulated Thresholding (PCMT) module to mitigate segmentation ambiguity when foreground and background are excessively similar. Extensive experiments are conducted on four popular target domain datasets, and the results demonstrate that our method achieves state-of-the-art performance.",
+      "authors": [
+        "Sujun Sun",
+        "Haowen Gu",
+        "Cheng Xie",
+        "Yanxu Ren",
+        "Mingwu Ren",
+        "Haofeng Zhang"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 11",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 11"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/37879",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/37879/41841",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-39123",
+      "source": "AAAI-2026-Accepted",
+      "title": "F2SST: Frequency-to-Spatial Semantic Transfer for Few-Shot Image Classification",
+      "abstract": "Few-shot image classification (FSIC) aims to recognize novel categories from only a few labeled examples, making it inherently challenging under limited supervision. Existing approaches have attempted to alleviate this issue by incorporating explicit semantics like class names or knowledge graphs to guide learning. However, such methods often encounter semantic ambiguity due to their dependence on either overly simplistic semantic priors or resource-intensive external knowledge sources, which limits their potential. In this paper, we explore the frequency domain as an implicit and task-adaptive source of semantic information. We propose F2SST, a Frequency-to-Spatial Semantic Transfer framework that enhances feature learning by leveraging spectral signals as hidden semantics. Specifically, F2SST applies Fast Fourier Transform (FFT) to extract phase-invariant global frequency descriptors, followed by a lightweight Gated Spectral Attention (GSA) module that selectively emphasizes class-relevant frequency components. These enhanced spectral cues are then integrated into the spatial stream through a class-guided fusion mechanism, enabling more robust and semantically aligned representations. Extensive experiments on four standard benchmarks (miniImageNet, tieredImageNet, CIFAR-FS and FC100)  demonstrate that F2SST consistently improves performance, validating the effectiveness of frequency-domain semantics in FSIC.",
+      "authors": [
+        "Xueyi Chen",
+        "Bangjun Wang",
+        "Jiaqing Fan",
+        "Li Zhang",
+        "Fanzhang Li"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 24",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 24"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39123",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39123/43085",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-38143",
+      "source": "AAAI-2026-Accepted",
+      "title": "PointDGRWKV: Generalizing RWKV-like Architecture to Unseen Domains for Point Cloud Classification",
+      "abstract": "Domain Generalization (DG) has been recently explored to enhance the generalizability of Point Cloud Classification (PCC) models toward unseen domains. Prior works are based on convolutional networks, Transformer or Mamba architectures, either suffering from limited receptive fields or high computational cost, or insufficient long-range dependency modeling. RWKV, as an emerging architecture, possesses superior linear complexity, global receptive fields, and long-range dependency. In this paper, we present the first work that studies the generalizability of RWKV models in DG PCC. We find that directly applying RWKV to DG PCC encounters two significant challenges: RWKV's fixed direction token shift methods, like Q-Shift, introduce spatial distortions when applied to unstructured point clouds, weakening local geometric modeling and reducing robustness. In addition, the Bi-WKV attention in RWKV amplifies slight cross-domain differences in key distributions through exponential weighting, leading to attention shifts and degraded generalization. To this end, we propose PointDGRWKV, the first RWKV-based framework tailored for DG PCC. It introduces two core modules to enhance spatial modeling and cross-domain robustness, while maintaining RWKV's linear efficiency. In particular, we present Adaptive Geometric Token Shift to model local neighborhood structures to improve geometric context awareness. In addition, Cross-Domain key feature Distribution Alignment is designed to mitigate attention drift by aligning key feature distributions across domains. Extensive experiments on multiple benchmarks demonstrate that PointDGRWKV achieves state-of-the-art performance on DG PCC.",
+      "authors": [
+        "Hao Yang",
+        "Qianyu Zhou",
+        "Haijia Sun",
+        "Xiangtai Li",
+        "Xuequan Lu",
+        "Lizhuang Ma",
+        "Shuicheng YAN"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 14",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 14"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/38143",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/38143/42105",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "openreview-icml-2026-13rceoefry",
+      "source": "ICML-2026-Accepted",
+      "title": "Directional Neural Collapse Explains Few-Shot Transfer in Self-Supervised Learning",
+      "abstract": "Frozen self-supervised representations often transfer well with only a few labels across many semantic tasks. We argue that a single geometric quantity, *directional* CDNV (decision-axis variance), sits at the core of two favorable behaviors: strong few-shot transfer within a task, and low interference across many tasks. We show that both emerge when variability *along* class-separating directions is small. First, we prove sharp non-asymptotic multiclass generalization bounds for downstream classification whose leading term is the directional CDNV. The bounds include finite-shot corrections that cleanly separate intrinsic decision-axis variability from centroid-estimation error. Second, we link decision-axis collapse to multitask geometry: for independent balanced labelings, small directional CDNV across tasks forces the corresponding decision axes to be nearly orthogonal, helping a single representation support many tasks with minimal interference. Empirically, across SSL objectives, directional CDNV collapses during pretraining even when classical CDNV remains large, and our bounds closely track few-shot error at practical shot sizes. Additionally, on synthetic multitask data, we verify that SSL learns representations whose induced decision axes are nearly orthogonal.",
+      "authors": [
+        "Achleshwar Luthra",
+        "Yash Salunkhe",
+        "Tomer Galanti"
+      ],
+      "primary_category": "Self-supervised Learning",
+      "categories": [
+        "Self-supervised Learning",
+        "Neural Collapse",
+        "Representation Learning",
+        "Transferability",
+        "Deep Learning Theory"
+      ],
+      "published": "2026-04-30T19:20:46.564+00:00",
+      "link": "https://openreview.net/forum?id=13rCeoefry",
+      "pdf_url": "https://openreview.net/pdf/35eb863e6937ad95472afe503f083636b3670c84.pdf",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-39086",
+      "source": "AAAI-2026-Accepted",
+      "title": "Cross-Domain Few-Shot Learning via Multi-View Collaborative Optimization with Vision-Language Models",
+      "abstract": "Vision-language models (VLMs) pre-trained on natural image and language data, such as CLIP, have exhibited significant potential in few-shot image recognition tasks, leading to development of various efficient transfer learning methods. These methods exploit inherent pre-learned knowledge in VLMs and have achieved strong performance on standard image datasets. However, their effectiveness is often limited when confronted with cross-domain tasks where imaging domains differ from natural images. To address this limitation, we propose Consistency-guided Multi-view Collaborative Optimization (CoMuCo), a novel fine-tuning strategy for VLMs. This strategy employs two functionally complementary expert modules to extract multi-view features, while incorporating prior knowledge-based consistency constraints and information geometry-based consensus mechanisms to enhance the robustness of feature learning. Additionally, a new cross-domain few-shot benchmark is established to help comprehensively evaluate methods on imaging domains distinct from natural images. Extensive empirical evaluations on both existing and newly proposed benchmarks suggest CoMuCo consistently outperforms current methods.",
+      "authors": [
+        "Dexia Chen",
+        "Wentao Zhang",
+        "Qianjie Zhu",
+        "Ping Hu",
+        "Weibing Li",
+        "Tong Zhang",
+        "Ruixuan Wang"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 24",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 24"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39086",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39086/43048",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-37569",
+      "source": "AAAI-2026-Accepted",
+      "title": "From Dataset to Real-world: General 3D Object Detection via Generalized Cross-domain Few-shot Learning",
+      "abstract": "LiDAR-based 3D object detection models often struggle to generalize to real-world environments due to limited object diversity in existing datasets. To tackle it, we introduce the first generalized cross-domain few-shot (GCFS) task in 3D object detection, aiming to adapt a source-pretrained model to both common and novel classes in a new domain with only few-shot annotations. We propose a unified framework that learns stable target semantics under limited supervision by bridging 2D open-set semantics with 3D spatial reasoning. Specifically, an image-guided multi-modal fusion injects transferable 2D semantic cues into the 3D pipeline via vision-language models, while a physically-aware box search enhances 2D-to-3D alignment via LiDAR priors. To capture class-specific semantics from sparse data, we further introduce contrastive-enhanced prototype learning, which encodes few-shot instances into discriminative semantic anchors and stabilizes representation learning. Extensive experiments on GCFS benchmarks demonstrate the effectiveness and generality of our approach in realistic deployment settings.",
+      "authors": [
+        "Shuangzhi Li",
+        "Junlong Shen",
+        "Lei Ma",
+        "Xingyu Li"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 8",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 8"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/37569",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/37569/41531",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-38076",
+      "source": "AAAI-2026-Accepted",
+      "title": "Training-free Boosting for Few-shot Segmentation via Generalizing Semantic Mining",
+      "abstract": "Few-shot Semantic Segmentation (FSS) aims to segment the novel target objects with the guidance of minimal annotated reference examples. \nThe affinity-based method has great advantages in the FSS inference stage for both specialist model and foundation model. However, current affinity calculation merely relies on only support-query matching, without considering the query-specific semantic or the semantic correlation among inter-support samples, which limits the representation ability of affinity map. In this paper, we propose the Generalizing Semantic Mining (GSM) that focuses on exploiting generalizing semantic to improve the affinity calculation. Concretely, we first organize the affinity-based inference into three main steps to reveal the crucial role of affinity map. To address the low-data problem, Target Semantic Reusing module considers the query sample as a proxy reference and assigns it with proxy mask identifying its most generalizing semantic regions. Then, to generate the high-fidelity proxy mask, Query-specific Semantic Modeling module pinpoints the most generalizing regions through prior semantic analysis. Finally, Representative Re-weighting module explicitly modulates affinity calculation via generalization-aware weighting. Experiments on FSS benchmarks demonstrate that our GSM can serve as a plug-and-play free lunch for both specialist models and foundation models.",
+      "authors": [
+        "Kangyu Xiao",
+        "Zilei Wang",
+        "Yixin Zhang",
+        "Junjie Li"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 13",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 13"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/38076",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/38076/42038",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-40093",
+      "source": "AAAI-2026-Accepted",
+      "title": "Decoupling Template Bias in CLIP: Harnessing Empty Prompts for Enhanced Few-Shot Learning",
+      "abstract": "The Contrastive Language-Image Pre-Training (CLIP) model excels in few-shot learning by aligning visual and textual representations. Our study shows that template-sample similarity (TSS), defined as the resemblance between a text template and an image sample, introduces bias. This bias leads the model to rely on template proximity rather than true sample-to-category alignment, reducing both accuracy and robustness in classification.\nWe present a framework that uses empty prompts, textual inputs that convey the idea of “emptiness” without category information. These prompts capture unbiased template features and offset TSS bias. The framework employs two stages. During pre-training, empty prompts reveal and reduce template-induced bias within the CLIP encoder. During few-shot fine-tuning, a bias calibration loss enforces correct alignment between images and their categories, ensuring the model focuses on relevant visual cues.\nExperiments across multiple benchmarks demonstrate that our template correction method significantly reduces performance fluctuations caused by TSS, yielding higher classification accuracy and stronger robustness.",
+      "authors": [
+        "Zhenyu Zhang",
+        "Guangyao Chen",
+        "Yixiong Zou",
+        "Zhimeng Huang",
+        "Yuhua Li"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 34",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 34"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/40093",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/40093/44054",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-39909",
+      "source": "AAAI-2026-Accepted",
+      "title": "MPA: Multimodal Prototype Augmentation for Few-Shot Learning",
+      "abstract": "Recently, Few-shot Learning (FSL) has become a popular task that aims to recognize new classes from only a few labeled examples and has been widely applied in fields such as natural science, remote sensing, and medical images.\nHowever, most existing methods focus only on the visual modality and compute prototypes directly from raw support images, which lack comprehensive and rich multimodal information.\nTo address these limitations, we propose a novel Multimodal Prototype Augmentation FSL framework called MPA, including LLM-based Multi-Variant Semantic Enhancement (LMSE), Hierarchical Multi-View Augmentation (HMA), and an Adaptive Uncertain Class Absorber (AUCA). \nLMSE leverages large language models to generate diverse paraphrased category descriptions, enriching the support set with additional semantic cues. \nHMA exploits both natural and multi-view augmentations to enhance feature diversity (e.g., changes in viewing distance, camera angles, and lighting conditions). \nAUCA models uncertainty by introducing uncertain classes via interpolation and Gaussian sampling, effectively absorbing uncertain samples. \nExtensive experiments on four single-domain and six cross-domain FSL benchmarks demonstrate that MPA achieves superior performance compared to existing state-of-the-art methods across most settings. Notably, MPA surpasses the second-best method by 12.29% and 24.56% in the single-domain and cross-domain setting, respectively, in the 5-way 1-shot setting.",
+      "authors": [
+        "Liwen Wu",
+        "Wei Wang",
+        "Lei Zhao",
+        "Zhan Gao",
+        "Qika Lin",
+        "Shaowen Yao",
+        "Zuozhu Liu",
+        "Bin Pu"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 32",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 32"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/39909",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/39909/43870",
+      "tags": [
+        "query:few-shot"
+      ]
+    },
+    {
+      "id": "aaai-2026-37280",
+      "source": "AAAI-2026-Accepted",
+      "title": "Intra-Image Mining and Symmetric Maximum Concept Matching for Few Shot Out-of-Distribution Detection",
+      "abstract": "Recent vision-language model (VLM)-based methods have achieved promising results in zero-shot out-of-distribution (OOD) detection by effectively leveraging the local patch features. However, the zero-shot nature inherently comes with two limitations: 1) imperfect local feature prototypes; 2) lack of OOD prototypes. In this paper, we propose Intra-Image Mining (IIM), a lightweight framework designed to overcome these limitations in a few-shot manner. IIM is motivated by the fact that local patches within an image often exhibit diverse semantics, with some patches deviating from the main class concept. Therefore, for each image, we first select the top-k class prototype-related patches as positive samples and leverage them to refine and optimize the local feature prototype. Then, the next top-k among the remaining patches are selected as negatives—serving as OOD signals to construct OOD prototypes. This process yields  coherent local positives and challenging negatives, effectively enhancing the model’s local feature discrimination.  \nBesides, we propose a novel inference strategy named Symmetric Maximum Concept Matching (S-MCM). While existing approaches typically adopt an image-to-text scheme—comparing the image features to textual class prototypes—S-MCM further incorporate a text-to-image perspective, leading to more reliable OOD detection. We also propose two benchmarks to analyze the impact of semantic diversity within ID dataset. Built on a frozen VLM, IIM, in conjunction with S-MCM, achieves consistent gains in OOD detection on ImageNet-1k and other benchmarks, outperforming prior methods in FPR95 and AUROC across various few-shot settings.",
+      "authors": [
+        "Kaixiang Chen",
+        "Pengfei Fang",
+        "Hui Xue"
+      ],
+      "primary_category": "AAAI-26 Technical Tracks 4",
+      "categories": [
+        "AAAI-2026",
+        "AAAI-26 Technical Tracks 4"
+      ],
+      "published": "2026-03-17T00:00:00+00:00",
+      "link": "https://ojs.aaai.org/index.php/AAAI/article/view/37280",
+      "pdf_url": "https://ojs.aaai.org/index.php/AAAI/article/download/37280/41242",
+      "tags": [
+        "query:few-shot"
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "type": "intent_query",
+      "tag": "few-shot",
+      "paper_tag": "query:few-shot",
+      "query_text": "How can meta learning be applied to cross domain few shot classification",
+      "sim_scores": {
+        "aaai-2026-37432": {
+          "score": 0.01639344262295082,
+          "rank": 1
+        },
+        "aaai-2026-39486": {
+          "score": 0.015873015873015872,
+          "rank": 3
+        },
+        "aaai-2026-37338": {
+          "score": 0.015625,
+          "rank": 4
+        },
+        "aaai-2026-39519": {
+          "score": 0.015384615384615385,
+          "rank": 5
+        },
+        "aaai-2026-39086": {
+          "score": 0.015151515151515152,
+          "rank": 6
+        },
+        "aaai-2026-37879": {
+          "score": 0.014925373134328358,
+          "rank": 7
+        },
+        "openreview-icml-2026-hhhsqmuwsu": {
+          "score": 0.014705882352941176,
+          "rank": 8
+        },
+        "aaai-2026-39123": {
+          "score": 0.014492753623188406,
+          "rank": 9
+        },
+        "openreview-icml-2026-qjwfbn77kx": {
+          "score": 0.014084507042253521,
+          "rank": 11
+        },
+        "aaai-2026-39508": {
+          "score": 0.013333333333333334,
+          "rank": 15
+        },
+        "aaai-2026-37569": {
+          "score": 0.012658227848101266,
+          "rank": 19
+        },
+        "openreview-icml-2026-13rceoefry": {
+          "score": 0.012195121951219513,
+          "rank": 22
+        },
+        "aaai-2026-38076": {
+          "score": 0.012048192771084338,
+          "rank": 23
+        },
+        "aaai-2026-40093": {
+          "score": 0.011494252873563218,
+          "rank": 27
+        },
+        "aaai-2026-37280": {
+          "score": 0.01098901098901099,
+          "rank": 31
+        },
+        "aaai-2026-40089": {
+          "score": 0.01020408163265306,
+          "rank": 38
+        },
+        "aaai-2026-39909": {
+          "score": 0.010101010101010102,
+          "rank": 39
+        },
+        "aaai-2026-38160": {
+          "score": 0.009708737864077669,
+          "rank": 43
+        },
+        "aaai-2026-38143": {
+          "score": 0.009345794392523364,
+          "rank": 47
+        },
+        "aaai-2026-38263": {
+          "score": 0.009259259259259259,
+          "rank": 48
+        }
+      },
+      "ranked": [
+        {
+          "paper_id": "aaai-2026-37432",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-39086",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-39486",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-37879",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-37338",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-38160",
+          "score": 0.8798076923076922,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39909",
+          "score": 0.8798076923076922,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-37569",
+          "score": 0.8422090729783037,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39519",
+          "score": 0.8422090729783037,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39123",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-38143",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-jpcg6vvked",
+          "score": 0.7703788748564866,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-hhhsqmuwsu",
+          "score": 0.73604826546003,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-37280",
+          "score": 0.73604826546003,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-13rceoefry",
+          "score": 0.702712746191007,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-qjwfbn77kx",
+          "score": 0.702712746191007,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-40093",
+          "score": 0.6703296703296702,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "anthology-2026.findings-acl.822",
+          "score": 0.6388587937883712,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39508",
+          "score": 0.608262108262108,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-38263",
+          "score": 0.578503688092729,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-38076",
+          "score": 0.5213675213675214,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39535",
+          "score": 0.46719946719946726,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-40089",
+          "score": 0.3668882557771445,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-38306",
+          "score": 0.3433395872420263,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-38010",
+          "score": 0.15469146238377016,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "anthology-2026.acl-long.187",
+          "score": 0.15469146238377016,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-39125",
+          "score": 0.11772814998621459,
+          "star_rating": 3
+        }
+      ]
+    },
+    {
+      "type": "intent_query",
+      "tag": "few-shot",
+      "paper_tag": "query:few-shot",
+      "query_text": "What methods are proposed to handle domain shift in few shot classification tasks",
+      "sim_scores": {
+        "aaai-2026-39486": {
+          "score": 0.01639344262295082,
+          "rank": 1
+        },
+        "aaai-2026-37432": {
+          "score": 0.016129032258064516,
+          "rank": 2
+        },
+        "aaai-2026-37879": {
+          "score": 0.015873015873015872,
+          "rank": 3
+        },
+        "aaai-2026-39519": {
+          "score": 0.015625,
+          "rank": 4
+        },
+        "aaai-2026-39123": {
+          "score": 0.015384615384615385,
+          "rank": 5
+        },
+        "openreview-icml-2026-5m6gcvcqdo": {
+          "score": 0.015151515151515152,
+          "rank": 6
+        },
+        "aaai-2026-37338": {
+          "score": 0.014925373134328358,
+          "rank": 7
+        },
+        "aaai-2026-38143": {
+          "score": 0.014492753623188406,
+          "rank": 9
+        },
+        "openreview-icml-2026-hhhsqmuwsu": {
+          "score": 0.013333333333333334,
+          "rank": 15
+        },
+        "openreview-icml-2026-13rceoefry": {
+          "score": 0.012987012987012988,
+          "rank": 17
+        },
+        "aaai-2026-38263": {
+          "score": 0.012658227848101266,
+          "rank": 19
+        },
+        "aaai-2026-39086": {
+          "score": 0.012048192771084338,
+          "rank": 23
+        },
+        "aaai-2026-37569": {
+          "score": 0.011764705882352941,
+          "rank": 25
+        },
+        "aaai-2026-38160": {
+          "score": 0.011627906976744186,
+          "rank": 26
+        },
+        "aaai-2026-38010": {
+          "score": 0.011494252873563218,
+          "rank": 27
+        },
+        "aaai-2026-38076": {
+          "score": 0.010752688172043012,
+          "rank": 33
+        },
+        "aaai-2026-40093": {
+          "score": 0.010309278350515464,
+          "rank": 37
+        },
+        "aaai-2026-39535": {
+          "score": 0.01020408163265306,
+          "rank": 38
+        },
+        "aaai-2026-40089": {
+          "score": 0.01,
+          "rank": 40
+        },
+        "aaai-2026-39909": {
+          "score": 0.00980392156862745,
+          "rank": 42
+        },
+        "aaai-2026-37280": {
+          "score": 0.009345794392523364,
+          "rank": 47
+        }
+      },
+      "ranked": [
+        {
+          "paper_id": "aaai-2026-37432",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-39486",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-38160",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-37338",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-38220",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "aaai-2026-37879",
+          "score": 0.8798076923076922,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-qjwfbn77kx",
+          "score": 0.8422090729783037,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39123",
+          "score": 0.8422090729783037,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "anthology-2026.acl-long.973",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-jpcg6vvked",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-5m6gcvcqdo",
+          "score": 0.7703788748564866,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39519",
+          "score": 0.7703788748564866,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-40089",
+          "score": 0.73604826546003,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "anthology-2026.findings-acl.822",
+          "score": 0.702712746191007,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39086",
+          "score": 0.702712746191007,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-icml-2026-iqxzdud36x",
+          "score": 0.6388587937883712,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39508",
+          "score": 0.608262108262108,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39535",
+          "score": 0.608262108262108,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-39125",
+          "score": 0.578503688092729,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-37569",
+          "score": 0.578503688092729,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "anthology-2026.acl-long.187",
+          "score": 0.5495495495495496,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-38010",
+          "score": 0.5495495495495496,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-38306",
+          "score": 0.5213675213675214,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "aaai-2026-38143",
+          "score": 0.46719946719946726,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-39909",
+          "score": 0.3433395872420263,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-icml-2026-13rceoefry",
+          "score": 0.29792429792429775,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-40093",
+          "score": 0.23371647509578536,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-38076",
+          "score": 0.23371647509578536,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-38263",
+          "score": 0.21328671328671328,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "aaai-2026-37280",
+          "score": 0.1360089186176142,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-icml-2026-hhhsqmuwsu",
+          "score": 0.11772814998621459,
+          "star_rating": 3
+        }
+      ]
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "classification task where training and test domains differ and only a few labeled samples are available",
+      "sim_scores": {
+        "anthology-2026.findings-acl.822": {
+          "score": 0.015384615384615385,
+          "rank": 5
+        },
+        "aaai-2026-39508": {
+          "score": 0.012658227848101266,
+          "rank": 19
+        },
+        "openreview-icml-2026-5m6gcvcqdo": {
+          "score": 0.012195121951219513,
+          "rank": 22
+        },
+        "aaai-2026-40089": {
+          "score": 0.009345794392523364,
+          "rank": 47
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "cross-domain few-shot classification",
+      "sim_scores": {
+        "aaai-2026-39486": {
+          "score": 0.01639344262295082,
+          "rank": 1
+        },
+        "aaai-2026-39519": {
+          "score": 0.015625,
+          "rank": 4
+        },
+        "openreview-icml-2026-qjwfbn77kx": {
+          "score": 0.015384615384615385,
+          "rank": 5
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "distribution mismatch between source and target domains causing performance degradation",
+      "sim_scores": {}
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "domain adaptation",
+      "sim_scores": {
+        "aaai-2026-40089": {
+          "score": 0.016129032258064516,
+          "rank": 2
+        },
+        "aaai-2026-39125": {
+          "score": 0.0136986301369863,
+          "rank": 13
+        },
+        "openreview-icml-2026-iqxzdud36x": {
+          "score": 0.011764705882352941,
+          "rank": 25
+        },
+        "aaai-2026-39535": {
+          "score": 0.011363636363636364,
+          "rank": 28
+        },
+        "openreview-icml-2026-hhhsqmuwsu": {
+          "score": 0.011235955056179775,
+          "rank": 29
+        },
+        "anthology-2026.acl-long.187": {
+          "score": 0.010869565217391304,
+          "rank": 32
+        },
+        "openreview-icml-2026-jpcg6vvked": {
+          "score": 0.009345794392523364,
+          "rank": 47
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "domain generalization",
+      "sim_scores": {
+        "aaai-2026-39508": {
+          "score": 0.014492753623188406,
+          "rank": 9
+        },
+        "aaai-2026-38263": {
+          "score": 0.014285714285714285,
+          "rank": 10
+        },
+        "anthology-2026.acl-long.187": {
+          "score": 0.011764705882352941,
+          "rank": 25
+        },
+        "aaai-2026-37338": {
+          "score": 0.011627906976744186,
+          "rank": 26
+        },
+        "aaai-2026-38306": {
+          "score": 0.011494252873563218,
+          "rank": 27
+        },
+        "aaai-2026-38010": {
+          "score": 0.011235955056179775,
+          "rank": 29
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "domain shift",
+      "sim_scores": {
+        "anthology-2026.acl-long.973": {
+          "score": 0.016129032258064516,
+          "rank": 2
+        },
+        "aaai-2026-38220": {
+          "score": 0.015873015873015872,
+          "rank": 3
+        },
+        "anthology-2026.acl-long.187": {
+          "score": 0.015151515151515152,
+          "rank": 6
+        },
+        "openreview-icml-2026-qjwfbn77kx": {
+          "score": 0.014925373134328358,
+          "rank": 7
+        },
+        "aaai-2026-39535": {
+          "score": 0.014705882352941176,
+          "rank": 8
+        },
+        "openreview-icml-2026-jpcg6vvked": {
+          "score": 0.0136986301369863,
+          "rank": 13
+        },
+        "aaai-2026-39125": {
+          "score": 0.011494252873563218,
+          "rank": 27
+        },
+        "aaai-2026-37432": {
+          "score": 0.01098901098901099,
+          "rank": 31
+        },
+        "aaai-2026-40089": {
+          "score": 0.010752688172043012,
+          "rank": 33
+        },
+        "aaai-2026-38306": {
+          "score": 0.010526315789473684,
+          "rank": 35
+        },
+        "aaai-2026-38160": {
+          "score": 0.010416666666666666,
+          "rank": 36
+        },
+        "openreview-icml-2026-iqxzdud36x": {
+          "score": 0.010309278350515464,
+          "rank": 37
+        },
+        "aaai-2026-39508": {
+          "score": 0.009433962264150943,
+          "rank": 46
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "learning a model that can generalize to unseen domains without fine-tuning",
+      "sim_scores": {
+        "aaai-2026-38010": {
+          "score": 0.015873015873015872,
+          "rank": 3
+        },
+        "aaai-2026-39508": {
+          "score": 0.011627906976744186,
+          "rank": 26
+        },
+        "aaai-2026-39519": {
+          "score": 0.009900990099009901,
+          "rank": 41
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "few-shot",
+      "paper_tag": "keyword:few-shot",
+      "query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution",
+      "sim_scores": {
+        "aaai-2026-40089": {
+          "score": 0.013513513513513514,
+          "rank": 14
+        },
+        "openreview-icml-2026-iqxzdud36x": {
+          "score": 0.009615384615384616,
+          "rank": 44
+        }
+      }
+    }
+  ],
+  "global_candidate_ids": [
+    "aaai-2026-37432",
+    "aaai-2026-37373",
+    "aaai-2026-39486",
+    "aaai-2026-39784",
+    "aaai-2026-39392",
+    "openreview-icml-2026-adyzunjhsi",
+    "openreview-icml-2026-gsqhzzowyf",
+    "anthology-2026.findings-acl.1373",
+    "aaai-2026-37785",
+    "aaai-2026-40089",
+    "openreview-icml-2026-yxygnw4mjl",
+    "aaai-2026-40436",
+    "openreview-icml-2026-ubzajt84nd",
+    "anthology-2026.acl-long.973",
+    "openreview-icml-2026-gc04o9t1wj",
+    "aaai-2026-39883",
+    "openreview-icml-2026-uqlgajv1cf",
+    "aaai-2026-39508",
+    "aaai-2026-39519",
+    "aaai-2026-39339",
+    "anthology-2026.findings-acl.1614",
+    "aaai-2026-40102",
+    "openreview-icml-2026-qjwfbn77kx",
+    "openreview-icml-2026-rrpmq1beol",
+    "aaai-2026-37338",
+    "aaai-2026-37492",
+    "openreview-icml-2026-4mgh9asgrq",
+    "openreview-icml-2026-hhhsqmuwsu",
+    "anthology-2026.acl-long.1852",
+    "aaai-2026-38010",
+    "aaai-2026-39194",
+    "anthology-2026.acl-long.187",
+    "openreview-icml-2026-xx4oq3pjzr",
+    "aaai-2026-38110",
+    "openreview-icml-2026-pwrn50icj4",
+    "aaai-2026-39535",
+    "aaai-2026-40087",
+    "aaai-2026-38263",
+    "aaai-2026-39975",
+    "aaai-2026-39495",
+    "aaai-2026-42488",
+    "aaai-2026-39177",
+    "aaai-2026-38616",
+    "aaai-2026-38160",
+    "aaai-2026-39118",
+    "openreview-icml-2026-iqxzdud36x",
+    "anthology-2026.acl-long.1498",
+    "aaai-2026-37879",
+    "openreview-icml-2026-y1av6cx8dx",
+    "aaai-2026-42435",
+    "aaai-2026-39123",
+    "aaai-2026-40485",
+    "anthology-2026.acl-long.174",
+    "anthology-2026.findings-acl.1026",
+    "anthology-2026.acl-long.1007",
+    "openreview-icml-2026-96ma1gyrnj",
+    "openreview-icml-2026-8cigrukxql",
+    "aaai-2026-38538",
+    "aaai-2026-37689",
+    "openreview-icml-2026-5m6gcvcqdo",
+    "openreview-icml-2026-qqhtbqshdg",
+    "aaai-2026-39086",
+    "aaai-2026-37797",
+    "openreview-icml-2026-4vfv9hxhxn",
+    "anthology-2026.findings-acl.507",
+    "openreview-icml-2026-mtoqfuksrq",
+    "openreview-icml-2026-cy2npckqzq",
+    "aaai-2026-39767",
+    "openreview-icml-2026-eo4ecitl1r",
+    "openreview-icml-2026-lchztioer6",
+    "aaai-2026-39564",
+    "openreview-icml-2026-kr5qskt8gz",
+    "aaai-2026-39125",
+    "aaai-2026-39456",
+    "openreview-icml-2026-13rceoefry",
+    "aaai-2026-39539",
+    "anthology-2026.findings-acl.1221",
+    "aaai-2026-37569",
+    "aaai-2026-40456",
+    "aaai-2026-39650",
+    "anthology-2026.findings-acl.2090",
+    "aaai-2026-38143",
+    "openreview-icml-2026-o2znfxqcij",
+    "openreview-icml-2026-wpka7g7cqu",
+    "openreview-icml-2026-jpcg6vvked",
+    "openreview-icml-2026-vorzq8gbdh",
+    "aaai-2026-39858",
+    "aaai-2026-38076",
+    "aaai-2026-37293",
+    "openreview-icml-2026-2x8qi3vdja",
+    "aaai-2026-38324",
+    "aaai-2026-38021",
+    "openreview-icml-2026-ymyrr00hfs",
+    "openreview-icml-2026-w31tisoc4m",
+    "anthology-2026.findings-acl.405",
+    "aaai-2026-37296",
+    "aaai-2026-38306",
+    "aaai-2026-40093",
+    "aaai-2026-37589",
+    "openreview-icml-2026-rl7yairt04",
+    "aaai-2026-37661",
+    "aaai-2026-39871",
+    "aaai-2026-37280",
+    "aaai-2026-39436",
+    "aaai-2026-39909",
+    "aaai-2026-39698",
+    "aaai-2026-39492",
+    "aaai-2026-38220",
+    "aaai-2026-40001",
+    "openreview-icml-2026-xpxwhoxoyc",
+    "aaai-2026-39791",
+    "openreview-icml-2026-kklzs0hqjj",
+    "openreview-icml-2026-woxvgo1vcv",
+    "anthology-2026.acl-long.226",
+    "anthology-2026.findings-acl.822",
+    "anthology-2026.findings-acl.1329",
+    "openreview-icml-2026-83hqzmzab8",
+    "aaai-2026-39616",
+    "aaai-2026-39693",
+    "openreview-icml-2026-adhgbxsrer"
+  ],
+  "global_pool_lane_top_k": 30,
+  "global_pool_limit": 120,
+  "global_pool_guaranteed_per_lane": 2,
+  "global_pool_effective_size": 120,
+  "reranked_at": "2026-09-09T09:21:42.790796+00:00",
+  "llm_ranked": [
+    {
+      "paper_id": "aaai-2026-39486",
+      "score": 10.0,
+      "evidence_en": "Cross-domain few-shot learning under source-target distribution shift; frequency-domain perturbation method",
+      "evidence_cn": "面向跨域少样本分类，直接在频域处理源/目标域分布偏移",
+      "canonical_evidence": "面向跨域少样本分类，直接在频域处理源/目标域分布偏移",
+      "tldr_en": "Proposes HAP for cross-domain few-shot learning, perturbing amplitude in frequency domain to counter spectral collapse under domain shift and improve accuracy on target domains.",
+      "tldr_cn": "跨域少样本学习常因源域与目标域分布差异显著而性能下降，现有方法偏重空间对齐却忽视频域失衡。作者发现频带离散化导致谱塌缩，并通过有效秩量化这一现象。为此提出谐波幅度扰动HAP，调节幅度谱以保持频谱多样性，从而减轻域偏移带来的过拟合与特征退化。实验验证HAP可提升跨域少样本分类性能，为该方向提供频域视角的新方案。",
+      "title_zh": "HAP：面向跨域少样本学习的谐波幅度扰动",
+      "motivation_cn": "现有跨域少样本方法集中于空间对齐，忽略频域幅度差异导致低频谱主导和谱塌缩，限制泛化。",
+      "method_cn": "提出谐波幅度扰动HAP，结合有效秩度量来抑制谱塌缩，增强频域表示多样性。",
+      "result_cn": "实验验证HAP能有效缓解跨域偏移下的谱塌缩并提升少样本分类精度。",
+      "conclusion_cn": "表明频域扰动是跨域少样本学习的一种有前景的补充手段，值得后续深入研究。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    },
+    {
+      "paper_id": "aaai-2026-39086",
+      "score": 10.0,
+      "evidence_en": "Cross-domain few-shot learning with vision-language models via multi-view collaborative optimization to handle non-natural image domains",
+      "evidence_cn": "面向视觉语言模型的跨域少样本学习方法，用多视角协同优化应对成像域偏离",
+      "canonical_evidence": "面向视觉语言模型的跨域少样本学习方法，用多视角协同优化应对成像域偏离",
+      "tldr_en": "CoMuCo improves CLIP-based few-shot recognition on cross-domain tasks via consistency-guided multi-view collaborative optimization with two complementary experts, countering imaging-domain distribution shift.",
+      "tldr_cn": "CLIP等视觉语言模型在自然图像少样本任务上表现出色，但当图像域与自然图像差异大时仍会失效。该文提出一致性引导的多视角协同优化CoMuCo，用两个功能互补的专家模块提取多视角特征，并通过协同优化提高跨域任务的适配能力。这种策略能扩展VLM到不同成像域，缓解高效微调方法在跨域任务上的不足，为跨域少样本分类提供有效方案。",
+      "title_zh": "基于多视角协同优化与视觉语言模型的跨域少样本学习",
+      "motivation_cn": "现有VLM的高效迁移方法在自然图像少样本任务收益大，但在成像域偏离的跨域任务效果有限。",
+      "method_cn": "提出CoMuCo，使用两个互补专家模块提取多视角表示，并以一致性约束协同优化以适配跨域数据。",
+      "result_cn": "在非自然图像的跨域少样本任务上，CoMuCo明显改善模型泛化能力并保持迁移效率。",
+      "conclusion_cn": "多视角互补与一致性约束可弥补VLM在跨域小样本图像识别上的泛化短板。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    },
+    {
+      "paper_id": "aaai-2026-38160",
+      "score": 9.0,
+      "evidence_en": "Directly addresses cross-domain few-shot detection under domain shift and limited labeled samples via style-augmented prototype learning against style bias and feature confusion",
+      "evidence_cn": "跨域小样本检测中，用风格增强原型学习处理域偏移与有限标注共同导致的风格偏差和特征混淆",
+      "canonical_evidence": "跨域小样本检测中，用风格增强原型学习处理域偏移与有限标注共同导致的风格偏差和特征混淆",
+      "tldr_en": "StyleProto tackles dual problems of domain shift and scarce labels in cross-domain few-shot object detection. It constructs style-aware prototypes from few support images, adds spatial weighting and discriminative fusion to suppress style bias and feature confusion, giving more transferable target representations.",
+      "tldr_cn": "跨域小样本目标检测同时面临域偏移和标注样本稀缺，少量支持样本既不能覆盖目标域风格多样性，又容易造成物体与背景及物体之间的特征混淆。为此StyleProto提出风格增强原型学习，从具有多样视觉风格的支持样本中构造风格感知原型，并通过空间加权与判别性融合进行精炼。该方法有效缓解了风格偏差与特征混淆带来的性能下降，为跨域小样本检测提供了更可靠的原型表达，可直接迁移到跨域小样本分类等低资源视觉任务。",
+      "title_zh": "StyleProto：跨域小样本目标检测的风格增强原型学习",
+      "motivation_cn": "跨域小样本检测中，域偏移与标注稀缺会使支持样本风格偏差大、特征混淆明显，极大影响检测性能。",
+      "method_cn": "构造风格感知原型并进行空间加权与判别融合，用支持样本的多样风格缓解风格偏差和特征混淆。",
+      "result_cn": "在跨域小样本检测任务上有效降低风格偏差与特征混淆，提升少样本目标检测的稳定性与泛化性能。",
+      "conclusion_cn": "风格增强原型的策略为跨域小样本视觉任务提供了一种可借鉴的克服双重困难的方法。",
+      "matched_requirement_id": "req-5",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "What methods are proposed to handle domain shift in few shot classification tasks"
+    },
+    {
+      "paper_id": "openreview-icml-2026-qjwfbn77kx",
+      "score": 8.0,
+      "evidence_en": "cross-domain image classification with domain shift; learns transferable representations for unseen datasets",
+      "evidence_cn": "跨域图像检测面临域偏移导致性能下降，论文学习可迁移表示以泛化到未见数据集",
+      "canonical_evidence": "跨域图像检测面临域偏移导致性能下降，论文学习可迁移表示以泛化到未见数据集",
+      "tldr_en": "Synthetic image detection suffers under domain shift. FiSeR proposes hierarchical contrastive learning that preserves generator identity while improving natural/synthetic separability, yielding robust decision boundaries on unseen datasets.",
+      "tldr_cn": "真实世界合成图像检测在域偏移下性能明显下降，原因在于分类头过拟合训练域伪影。FiSeR利用生成器多样性这一结构事实，设计层次化对比学习，既拉开自然与合成特征的距离，又保留生成器身份信息，从而获得更可迁移的表示。该方法使决策准则在未知域上保持稳定，有效缓解跨域检测性能下降，展示了学习可迁移表示对鲁棒性的关键作用。",
+      "title_zh": "FiSeR：面向跨域AI图像检测的细粒度源表示",
+      "motivation_cn": "真实场景合成图像检测器在域偏移下泛化较差，分类头容易过拟合训练域伪影导致性能下降。",
+      "method_cn": "提出层次化对比学习框架，增强自然与合成图像特征的可分性，同时保留生成器身份信息以学习可迁移表示。",
+      "result_cn": "在未见数据集上改善了特征可分性并使决策准则更稳定，缓解跨域性能下降。",
+      "conclusion_cn": "学习结构化的可迁移表示可使分类边界对域偏移更鲁棒，提升跨域AI图像检测的实用能力。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "aaai-2026-39125",
+      "score": 8.0,
+      "evidence_en": "multi-source domain adaptation for multimodal classification; actively labels a small target subset to adapt across distribution shifts",
+      "evidence_cn": "面向多模态假新闻检测的多源域适应，主动标注少量目标样本以缓解分布偏移",
+      "canonical_evidence": "面向多模态假新闻检测的多源域适应，主动标注少量目标样本以缓解分布偏移",
+      "tldr_en": "Fake news detection degrades under domain shift or requires heavy annotation. ADOSE performs active multi-source domain adaptation, labeling a small target subset and classifying with refined-feature multi-expert networks to improve cross-domain detection.",
+      "tldr_cn": "多模态假新闻检测常因新闻语义和欺骗模式在源域与目标域之间的偏移而性能明显下降，也常过度依赖人工标注。作者提出ADOSE主动多源域适应框架，主动标注一小部分目标样本，并基于精炼特征设计多专家分类器网络来分别应对域间变化。该方法在少量目标标注条件下提升了跨域检测性能，缓解了域偏移带来的性能退化，为多源假新闻检测提供了可行思路。",
+      "title_zh": "面向多模态假新闻检测的主动多源域适应",
+      "motivation_cn": "新闻域多样性使跨域检测性能下降或严重依赖标注，现有方法无法同时解决域偏移和标注成本问题。",
+      "method_cn": "提出ADOSE框架，结合主动标注少量目标样本与基于精炼特征的多专家分类器网络来适应多个源域。",
+      "result_cn": "在少量目标样本标注下改善多模态假新闻检测的跨域性能，缓解语义与欺骗模式偏移问题。",
+      "conclusion_cn": "主动标注与多专家分类相结合可降低标注成本并有效应对多源域偏移。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution"
+    },
+    {
+      "paper_id": "aaai-2026-38263",
+      "score": 8.0,
+      "evidence_en": "single-source domain generalization for object detection; learns intra-class domain-invariant representations for unseen conditions",
+      "evidence_cn": "单源域泛化目标检测，学习类内域不变表示以应对训练与部署环境的分布差异",
+      "canonical_evidence": "单源域泛化目标检测，学习类内域不变表示以应对训练与部署环境的分布差异",
+      "tldr_en": "Object detection suffers from source-target distribution shift. UICL exchanges region proposals between original and augmented pipelines to learn intra-class domain-invariant representations for single-source domain-generalized detection.",
+      "tldr_cn": "神经网络目标检测在白天晴好等训练条件与夜间雨天等现实部署场景之间因分布差异产生定位不精确和分类错误。论文提出统一交互一致性学习（UICL）框架，通过跨域交互机制在原始分支与增强分支之间交换区域提议，丰富实例级特征多样性，从而学习类内域不变表示。该方法面向单源域泛化，无需目标域标注，即可提升模型对夜间、雨雾等未见视觉条件下目标检测的鲁棒性，为城市场景中的可靠部署提供了有效方案。",
+      "title_zh": "面向城市场景单源域泛化目标检测的统一交互一致性学习",
+      "motivation_cn": "训练条件如白天晴与部署条件如夜间雨之间的分布差异会导致目标定位和分类错误，域泛化困难。",
+      "method_cn": "提出统一交互一致性学习框架，跨域交换原始与增强分支的区域提议，学习类内域不变的实例级表示。",
+      "result_cn": "在未见天气或场景条件下改善目标检测的定位与分类，增强单源域泛化能力。",
+      "conclusion_cn": "以交互一致性约束域不变表示，可有效解决单源域泛化目标检测中的分布偏移问题。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "openreview-icml-2026-iqxzdud36x",
+      "score": 8.0,
+      "evidence_en": "gradual domain adaptation adapts from source to target via intermediate domains to mitigate domain shift",
+      "evidence_cn": "通过中间域将模型从源域逐步迁移到目标域以缓解分布偏移",
+      "canonical_evidence": "通过中间域将模型从源域逐步迁移到目标域以缓解分布偏移",
+      "tldr_en": "Proposes entropy-regularized semi-dual optimal transport for flow-based gradual domain adaptation, constructing intermediate domains directly from samples to avoid information loss and improve source-to-target adaptation under domain shift.",
+      "tldr_cn": "渐进域适应通过中间域将模型从源域平滑迁移到目标域，然而真实中间域常缺失或无效，需要合成中间样本。现有流模型以样本级似然训练会丢弃有用信息，影响适应效果。本文提出熵正则化的半对偶最优传输方法，直接从样本构造中间分布，避免流模型信息损失，以更稳健地缓解源域与目标域间的分布偏移。",
+      "title_zh": "流式渐进域适配再思考：半对偶最优传输视角",
+      "motivation_cn": "流式渐进域适应的似然估计会丢弃中间域信息，且合成中间域的方式不够有效。",
+      "method_cn": "提出熵正则化半对偶最优传输机制，直接从样本构造中间域，替代传统样本级似然的流训练。",
+      "result_cn": "避免训练中的信息丢弃，在源到目标域分布偏移下获得更优的渐进适应表现。",
+      "conclusion_cn": "为渐进域适应中的中间域合成与模型迁移提供新的最优传输理论视角。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution"
+    },
+    {
+      "paper_id": "aaai-2026-37432",
+      "score": 8.0,
+      "evidence_en": "Cross-domain few-shot object detection addressing substantial domain shift and data scarcity with sparse instance learning",
+      "evidence_cn": "跨域少样本目标检测，针对域偏移和数据稀缺提出稀疏实例学习",
+      "canonical_evidence": "跨域少样本目标检测，针对域偏移和数据稀缺提出稀疏实例学习",
+      "tldr_en": "Introduces sparse instance learning for cross-domain few-shot object detection, pruning noisy support and query features to mitigate domain-shift overfitting and learn discriminative class prototypes.",
+      "tldr_cn": "跨域少样本目标检测同时面对标注稀缺和源/目标域间的显著偏移，常见方法因此过拟合并使类原型含噪。该文提出SI-ViTO框架，通过双阶段稀疏模块对支撑集和查询集实例特征做稀疏化，以较少的表示获得更稳健的检测。稀疏化有助于抑制域噪声并保留关键类别信息，缓解了过拟合，为少量标注跨域检测提供了新思路。",
+      "title_zh": "少即是多：面向跨域少样本目标检测的稀疏实例学习",
+      "motivation_cn": "跨域少样本检测中，少量样本和域偏移导致过拟合与噪声特征，难以形成判别性原型。",
+      "method_cn": "提出SI-ViTO，在支撑集与查询集上执行双阶段实例特征稀疏，筛除域噪声，保留判别信息。",
+      "result_cn": "实例稀疏能增强原型判别性并降低过拟合，在跨域少样本检测场景中取得更好结果。",
+      "conclusion_cn": "证明在少样本条件下去除噪声可提升跨域目标检测能力，相关思路可迁移至其他跨域小样本任务。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "distribution mismatch between source and target domains causing performance degradation"
+    },
+    {
+      "paper_id": "aaai-2026-38010",
+      "score": 8.0,
+      "evidence_en": "Fine-grained domain generalization decomposing features into commonality, specificity and confounding to handle unseen domains without target fine-tuning",
+      "evidence_cn": "细粒度域泛化方法，将特征分解为共性、特异性和混杂以泛化到未见域且无需微调",
+      "canonical_evidence": "细粒度域泛化方法，将特征分解为共性、特异性和混杂以泛化到未见域且无需微调",
+      "tldr_en": "Decomposes concept and feature space into commonality, specificity and confounding to prevent fine-grained domain shift from suppressing critical cues, yielding better unseen-domain generalization without fine-tuning.",
+      "tldr_cn": "细粒度域泛化比常规域泛化更难，因为域偏移会抑制细微类别线索并使性能明显下降。受人类认知中同时利用共有与特有属性的机制启发，该文将概念和特征空间结构化为共性、特异性和混杂三部分。这种结构化显式解耦域偏移来源与类别线索，在未见域上无需目标微调即可分类。实验显示该方法能有效保留关键类别特征，改善细粒度跨域泛化。",
+      "title_zh": "通过将概念与特征空间划分为共性、特异性与混杂的细粒度泛化",
+      "motivation_cn": "域偏移下细粒度模型对类别线索过于敏感，关键特征易被抑制，现有模型又缺少共性与特有属性的利用。",
+      "method_cn": "借鉴认知机制，将概念与特征空间划分为共性、特异性和混杂三个部分进行结构化学习。",
+      "result_cn": "该方法能防止关键类别特征被抑制，在细粒度未见域分类中获得更稳健的性能。",
+      "conclusion_cn": "为细粒度域泛化提供了显式解耦框架，可作为无需目标微调的跨域部署参考。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "aaai-2026-37338",
+      "score": 8.0,
+      "evidence_en": "Cross-domain few-shot segmentation decoupling category-private and domain-shared features to handle domain shift in low-shot regime",
+      "evidence_cn": "跨域少样本分割，解耦类别相关与域相关特征以应对少量标注下的域偏移",
+      "canonical_evidence": "跨域少样本分割，解耦类别相关与域相关特征以应对少量标注下的域偏移",
+      "tldr_en": "Proposes DCDNet for cross-domain few-shot segmentation, using adversarial-contrastive decomposition to untangle category and domain features, improving generalization and few-shot adaptation to new domains.",
+      "tldr_cn": "跨域少样本分割既要识别新类别，又要在极少标注下适应未见域，而编码器特征常纠缠域相关与类别相关信息。针对该问题，提出分而治之解耦网络DCDNet，其中对抗-对比特征分解模块把骨干特征分解为类别相关的私有表示和域相关的共享表示。该解耦能降低域偏移对特征可迁移性的干扰，并支持在新域快速适应。结果表明其能改善跨域少样本分割性能，为跨域小样本特征学习提供一般性思路。",
+      "title_zh": "面向跨域少样本分割的分治解耦网络",
+      "motivation_cn": "编码器特征将域相关信息和类别信息纠缠，限制了向未见过域泛化和快速适应的能力。",
+      "method_cn": "提出DCDNet，利用对抗-对比特征分解将特征拆为类别相关私有表示和域相关共享表示。",
+      "result_cn": "解耦后的特征缓解域偏移影响，在少量标注下提升了未见域的适应效果与分割性能。",
+      "conclusion_cn": "对抗与对比结合的解耦可提高跨域小样本特征的可迁移性，并适用于其他识别任务。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "distribution mismatch between source and target domains causing performance degradation"
+    },
+    {
+      "paper_id": "aaai-2026-37569",
+      "score": 8.0,
+      "evidence_en": "Introduces a generalized cross-domain few-shot task for 3D object detection, adapting a source-pretrained model to a new domain with few-shot annotations for common and novel classes",
+      "evidence_cn": "提出三维目标检测中的广义跨域小样本任务，在新域仅用少量标注适应常见类和新类",
+      "canonical_evidence": "提出三维目标检测中的广义跨域小样本任务，在新域仅用少量标注适应常见类和新类",
+      "tldr_en": "Introduces generalized cross-domain few-shot learning for 3D detection, adapting source-pretrained models to real-world target domains with few-shot annotations for both common and novel classes; fuses 2D open-set semantics and 3D spatial reasoning.",
+      "tldr_cn": "激光雷达三维检测模型常因公开数据物体多样性有限而难以泛化到真实环境。作者提出三维目标检测中首个广义跨域小样本任务，希望在新域仅用少量标注同时适应常见类和新类。联合框架利用图像引导的多模态融合，将2D开放集语义经视觉语言模型注入3D流程，并用物理感知框搜索增强2D与3D对齐，从而稳定学习目标域语义。该工作把跨域小样本学习从图像检测拓展到三维点云检测，为解决数据集到真实世界分布鸿沟提供了新范式。",
+      "title_zh": "从数据集到真实世界：基于广义跨域小样本学习的通用三维目标检测",
+      "motivation_cn": "三维检测模型因公开数据集物体多样性有限难以泛化到真实世界，且现有跨域小样本设置未兼顾常见类与新类。",
+      "method_cn": "提出广义跨域小样本检测框架，用视觉语言模型将2D开集语义注入3D流程，并结合物理感知框搜索在极少量标注下学习目标语义。",
+      "result_cn": "在少量新域标注的条件下稳定学习常见类与新类的目标语义，提升真实世界三维检测的泛化能力。",
+      "conclusion_cn": "将广义跨域小样本学习引入三维检测，证明多模态语义桥接能缓解真实世界标注稀缺造成的领域鸿沟。",
+      "matched_requirement_id": "req-5",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "What methods are proposed to handle domain shift in few shot classification tasks"
+    },
+    {
+      "paper_id": "aaai-2026-37879",
+      "score": 8.0,
+      "evidence_en": "Explicitly targets cross-domain few-shot learning with source-target distribution gap and few annotated samples, though for segmentation rather than classification",
+      "evidence_cn": "明确面向跨域小样本任务，处理源/目标域分布差异与少量标注，任务为分割而非分类，但主题高度重合",
+      "canonical_evidence": "明确面向跨域小样本任务，处理源/目标域分布差异与少量标注，任务为分割而非分类，但主题高度重合",
+      "tldr_en": "Proposes Hierarchical Semantic Learning for cross-domain few-shot segmentation, using Dual Style Randomization and Hierarchical Semantic Mining to bridge style and granularity gaps and improve novel-class semantics in target domains.",
+      "tldr_cn": "跨域小样本分割旨在仅用少量标注样本分割目标域未见类别，但现有方法只注重风格差异，忽略分割粒度差异，导致语义判别力不足。本文提出层次化语义学习框架，引入双风格随机化模块与层次化语义挖掘模块，同时弥合风格差距与语义粒度差距，增强目标域新类别的特征可分性。实验证明了该框架在跨域小样本分割任务上的有效性。该工作为跨域小样本学习提供了兼顾粒度感知的新视角，对分类任务具有借鉴意义。",
+      "title_zh": "弥合粒度差距：面向跨域小样本分割的层次化语义学习",
+      "motivation_cn": "现有跨域小样本分割方法多只关注领域风格差异，忽略语义粒度差异，导致目标域新类别特征的判别性不足。",
+      "method_cn": "提出层次化语义学习框架，采用双风格随机化和层次化语义挖掘，同时弥合风格差距与粒度差距。",
+      "result_cn": "在跨域小样本分割基准上验证了该框架能有效提升目标域新类别的分割性能与语义判别性。",
+      "conclusion_cn": "同时刻画风格与语义粒度差异是跨域小样本分割改进的关键，相关思想亦可迁移至跨域小样本分类。",
+      "matched_requirement_id": "req-composite-few-shot",
+      "matched_query_tag": "query:few-shot:composite",
+      "matched_query_text": "Papers central to 查找跨域小样本分类相关论文, especially work that connects or combines: classification task where training and test domains differ and only a few labeled samples are available; distribution mismatch between source and target domains causing performance degradation; techniques for adapting a model from a source domain to a target domain with different data distribution; learning a model that can generalize to unseen domains without fine-tuning; What methods are proposed to handle domain shift in few shot classification tasks; How can meta learning be applied to cross domain few shot classification."
+    },
+    {
+      "paper_id": "aaai-2026-39508",
+      "score": 7.0,
+      "evidence_en": "aims to minimize expected risk and fairness violations on unseen target domains without fine-tuning",
+      "evidence_cn": "目标是让模型在未见目标域上同时降低期望风险与公平违规，实现免微调泛化",
+      "canonical_evidence": "目标是让模型在未见目标域上同时降低期望风险与公平违规，实现免微调泛化",
+      "tldr_en": "Bridges domain generalization and algorithmic fairness by deriving mutual information upper bounds that jointly minimize expected risk and fairness violations on unseen domains for multi-class classification.",
+      "tldr_cn": "现有域泛化方法往往只最小化未见目标域上的期望风险而忽视公平性，公平性方法又往往未建模域偏移。本文研究公平域泛化问题，目标是在未见目标域同时降低期望风险与公平性违规，并为多类别分类与多组敏感属性推导出互信息上界。该上界既给出理论刻画，也为训练跨域公平且鲁棒的分类器提供了可操作的优化依据。",
+      "title_zh": "公平域泛化：一种信息论视角",
+      "motivation_cn": "域泛化方法通常忽略算法公平性，公平性方法又缺少对域偏移的建模，导致二者在未见域上难以兼得。",
+      "method_cn": "提出公平域泛化框架，推导期望风险与公平违规的互信息上界，以同时约束域泛化性能与公平性。",
+      "result_cn": "在多种多类分类与多组敏感属性设定下获得理论保证，为训练公平且鲁棒的域泛化模型提供依据。",
+      "conclusion_cn": "从信息论角度为公平域泛化提供了可操作的优化目标和理论基础。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "aaai-2026-40089",
+      "score": 7.0,
+      "evidence_en": "Active domain adaptation selecting informative target samples with density and prototype criteria to adapt source model under domain shift",
+      "evidence_cn": "主动域适应，通过密度与原型准则挑选信息样本并在域偏移下适配源模型",
+      "canonical_evidence": "主动域适应，通过密度与原型准则挑选信息样本并在域偏移下适配源模型",
+      "tldr_en": "Proposes prototype-driven active domain adaptation with density-conscious domainness and prototype-driven informativeness, selecting valuable target samples to adapt robustly under domain shift and class imbalance.",
+      "tldr_cn": "主动域适应希望只标注少量目标样本来最大化适配收益，但很多方法仅看模型输出而忽略源/目标特征关系。该文提出PDADA，利用密度感知域性与原型驱动信息性两类准则挑选最有价值的目标样本。该方法还结合类别不平衡和簇松散处理，使小标注预算下的域适应更有效。实验表明所提选择标准在域偏移条件下优于常见主动选择策略，为跨域小样本适配提供借鉴。",
+      "title_zh": "考虑密度的原型驱动主动域适应",
+      "motivation_cn": "现有主动域适应只使用模型输出，未考虑源/目标域特征关系，可能选出无信息的目标样本。",
+      "method_cn": "提出双准则原型主动选择：密度感知域性衡量域内密度，原型驱动信息性衡量对类原型的增量价值。",
+      "result_cn": "该策略可挑选更具代表性样本并缓解类不平衡与簇松散问题，提升适配效果。",
+      "conclusion_cn": "主动选择应结合源/目标特征关系，为少标注跨域适配提供了更高效途径。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution"
+    },
+    {
+      "paper_id": "aaai-2026-38143",
+      "score": 7.0,
+      "evidence_en": "Domain generalization for point cloud classification using RWKV architecture; no fine-tuning on unseen domains, no few-shot setting",
+      "evidence_cn": "域泛化用于点云分类，以RWKV架构泛化到未见域但无少样本设置",
+      "canonical_evidence": "域泛化用于点云分类，以RWKV架构泛化到未见域但无少样本设置",
+      "tldr_en": "First study of RWKV-like architecture in domain generalization for point cloud classification, fixing token shift direction biases to generalize to unseen domains without target fine-tuning; no few-shot scenario.",
+      "tldr_cn": "为让点云分类模型泛化到未见域，已有域泛化工作多基于卷积、Transformer或Mamba，但各有感受野、算力或长程依赖局限。该文首次探索RWKV结构在点云域泛化中的潜力，指出固定方向token shift会引入域偏差，阻碍泛化。调整架构后模型无需对目标域微调即可用于新的点云域。实验表明这种线性复杂度全局建模架构有效，但它不涉及小样本分类，与核心需求只在域泛化目标上有一定关联。",
+      "title_zh": "PointDGRWKV：将RWKV类架构推广至未见域点云分类",
+      "motivation_cn": "域泛化点云分类现有架构难兼顾全局感受野、线性复杂度与有效长程建模，RWKV直接迁移会因固定方向token shift产生偏差。",
+      "method_cn": "设计适配点云域泛化的RWKV式架构，修正固定方向token shift带来的不可泛化问题。",
+      "result_cn": "架构改进使点云模型可以无需目标域微调而在未见域上获得更好精度。",
+      "conclusion_cn": "为域泛化点云分类提供了高效架构选择，但没有结合少样本场景，适用范围仍需调整。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "aaai-2026-38306",
+      "score": 7.0,
+      "evidence_en": "Trains a detector on a single source domain and generalizes to multiple unseen target domains without target data or fine-tuning",
+      "evidence_cn": "在单一源域训练并面向多个未知目标域检测，不接触目标域数据即可获得跨域泛化能力",
+      "canonical_evidence": "在单一源域训练并面向多个未知目标域检测，不接触目标域数据即可获得跨域泛化能力",
+      "tldr_en": "Recognizing that real domain shifts change continuously, this work simulates distribution dynamics with liquid temporal feature evolution, allowing single-source object detection models to capture fine-grained cross-domain variations and generalize to unseen domains.",
+      "tldr_cn": "面向单源域广义目标检测的方法通常用离散数据增强或静态扰动来扩充数据多样性，却难以刻画真实场景中天气、光照导致的连续渐变的域偏移。为此本文提出液态时序特征演化机制，让模型模拟特征分布随时间的连续变化，从而捕捉更细粒度的跨域差异。该方法不依赖目标域数据或微调，可提升检测器对多个未知域的泛化能力，为动态域偏移建模提供了新思路。",
+      "title_zh": "模拟分布动态：面向单域广义目标检测的液态时序特征演化",
+      "motivation_cn": "单源域广义目标检测需迁移至多个未知域，但离散增广与静态扰动无法刻画真实世界域偏移的连续渐变过程。",
+      "method_cn": "通过液态时序特征演化模拟特征分布的连续变化，使模型感知更细粒度的跨域分布差异。",
+      "result_cn": "在未知目标域检测场景中，检测器可捕获动态跨域差异从而获得更强的免微调泛化能力。",
+      "conclusion_cn": "揭示建模域偏移的连续动态比离散扰动更贴近现实，为免微调跨域泛化提供了新策略。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "aaai-2026-38220",
+      "score": 6.0,
+      "evidence_en": "disentangles domain-specific style from semantic structure to generalize to unseen domains in open-set object detection",
+      "evidence_cn": "通过解耦域风格与语义结构，使检测模型更好泛化到未见域和新类别",
+      "canonical_evidence": "通过解耦域风格与语义结构，使检测模型更好泛化到未见域和新类别",
+      "tldr_en": "Introduces DOAT for open-set object detection under domain shift, separating domain-specific style from semantic content with wavelet decomposition and using objectness scores to improve generalization to unseen domains and novel categories.",
+      "tldr_cn": "开集目标检测需识别已知类并定位未见类，真实场景常伴随域偏移，而源域表示将风格与语义纠缠，损害泛化。为此提出DOAT框架，利用小波特征分解分离域特有风格与语义结构，并引入目标性分数辅助检测，使模型在未见域和新类别上具有更强泛化性，为开集检测在分布外场景中的应用提供了新思路。",
+      "title_zh": "分解与归因：利用目标性分数提升可泛化开集目标检测",
+      "motivation_cn": "现有开集检测常忽略域偏移，源训练表示中风格与语义纠缠，损害未见域与新类别泛化。",
+      "method_cn": "提出联合分解-归因框架，用小波分解剥离域特有风格，引入目标性分数辅助开集检测。",
+      "result_cn": "在域偏移与开放类别同时存在时，有效提升对未见域和未见类目标的检测能力。",
+      "conclusion_cn": "表明将域风格与语义内容解耦是提升开集检测跨域泛化的重要方向。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "aaai-2026-39535",
+      "score": 6.0,
+      "evidence_en": "Unsupervised domain adaptation method exploiting language modality to adapt vision model under complex distribution shifts",
+      "evidence_cn": "利用语言模态作为鲁棒信号，引导视觉模型在地理等复杂分布偏移下完成无监督域适应",
+      "canonical_evidence": "利用语言模态作为鲁棒信号，引导视觉模型在地理等复杂分布偏移下完成无监督域适应",
+      "tldr_en": "TRUST addresses complex domain shifts such as geographical transfer where existing UDA fails; it uses captions to generate target pseudo-labels and normalised CLIP similarity based uncertainty to guide vision model adaptation.",
+      "tldr_cn": "针对背景与物体外观同时显著变化的地理等复杂分布偏移下无监督域适应性能退化的问题，TRUST利用文本描述对域偏移更鲁棒的属性，为目标样本生成伪标签，并以归一化CLIP相似度估计不确定性，从而引导视觉模型适应目标域。所提出的多模态引导策略可缓解经典UDA在复杂跨域场景中的失效问题，为借助语言模态支撑视觉域适应提供了新思路。",
+      "title_zh": "TRUST：利用文本鲁棒性进行无监督域适应",
+      "motivation_cn": "现有无监督域适应在经典分布偏移上有效，但在背景和物体外观差异显著的复杂偏移下仍会退化，需要引入更鲁棒的语言模态。",
+      "method_cn": "用目标样本的文本描述生成伪标签，结合归一化CLIP相似度的不确定性估计，以语言鲁棒性引导视觉模型适应目标域。",
+      "result_cn": "在复杂跨域场景中提升视觉模型的域适应能力，缓解传统UDA在显著外观变化下的失效问题。",
+      "conclusion_cn": "表明文本鲁棒性是视觉域适应中可利用的强信号，为复杂分布偏移的适应提供了可行方向。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution"
+    },
+    {
+      "paper_id": "openreview-icml-2026-5m6gcvcqdo",
+      "score": 6.0,
+      "evidence_en": "Studies label-shift distribution mismatch and adapts to target domains by aligning deep latent representations",
+      "evidence_cn": "研究标签偏移这一分布不匹配问题，通过在深层表征空间对齐分布来适应目标域",
+      "canonical_evidence": "研究标签偏移这一分布不匹配问题，通过在深层表征空间对齐分布来适应目标域",
+      "tldr_en": "RDALS adapts deep classifiers to label shift by aligning source and target distributions in latent space via LDA moment matching; it handles a weaker invariance assumption and provides numerical stability.",
+      "tldr_cn": "标签偏移是边际标签分布发生变化而类别条件分布保持不变的分布偏移，会导致深度模型在目标域上性能退化。RDALS提出在深度隐空间中用线性判别分析构造矩匹配线性系统，对源和目标表示分布进行对齐，从而只需要更弱的实际不变性假设即可适应目标域。理论分析进一步表明该选择可最大化数值稳定性，为复杂真实场景下的标签偏移适应提供了可靠可用的深度表征对齐方案。",
+      "title_zh": "标签偏移下深度表示的正则化判别对齐",
+      "motivation_cn": "真实场景中的标签偏移改变边际标签分布并引发深层模型性能退化，现有适应方法依赖较强假设难以使用。",
+      "method_cn": "用线性判别分析在深度隐空间构造矩匹配线性系统对齐分布，配合正则化判别对齐实现标签偏移适应。",
+      "result_cn": "理论分析证明该方法数值稳定，在深层表征上能够适应标签偏移并提升目标域表现。",
+      "conclusion_cn": "把分布对齐提升到表示层并放宽假设，为实际部署中的标签偏移提供了可操作的深度适应框架。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "distribution mismatch between source and target domains causing performance degradation"
+    },
+    {
+      "paper_id": "openreview-icml-2026-hhhsqmuwsu",
+      "score": 6.0,
+      "evidence_en": "Unsupervised video domain adaptation method with a concise objective and module design to remove spatial and temporal divergence across domains",
+      "evidence_cn": "提出极简的无监督视频域适应方法，通过时间-静态相减模块分别消除跨域视频的空间与时序差异",
+      "canonical_evidence": "提出极简的无监督视频域适应方法，通过时间-静态相减模块分别消除跨域视频的空间与时序差异",
+      "tldr_en": "MetaTrans makes unsupervised video domain adaptation simple: only two loss terms plus a temporal-static subtraction module separately remove spatial and temporal divergence, yielding substantial gains in cross-domain action recognition.",
+      "tldr_cn": "无监督视频域适应是重要但尚未充分探索的问题，现有方法往往引入复杂目标。论文提出极其简洁的MetaTrans方法，学习目标仅包含两个基础损失项，同时利用时间-静态相减模块在模型架构层面分别剥离跨域视频的空间差异与时序差异。该设计在多个跨域动作识别任务上带来显著的绝对性能提升，证明将空间与时序域差异解耦后，简单目标也能实现强适应效果。",
+      "title_zh": "MetaTrans：回归简单的无监督视频域适应",
+      "motivation_cn": "无监督视频域适应中空间与时序差异交织，现有方法复杂且难以分离这两类域偏移。",
+      "method_cn": "用时间-静态相减模块分别消除空间与时序域差异，仅保留两个基础损失项作为学习目标。",
+      "result_cn": "在跨域动作识别等多项视频域适应任务上取得显著的绝对性能提升，验证了简洁设计的高效性。",
+      "conclusion_cn": "将视频域偏移分解为空间与时序两部分并配以极简目标，为无监督视频域适应提供了易扩展的高效路线。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution"
+    },
+    {
+      "paper_id": "anthology-2026.findings-acl.822",
+      "score": 6.0,
+      "evidence_en": "Identifies distribution shift over streaming test data as cause of degradation in LLM multi-label classification and proposes confidence-guided online adaptation",
+      "evidence_cn": "指出流式测试数据分布偏移导致LLM多标签分类性能下降，并设计无参数在线适应方法",
+      "canonical_evidence": "指出流式测试数据分布偏移导致LLM多标签分类性能下降，并设计无参数在线适应方法",
+      "tldr_en": "SCOTTA adapts LLM multi-label classifiers to streaming distribution shift online without parameter updates, replacing unreliable generation probabilities with label-set local likelihood structured confidence and preventing cache overfitting.",
+      "tldr_cn": "大语言模型虽可借助上下文学习完成零样本或少样本多标签分类，但在流式测试数据上常因分布偏移和长尾标签而性能下降，静态推理无法适应动态分布。该文提出无参数更新的在线适应框架SCOTTA，用标签集局部似然构造结构化置信度，避免标准生成概率不可靠的问题，同时改进置信度缓存防止高频易例过拟合、降低标签覆盖。实验表明它能提升流式多标签分类的适应性与标签多样性，为LLM在线部署提供了轻量方案。",
+      "title_zh": "面向LLM多标签分类的结构化置信度引导在线适应",
+      "motivation_cn": "流式测试数据中的分布偏移和长尾标签使LLM多标签分类性能退化，且静态推理与朴素缓存均不可靠。",
+      "method_cn": "提出SCOTTA在线适应框架，用标签集局部似然作为结构化置信度，并设计避免过拟合的缓存机制，无需更新参数。",
+      "result_cn": "缓解不可靠置信度与缓存过拟合，提高流式数据下的分类性能和标签覆盖率。",
+      "conclusion_cn": "结构化置信度驱动的无参数在线适应为LLM应对分布偏移提供了有效的轻量级解决方案。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "distribution mismatch between source and target domains causing performance degradation"
+    },
+    {
+      "paper_id": "openreview-icml-2026-13rceoefry",
+      "score": 5.0,
+      "evidence_en": "few-shot downstream classification with finite labels; proves generalization bounds for transfer but does not address domain shift",
+      "evidence_cn": "研究少样本下游分类的可迁移性并给出泛化界，但未涉及领域偏移",
+      "canonical_evidence": "研究少样本下游分类的可迁移性并给出泛化界，但未涉及领域偏移",
+      "tldr_en": "Directional neural collapse is shown to drive strong few-shot transfer of frozen self-supervised representations. The paper proves non-asymptotic multiclass bounds with finite-shot corrections and connects decision-axis collapse to multitask geometry.",
+      "tldr_cn": "自监督预训练表示在仅少量标注的情况下往往具有良好迁移能力，但背后的几何原因尚不清楚。论文提出方向性CDNV（决策轴方差）这一几何量，并证明下游少样本分类的泛化误差主要受该量控制。理论给出非渐近多分类泛化界和有限样本修正，清晰区分了决策轴内在方差与质心估计误差。该结果揭示了少样本迁移与多任务低干扰对几何结构的共同依赖，为理解表示可迁移性提供了新的判据。",
+      "title_zh": "方向性神经坍缩对自监督学习少样本迁移的解释",
+      "motivation_cn": "自监督冻结表示仅用少量标签即可迁移到多个任务，但缺少统一几何解释，难以预测少样本分类表现。",
+      "method_cn": "提出方向性CDNV刻画决策轴方差，推导非渐近多分类泛化界，并用有限样本修正分离内在方差与质心估计误差。",
+      "result_cn": "证明沿类分离方向的小变异性同时带来强少样本迁移与低跨任务干扰，并建立与多任务几何的联系。",
+      "conclusion_cn": "决策轴坍缩几何是决定少样本迁移能力的关键因素，可用于表征自监督表示的可迁移性。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    },
+    {
+      "paper_id": "anthology-2026.acl-long.973",
+      "score": 5.0,
+      "evidence_en": "Introduces test-time adaptation to handle domain shift in sign language translation under limited labeled data",
+      "evidence_cn": "面向手语翻译提出测试时适应，无需目标标注即可应对手语者、光照和背景等域偏移",
+      "canonical_evidence": "面向手语翻译提出测试时适应，无需目标标注即可应对手语者、光照和背景等域偏移",
+      "tldr_en": "SAME introduces the first test-time adaptation framework for sign language translation, rapidly adapting to signer, lighting, and background domain shifts without labeled data via signer-aware mixture-of-experts.",
+      "tldr_cn": "手语翻译在真实部署中会因为手语者、光照和背景等差异出现域偏移，监督微调又受限于标注样本稀少。文章提出首个面向手语翻译的测试时适应方法SAME，利用考虑手语者身份的专家混合结构，在不需要标签的情况下快速适应域偏移，克服现有无监督方法依赖批统计或长时适应的局限。该工作将测试时适应从图像分类推广到更复杂的序列翻译任务，展示了其在低资源跨域场景的适用性。",
+      "title_zh": "SAME：面向手语翻译的基于手语者感知专家混合的测试时自适应",
+      "motivation_cn": "手语翻译存在手语者、光照、背景等分布变化，监督微调标注稀缺，现有无监督适应方法不适用。",
+      "method_cn": "提出测试时适应框架SAME，基于手语者感知的专家混合模型，无需标签即可快速适配分布偏移。",
+      "result_cn": "首次在手语翻译中实现无需标注的快速域适应，优于需要批统计或长时适应的已有方法。",
+      "conclusion_cn": "证明测试时适应能有效处理手语翻译域偏移，为标注受限的序列跨域任务提供了新范式。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution"
+    },
+    {
+      "paper_id": "aaai-2026-38076",
+      "score": 4.0,
+      "evidence_en": "few-shot semantic segmentation with limited annotated reference examples; improves affinity computation without considering domain shift",
+      "evidence_cn": "少样本语义分割利用极少量标注示例，未涉及域偏移，仅改进亲和力计算",
+      "canonical_evidence": "少样本语义分割利用极少量标注示例，未涉及域偏移，仅改进亲和力计算",
+      "tldr_en": "Few-shot semantic segmentation relies on affinity-based inference. Generalizing Semantic Mining exploits query-specific semantics and inter-support correlations to enhance affinity maps, boosting specialist and foundation models without extra training.",
+      "tldr_cn": "少样本语义分割旨在仅用极少标注示例分割新目标，现有亲和力计算只依赖支持-查询匹配，未利用查询自身语义及支持样本之间的关联。为此提出泛化语义挖掘（GSM），将亲和力推断组织为三个主要步骤，利用查询语义和支持样本间语义相关性增强亲和力图表示。该增强方法无需额外训练，即可在推理阶段提升专用分割模型和基础模型在少样本任务上的性能，拓展了亲和力建模的表达能力。",
+      "title_zh": "基于泛化语义挖掘的无训练少样本分割增强",
+      "motivation_cn": "少样本分割中现有亲和力计算仅考虑支持-查询匹配，忽略查询自身语义与支持样本间相关性，限制了表示能力。",
+      "method_cn": "提出泛化语义挖掘，将亲和力推断分为三个步骤，挖掘查询特定语义与支持样本间的泛化语义以改进亲和力图。",
+      "result_cn": "无需额外训练即可提升专用分割模型与基础模型在少样本分割上的性能。",
+      "conclusion_cn": "显式挖掘泛化语义能增强推理阶段亲和力计算，是通用且有效的少样本分割增强手段。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    },
+    {
+      "paper_id": "anthology-2026.acl-long.187",
+      "score": 4.0,
+      "evidence_en": "continual test-time adaptation for text understanding across unobserved domains; relevant but not few-shot classification",
+      "evidence_cn": "面向未观测文本域的持续测试时适应方法，虽不属少样本分类，但处理域偏移的思路可借鉴",
+      "canonical_evidence": "面向未观测文本域的持续测试时适应方法，虽不属少样本分类，但处理域偏移的思路可借鉴",
+      "tldr_en": "Text understanding degrades under domain shift. CTTA-T handles a sequence of unobserved text domains via continual test-time adaptation; its teacher-student design with a domain-aware generalized teacher reduces error accumulation and improves robustness.",
+      "tldr_cn": "文本理解应用常受域偏移影响，现有测试时适应往往只能处理固定测试域。论文面向更实际的持续测试时适应（CTTA）场景，即测试阶段出现一系列未见文本域。当前CTTA方法难以抑制跨域误差累积并提升对未见域的泛化。为此提出CTTA-T，采用具有域感知和泛化能力的教师网络的师生结构，在线适应序列化的未见域，从而降低误差累积并提升对未知域的适应能力，为文本理解在动态域偏移下的部署提供了更实用的范式。",
+      "title_zh": "CTTA-T：使用域感知与泛化教师的师生网络实现文本持续测试时适应",
+      "motivation_cn": "文本理解的测试域通常依次出现且不可预知，现有域适应和TTA难以处理持续未见域，误差累积问题严重。",
+      "method_cn": "提出CTTA-T师生框架，设计域感知且泛化的教师网络，在线适应连续出现的未见文本域并抑制误差传播。",
+      "result_cn": "在文本理解的持续测试时适应场景中减少跨域误差累积，提升对未见域的处理能力。",
+      "conclusion_cn": "面向未见文本域序列的师生持续适应能显著提高文本模型在动态域偏移下的鲁棒性与泛化能力。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "techniques for adapting a model from a source domain to a target domain with different data distribution"
+    },
+    {
+      "paper_id": "openreview-icml-2026-jpcg6vvked",
+      "score": 4.0,
+      "evidence_en": "cross-domain class-incremental learning suffers from domain shift causing unstable adaptation and severe forgetting",
+      "evidence_cn": "跨域类增量学习中域偏移引发不稳定适配和严重遗忘，需约束更新并保留已学知识",
+      "canonical_evidence": "跨域类增量学习中域偏移引发不稳定适配和严重遗忘，需约束更新并保留已学知识",
+      "tldr_en": "Introduces PMDO for cross-domain class-incremental learning, decoupling rapid adaptation from stable consolidation and selectively adapting shared parameters to mitigate forgetting under domain shift.",
+      "tldr_cn": "跨域类增量学习要求模型在域不断变化时持续学习新类并保持已有知识。现有方法常将更新内容与更新方式耦合，在域偏移下容易产生不稳定适配与严重遗忘。本文借鉴海马体机制，提出参数掩码解耦优化PMDO，通过领域感知知识解耦器选择性地适配共享参数，把快速适配与稳定巩固分离，以缓解遗忘并增强跨域持续学习能力。",
+      "title_zh": "面向跨域类增量学习的参数掩码解耦优化",
+      "motivation_cn": "跨域增量场景中域偏移导致更新不稳定与前向遗忘，根因在于更新内容和更新方式相互纠缠。",
+      "method_cn": "提出参数掩码解耦优化框架，借助领域感知知识解耦器保留类共享知识，限制增量更新范围。",
+      "result_cn": "能够缓解跨域偏移下的灾难性遗忘，在不牺牲已学知识的前提下持续适配新域新类。",
+      "conclusion_cn": "将记忆巩固机制引入跨域增量学习，为持续适应与稳定保留提供解耦优化范式。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "distribution mismatch between source and target domains causing performance degradation"
+    },
+    {
+      "paper_id": "aaai-2026-39519",
+      "score": 4.0,
+      "evidence_en": "few-shot classification with few labeled samples but no cross-domain shift considered",
+      "evidence_cn": "面向仅有少量标签样本的少样本分类，但未涉及训练与测试域不同的跨域偏移",
+      "canonical_evidence": "面向仅有少量标签样本的少样本分类，但未涉及训练与测试域不同的跨域偏移",
+      "tldr_en": "Proposes query-only fine-tuning for few-shot classification with vision transformers, reducing GPU cost while exploiting pretrained knowledge to achieve competitive accuracy in low-resource settings.",
+      "tldr_cn": "大型Vision Transformer在少样本分类中优于小网络，但微调需要大量GPU显存与时间。为此，本文提出EfficientFSL，一种仅微调查询样本的轻量少样本分类框架，充分利用预训练模型已有的表示与理解能力。在保持高分类精度的同时，该方法显著降低计算开销，使大模型更适用于低资源真实场景。",
+      "title_zh": "EfficientFSL：通过查询样本微调增强视觉Transformer少样本分类",
+      "motivation_cn": "大型模型微调成本高，阻碍少样本分类在低资源场景的实际部署。",
+      "method_cn": "提出仅对查询样本进行微调的EfficientFSL，冻结骨干并高效利用预训练知识完成少样本分类。",
+      "result_cn": "与传统全量微调相比性能相当但显存和训练时间大幅降低，取得较优的少样本精度。",
+      "conclusion_cn": "为大型预训练模型在少样本低资源分类中的高效适配提供了实用路径。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    },
+    {
+      "paper_id": "aaai-2026-39909",
+      "score": 4.0,
+      "evidence_en": "few-shot classification with only few labeled examples but does not address domain shift",
+      "evidence_cn": "面向仅有少数标注样本的少样本分类，但未讨论域间分布差异",
+      "canonical_evidence": "面向仅有少数标注样本的少样本分类，但未讨论域间分布差异",
+      "tldr_en": "Presents multimodal prototype augmentation for few-shot learning, using LLM-generated category descriptions and hierarchical multi-view augmentation to enrich prototypes and improve classification from few labeled examples.",
+      "tldr_cn": "少样本学习旨在从极少量标注样本中识别新类，现有方法多只依赖视觉模态，直接由原始支持图计算原型，缺少多模态信息。本文提出多模态原型增强框架MPA，通过大语言模型生成多样化的类别描述，结合层次化多视角增强与自适应不确定类吸收模块，丰富类别表征，从而提升少样本新类识别性能。",
+      "title_zh": "MPA：用于少样本学习的多模态原型增强",
+      "motivation_cn": "主流少样本方法仅用视觉模态从原始支持图像中计算原型，缺乏跨模态语义与细粒度类别判别信息。",
+      "method_cn": "提出MPA框架，以大语言模型生成多样化描述，并配合层次多视角增强和不确定类吸收模块增强原型。",
+      "result_cn": "融入多模态语义增强后，少样本分类精度获得提升，尤其在类别差异细微时更有效。",
+      "conclusion_cn": "说明利用语义生成与多视角增强是改善少样本分类原型质量的有效方向。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    },
+    {
+      "paper_id": "aaai-2026-39123",
+      "score": 4.0,
+      "evidence_en": "Few-shot classification with frequency-domain semantic transfer; lacks cross-domain shift modeling",
+      "evidence_cn": "属于小样本分类方法但未涉及训练与测试域不同的分布偏移",
+      "canonical_evidence": "属于小样本分类方法但未涉及训练与测试域不同的分布偏移",
+      "tldr_en": "Leverages frequency domain as implicit task-adaptive semantics to improve few-shot image classification without external knowledge; the approach could inspire but does not address cross-domain shift.",
+      "tldr_cn": "小样本图像分类在监督有限时难以学习充分特征，而现有引入语义先验的方法或有歧义或依赖外部资源。该文将频域视为隐式且任务自适应的语义来源，提出F2SST频域到空间语义迁移框架，用频谱信息增强特征表达。实验表明该方法可提升少样本分类性能，但它未涉及跨域分布偏移，因此与核心需求的关联有限。",
+      "title_zh": "F2SST：面向少样本图像分类的频域到空间语义迁移",
+      "motivation_cn": "现有少样本方法依赖类名或知识图谱等外部语义，存在歧义和资源开销问题。",
+      "method_cn": "提出F2SST框架，把频域当作隐式语义，并将频谱特征迁移到空间增强少样本特征学习。",
+      "result_cn": "实验表明利用频域语义可在小样本图像分类上取得性能增益。",
+      "conclusion_cn": "说明频域可作为少样本分类无需外部知识的语义补充，但需扩展至跨域设置才更契合目标。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    },
+    {
+      "paper_id": "aaai-2026-37280",
+      "score": 4.0,
+      "evidence_en": "Few-shot VLM framework recognizes unseen/out-of-distribution inputs without fine-tuning, but targets OOD detection rather than cross-domain classification",
+      "evidence_cn": "面向未见过或分布外样本的小样本识别，但任务目标为分布外检测，与跨域小样本分类不同",
+      "canonical_evidence": "面向未见过或分布外样本的小样本识别，但任务目标为分布外检测，与跨域小样本分类不同",
+      "tldr_en": "IIM is a lightweight VLM framework for few-shot OOD detection; image-level support mining selects class-relevant patches and symmetric maximum concept matching supplies missing OOD prototypes.",
+      "tldr_cn": "基于视觉语言模型的零样本分布外检测受局部特征原型不完善和缺少分布外原型限制。IIM通过图像内挖掘，先选出每张图像中与类原型最相关的局部块作为正样本，再以对称最大概念匹配提升小样本分布外识别能力。该框架轻量且只需少量样本，为小样本开放环境感知提供了补充，但与面向源-目标域的跨域小样本分类问题存在本质差异。",
+      "title_zh": "通过图像内挖掘与对称最大概念匹配的小样本分布外检测",
+      "motivation_cn": "现有视觉语言模型零样本分布外检测受限于局部特征原型不完善且缺少分布外原型。",
+      "method_cn": "提出图像内挖掘IIM，选择与类原型相关的局部块作为正样本，并用对称最大概念匹配进行小样本优化。",
+      "result_cn": "以轻量方式改善零样本检测的原型缺陷，提升小样本分布外检测能力。",
+      "conclusion_cn": "该工作属于小样本分布外检测，方法思路可借鉴，但与查询的跨域小样本分类任务弱相关。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "learning a model that can generalize to unseen domains without fine-tuning"
+    },
+    {
+      "paper_id": "aaai-2026-40093",
+      "score": 4.0,
+      "evidence_en": "Improves CLIP few-shot classification by removing template-sample bias, but does not address cross-domain distribution shift in the setting",
+      "evidence_cn": "提升小样本分类精度与鲁棒性，但未涉及训练/测试领域不一致的跨域场景",
+      "canonical_evidence": "提升小样本分类精度与鲁棒性，但未涉及训练/测试领域不一致的跨域场景",
+      "tldr_en": "Proposes a CLIP few-shot classification framework using empty prompts to reveal and offset template-sample similarity bias, preventing over-reliance on template proximity instead of true sample-category alignment.",
+      "tldr_cn": "CLIP在小样本分类中，模板与样本的相似度会引入偏差，使模型依赖模板邻近度而非真实类别对齐，降低精度与鲁棒性。作者提出空提示框架，用不含类别信息的空文本捕获无偏模板特征，并通过两阶段训练在预训练阶段揭示并缓解模板偏差。实验表明该方法能有效抵消模板偏差，提升少样本分类的性能与稳定性。该工作为CLIP小样本分类提供了简洁实用的提示学习策略。",
+      "title_zh": "解耦CLIP中的模板偏差：利用空提示增强小样本学习",
+      "motivation_cn": "CLIP小样本分类中模板-样本相似度偏差会误导模型，使其过度依赖模板位置而非真实类别对齐，影响精度与鲁棒性。",
+      "method_cn": "设计空提示文本以捕获无偏模板特征，并采用两阶段训练揭示并降低模板偏差，改善少样本分类。",
+      "result_cn": "实验表明该方法能有效抵消模板偏差，在多个小样本分类基准上提升准确率与鲁棒性。",
+      "conclusion_cn": "空提示是一种简单有效的提示学习方法，能解耦CLIP中的模板偏差，增强少样本分类性能。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:few-shot",
+      "matched_query_text": "classification task where training and test domains differ and only a few labeled samples are available"
+    }
+  ],
+  "llm_ranked_at": "2026-09-09T09:28:16.177411+00:00",
+  "display_min_score": 4.0,
+  "pruned_at": "2026-09-09T09:28:16.214502+00:00"
+}

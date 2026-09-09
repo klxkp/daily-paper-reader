@@ -1,0 +1,1086 @@
+Title: 2026.acl-long.187.pdf
+
+URL Source: https://aclanthology.org/2026.acl-long.187.pdf
+
+Published Time: Thu, 11 Jun 2026 01:09:31 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 4058–4078 July 2-7, 2026 ©2026 Association for Computational Linguistics CTTA-T: Continual Test-Time Adaptation for Text Understanding via Teacher-Student with a Domain-aware and Generalized Teacher 
+
+Tianlun Liu 1, Zhiliang Tian 1*, Zhen Huang 1*, Xingzhi Zhou 2,Wanlong Yu 1, Tianle Liu 1, Feng Liu 3, Dongsheng Li 1
+
+1College of Computer Science and Technology, National University of Defense Technology, Hunan, China 
+
+2The Hong Kong University of Science and Technology, Hong Kong SAR, China 
+
+3National University of Defense Technology, Hunan, China 
+
+{ltlun, tianzhiliang, huangzhen, ywl, liutianle, richardlf, dsli}@nudt.edu.cn, xzhoubl@cse.ust.hk 
+
+Abstract 
+
+Text understanding often suffers from domain shifts. To handle testing domains, domain adap-tation (DA) is trained to adapt to a fixed and observed testing domain; a more challenging paradigm, test-time adaptation (TTA), cannot access the testing domain during training and online adapts to the testing samples during test-ing, where the samples are from a fixed domain. We aim to explore a more practical and un-derexplored scenario, continual test-time adap-tation (CTTA) for text understanding, which involves a sequence of testing (unobserved) domains in testing. Current CTTA methods struggle in reducing error accumulation over domains and enhancing generalization to han-dle unobserved domains: 1) Noise-filtering re-duces accumulated errors but discards useful information, and 2) accumulating historical do-mains enhances generalization, but it is hard to achieve adaptive accumulation. In this paper, we propose a CTTA-T 1 (continual test-time 
+
+adaptation for text understanding) framework adaptable to evolving target domains: it adopts a teacher-student framework, where the teacher is domain-aware and generalized for evolving domains. To improve teacher predictions, we propose a refine-then-filter based on dropout-driven consistency, which calibrates predictions and removes unreliable guidance. For the adap-tation–generalization trade-off, we construct a domain-aware teacher by dynamically accumu-lating cross-domain semantics via incremental PCA, which continuously tracks domain shifts. Experiments show CTTA-T excels baselines. 
+
+1 Introduction 
+
+Text understanding has a wide range of applica-tions. Most existing models rely on offline train-ing with fixed source data and perform well when the testing and training domains are aligned (De-vlin et al., 2019; Hu et al., 2018). However, in 
+
+> *
+
+Corresponding Authors 
+
+> 1
+
+Code is: https://github.com/coyil-hub/CTTA-T .DA 
+
+CTTA 
+
+TTA       
+
+> Testing
+> ………
+> Training
+> Source domain
+> 𝑦 1𝑥 2s𝑦 2
+> 𝑥 3s𝑦 3𝑥 4s𝑦 4
+
+……    
+
+> 𝑥 1s
+> Target domain
+> 𝑥 1𝑡 𝑥 2𝑡
+> 𝑥 3𝑡 𝑥 4𝑡
+
+……  
+
+> Target domain N
+
+……         
+
+> adaptation on that stage
+> 𝑥 𝑖 𝑦 𝑖
+> Not adaptation on that stage
+> Data Label Unavailable Data Available Data
+> Source domain
+> 𝑦 1𝑥 2s𝑦 2
+> 𝑥 3s𝑦 3𝑥 4s𝑦 4
+
+……       
+
+> 𝑥 1s
+> Source domain
+> 𝑦 1𝑥 2s𝑦 2
+> 𝑥 3s𝑦 3𝑥 4s𝑦 4
+
+……    
+
+> 𝑥 1s
+> Target domain
+> 𝑥 1𝑡 𝑥 2𝑡
+> 𝑥 3𝑡 𝑥 4𝑡
+
+……    
+
+> Target domain
+> 𝑥 1𝑡 𝑥 2𝑡
+> 𝑥 3𝑡 𝑥 4𝑡
+
+……   
+
+> 𝑥 1𝑡 𝑥 2𝑡
+> 𝑥 3𝑡 𝑥 4𝑡
+
+Figure 1: Comparison of three settings for adapting to domain shift. DA, TTA, and CTTA represent progres-sively more challenging and practical scenarios. 
+
+real-world text understanding applications, testing domains shift over time, a phenomenon known as continual domain shift (Wang et al., 2022). This oc-curs, for instance, when a model trained in a source domain (i.e., movie reviewing) is later deployed for testing on various target domains (i.e., restaurant reviewing or book reviewing). Most current mod-els do not improve themselves as they are applied to new target domains. It is sometimes necessary for models to continually enhance themselves as they encounter evolving target domains. To mitigate the domain shift, some researchers explore domain adaptation (DA) in text understand-ing. DA improves model performance by reducing the gap between source (training) and target (test-ing) domains (Cao et al., 2020) to mitigate a single domain shift, which requires observed information of the target domain during training. However, in practice, domain shifts are often observed dur-ing testing, which limits the applicability of DA. A new task, test-time adaptation (TTA), enables models to adapt to domain shift during testing by learning online on unlabeled testing data from the fixed target domain. However, real-world scenarios always involve continual domain shifts (i.e., con-tinuous multiple shifts), where domains shift over time, and TTA methods are inadequate in handling such scenarios. To overcome the limitation, we study continual test-time adaptation (CTTA) in text 
+
+4058 understanding, where unlabeled testing samples arrive sequentially from continuously shifting do-mains. In this setting, the model should continually predict and adapt online without access to training samples. The illustration of the three settings (DA, TTA, and CTTA) is in Fig. 1. Although TTA has explored techniques such as entropy minimization (Wang et al., 2021), teacher-student self-training (Lee et al., 2013; Ye et al., 2022), and contrastive learning (Chen et al., 2022), these methods are not fully applicable under CTTA for text understanding due to two limitations: 1) continual domain shift amplifies noise accumula-tion over evolving domains, eventually causing col-lapse (Guo et al., 2017; Chen et al., 2019). 2) TTA focuses on fixed domain shifts but lacks mech-anisms to adapt to evolving textual patterns for evolving domains, leading to poor generalization. To fix noise accumulation and generalization issues in CTTA mentioned above, researchers pro-pose sample filtering and teacher-student frame-work methods: (1) To mitigate noise accumula-tion, researchers proposed sample filtering methods (Lee et al.; Wang et al., 2024) that remove noisy samples during adaptation to improve robustness. However, these methods often struggle to distin-guish noise from useful signals, and directly filter-ing samples may harm performance by discarding target-domain information. (2) To address gener-alization issues, researchers proposed a teacher-student framework (Karim et al., 2023; Lyu et al., 2024) that accumulates information from previous domains to build a teacher for generating pseudo-labels to guide the student. This enhances general-ization across domains: the teacher, updated by par-tially absorbing the student’s parameters, provides cross-domain understanding ability, while the stu-dent adapts to each specific domain. When teacher accumulates historical domain information from student, the contribution of each domain remains fixed at every update and cannot adapt dynamically to domain-specific semantic information. In summary, when applying existing CTTA methods (i.e., teacher-student with sample filtering) to text understanding, models struggle to balance the useful and noisy information from the target domain. We argue that we should carefully and adaptively absorb the sample-level and domain-level information: (1) considering uncertainty in sample filtering, and (2) dynamically accumulating domain-specific semantic information. In this paper, we propose the continual test-time 
+
+adaptation for text understanding (CTTA-T) frame-work: We design a strong teacher-student frame-work, equipping the teacher with both domain awareness and generalization to adapt to evolv-ing domains, while applying a consistency-based refine-then-filter module to improve the quality of its predictions. Specifically, we use the teacher-student framework as the foundation for our imple-mentation in CTTA for text understanding. We pro-pose a refine-then-filter module to improve teacher prediction by leveraging consistency from multiple dropout forward passes. It first refines the teacher’s outputs via consistency-based reweighting, then filters low-consistency predictions. We propose a domain-aware teacher module that employs in-cremental principal component analysis (IPCA) to compute semantic shift, enabling the teacher to perform cross-domain accumulation by dynami-cally adjusting its integration of target-domain in-formation, balancing specific-domain adaptation and cross-domain generalization. We stochasti-cally restore part of the teacher’s parameters, in-jecting source general knowledge to enhance its generalization. Since there is currently no available benchmark for CTTA in text understanding, we further construct a benchmark that covers multiple domains and task sequences across robust QA, read-ing comprehension, cross-lingual QA, and cross-topic and -lingual sentiment analysis. Experiments show that, unlike all baselines whose performance degrades under CTTA, our method maintains more stable performance and outperforms all baselines. Our contributions are: (1) We propose CTTA-T ,a continual test-time adaptation (CTTA) framework for text understanding, and introduce a benchmark tailored for evaluating CTTA. (2) We introduce a refine-then-filter module to improve teacher predic-tion reliability based on prediction consistency. (3) 
+
+We propose a domain-aware teacher update module that applies dynamically cross-domain accumula-tion via IPCA to balance adaptation and general-ization. (4) Experiments on the CTTA benchmark demonstrate that CTTA-T achieves SOTA. 
+
+2 Related Work 
+
+Domain Adaptation aims to improve generaliza-tion across domains in text understanding. It falls into two types: 1) Data-based methods adapt to the target domain by generating or selecting rel-evant data. CANMD (Yue et al., 2022) gener-ates high-confidence pseudo-labels. T-SAS (Jeong 4059 et al., 2023) mitigates noise by generating and fil-tering answers. 2) Self-training-based methods 
+
+mitigate domain gaps by modifying model architec-ture or training protocols. TTT-NN (Hardt and Sun, 2024) retrieves neighbors during testing. CrossIn (Lin et al., 2025) enables cross-lingual tuning us-ing translated pairs. However, DA assumes access to domain shifts during training, while in practice, such shifts are observable at testing. 
+
+Test-Time Adaptation is a testing process that mitigates domain shift (Wang et al., 2021). It falls into two types: 1) Non-backpropagation-based methods update modules or outputs solely during testing. LAME (Boudiaf et al., 2022) adjusts prob-abilities with Laplace maximum likelihood. FOA (Niu et al., 2024) uses covariance adaptation to learn input prompts. 2) Backpropagation-based methods update the model by optimizing using test samples. Tent (Wang et al., 2021) adapts during testing by minimizing entropy. EATA (Niu et al., 2022) minimizes low-entropy samples. CoTTA (Wang et al., 2022) uses a teacher-student frame-work. OIL (Ye et al., 2022) uses a teacher-student framework and causal inference. VIDA (Liu et al., 2023) adds lower- and higher-order parameters. SAR (Niu et al., 2023) conducts sharpness-aware entropy minimization. SoTTA (Gong et al., 2023) buffers class-balanced samples and sharpens en-tropy minimization. MoTTA (Zhou et al., 2025) filters noise via model-pruning and uses flatness-aware minimization. REM (Han et al., 2025) builds the prediction difficulty via a progressive masking strategy. Existing work primarily focuses on com-puter vision (CV), and our goal is to propose a framework that achieves strong performance under continual domain shift in text understanding. 
+
+3 Method 
+
+The CTTA-T framework comprises four modules as shown in Fig. 2. (1) We employ a teacher-student framework as the foundation of our CTTA approach for text understanding (§3.1): the teacher absorbs cross-domain information, and students learn domain-specific information. (2) We apply a refine-then-filter module (§3.2) via consistency to improve teacher prediction reliability, which re-duces the teacher-predicted uncertainty according to its consistency. (3) We propose a domain-aware teacher module (§3.3) that dynamically accumu-lates cross-domain semantic information from the student. We adopt incremental principal compo-nent analysis (IPCA) to extract and update the se-mantic space that reflects the evolving domain in-formation. (4) We introduce a stochastic restoration module (§3.4) to enhance teacher generalization by randomly injecting source-domain knowledge. 
+
+Problem Definition: Given a model pre-trained on source domain Ps, we aim to adapt it to a continu-ally shifting target domain Pt. The model updates using the no-label of the current test data xTt , with-out accessing source data Xs, past test data XT<t ,or future test data XT>t . (Details are in App. A.) 
+
+3.1 Teacher-Student Model for CTTA in Text Understanding 
+
+To achieve continual test-time adaptation (CTTA) for text understanding, we build a CTTA back-bone using a teacher-student framework where the teacher continuously guides the student during test-ing. This is motivated by text understanding, which involves context-sensitive semantics and domain-specific terminology, making continual adaptation crucial as domains shift during testing. Let θTt and θSt denote the teacher and student models at time t, both initialized from the source model θ0. At each time, we enforce consistency between their predictions by minimizing the cross-entropy of their softmax probability outputs:      
+
+> LθSt(xt) = −∑
+> y
+> p
+> (
+> y|xt, θ Tt
+> )
+> log p
+> (
+> y|xt, θ St
+> )
+> .(1)
+
+After the student is updated via Eq. 1, the teacher updates by partially absorbing the student with a fixed weight. In this framework, the student model 
+
+θSt acts as a fast adapter to the current domain, cap-turing domain-specific semantics from the textual embedding of xt by directly updating its parame-ters via Eq. 1. The teacher model θTt , in contrast, serves as a stable knowledge aggregator, progres-sively integrating the student’s updates to maintain a general understanding of semantics across testing domains. This allows the teacher to provide reli-able pseudo-labels to guide the student, even as the input domain shifts continuously. 
+
+3.2 Refine-then-Filter Teacher Prediction via Consistency 
+
+We propose a Refine-then-Filter Teacher Predic-tion (RFP) module that enhances teacher guidance by improving the reliability of teacher predictions before using them to guide the student. In CTTA, adaptation under continual domain shifts amplifies two types of uncertainty: epistemic uncertainty 4060 Source Pre -             
+
+> Trained Model
+> Student
+> Teacher
+> 𝜽 𝟎
+> 𝒑 𝒚 𝒙 𝒕 , 𝜽 𝒕 𝑺
+> 𝒑 𝒚 𝒙 𝒕 , 𝜽 𝒕 𝑻
+> 𝜽 𝒕 𝑻
+> 𝜽 𝒕 𝑺
+> 𝜽 𝒕−𝟏
+> 𝑺
+> 𝜽 𝟎 𝑺
+> 𝜽 𝟎 𝑻 𝜽 𝒕−𝟏 𝑻
+> 𝓗( )𝑰𝒇 ≥ 𝜸 𝒄
+> 𝓗( )𝑰𝒇 < 𝜸 𝒄
+> 𝒑 𝒚 𝒙 𝒕 , 𝜽 𝒕 𝑻
+> 𝒑 𝒚 𝒙 𝒕 , 𝜽 𝒕 𝑻 , 𝐬
+> Continual Domain Shift Unlabeled Task Stream
+
+𝜶 𝒕−𝟏 
+
+𝑽 𝒕−𝟐  𝑽 𝒕+𝟏 
+
+𝜶 𝒕 
+
+𝑽 𝒕−𝟏 
+
+𝜶 𝒕+𝟏 
+
+𝑽 𝒕              
+
+> Principal Component Space (PCS)
+> Task 𝒕 -2
+> Domain 𝒕 -2
+> Task 𝒕 -1
+> Domain 𝒕 -1
+> Task 𝒕
+> Domain 𝒕
+> Task 𝒕 +1
+> Domain 𝒕 +1
+> 𝜽 𝒕+𝟏 𝑻 =𝟏 − 𝜶 𝒕 𝜽 𝒕+𝟏 𝑺 + 𝜶 𝒕 𝜽 𝒕 𝑻
+
+𝒙 𝒕   
+
+> 𝜽 𝒕+𝟏 𝑺
+> 𝜽 𝒕+𝟏 𝑻 =𝑴 ⊙ 𝜽 𝟎
+> +(𝟏 − 𝑴) ⊙ 𝜽 𝒕+𝟏 𝑻
+> Update Teacher
+
+…
+
+> M
+
+…0 1 0 1 1 0 0… 
+
+> Stochastic Restores Teacher
+> 𝜽 𝒕+𝟏 𝑺
+> 𝜽 𝒕+𝟏 𝑻
+> Dropout 1
+> Dropout 2
+> ………
+> Dropout N
+> Prediction Consistency Matrix
+> Stack SVD
+> U
+
+𝚺       
+
+> V
+> 𝑰𝒇 𝐬 𝒎𝒂𝒙 ≥ 𝝉
+> Filtering
+> Refining
+> 𝐬 = [𝒔 𝒋 ]𝒋∈[𝟏,𝟐,...,𝑪]
+> 𝐬 𝒎𝒂𝒙
+> 𝑰𝒇 𝐬 𝒎𝒂𝒙 < 𝝉
+> Retain 𝒙 𝒕
+> Filter 𝒙 𝒕
+> 𝚺 = 𝒅𝒊𝒂𝒈(𝝈 𝟏 , . . . , 𝝈 𝒓 )𝒔 𝒋 = (𝐕 𝒋,: ⋅ [𝝈 𝟏 , . . . , 𝝈 𝒓 ])
+> 𝜽 𝒕,𝟏 𝑻
+> 𝜽 𝒕,𝟐 𝑻
+> 𝜽 𝒕,𝑵 𝑻
+> Consistency Scores
+
+IPCA    
+
+> Forward Backward Omitted adaptation steps
+> Copy
+> 𝜶 𝒕 ：Teacher update weight
+
+Figure 2: Overview of CTTA-T . When a textual sample xt arrives (blue box), teacher and student predict on it. Low-entropy teacher outputs guide the student via cross-entropy; otherwise, smax is computed (bottom-right). Low-smax samples are discarded, while high ones combine the consistency distribution with the teacher output for refined student update. The student then updates the teacher (upper top-right), with update weight measured by IPCA domain distance (bottom-left). Finally, part of the teacher’s parameters is randomly restored (lower top-right). 
+
+(EU), caused by model uncertainty, which leads to unstable predictions on unseen domains, aleatoric uncertainty (AU), caused by input noise, which in-troduces random noise even for familiar domain inputs (Kendall and Gal, 2017). As the EU stems from insufficient model confidence and the AU from irreducible data noise, handling them jointly is ineffective. To mitigate their effects, our RFP op-erates in two stages: the refine stage reduces EU by leveraging prediction consistency (i.e., the agree-ment among multiple stochastic forward passes under our dropout) to calibrate the teacher’s out-puts, which stabilizes predictions in unfamiliar do-mains. The filter stage suppresses AU by removing predictions with low consistency, as these likely arise from intrinsically noisy; eliminating them pre-vents such randomness from passing to the student. Hence, explicitly modeling EU and AU becomes essential to prevent accumulated uncertainty from destabilizing continual adaptation in CTTA. 
+
+Refinement via Prediction Consistency Distribu-tion To identify samples with high EU, we first use entropy as a screening mechanism and then per-form refinement based on prediction consistency. We compute the entropy of the teacher’s predic-tion as a proxy to detect high-EU samples, follow-ing established practice (Kendall and Gal, 2017). Specifically, for a given sample xt, we compute the entropy H(p(y|xt, θ Tt )) using θTt , and mark it as high-EU if the entropy exceeds a threshold γc.Once these high-EU samples are identified, we in-troduce a three-step prediction refinement process: 
+
+Step 1: Construct the prediction consistency matrix. We take N stochastic dropout masks on the teacher model θTt at time t, yielding N sam-pled models θdp nn∈[1 ,2,...,N ]. Each θdp n belongs to a variational distribution q(θ) that approximates the true posterior. This enables MC sampling to approximate the model’s predictive distribution and quantify EU through the variability of predic-tions across different dropout-induced parameter samples. For input xt, we obtain the probability 
+
+pn = P (y|xt, θ dp n ) from each sampled model. We then construct a prediction consistency matrix PC
+
+by stacking these probability vectors column-wise: 
+
+PC = [ p1, ..., p N ]T ∈ RN ×C , where each row cor-responds to one stochastic forward pass and each column corresponds to a class. Finally, we apply SVD to PC to capture the principal consistency patterns among predictions: 
+
+PC = U ΣV T , Σ = diag( σ1, σ 2, ..., σ r), (2) where r = rank (PC ), Each row of V T represents a principal direction in the class space, whose cor-responding singular value σi quantifies its impor-tance. A large vji indicates a strong correlation between class j and principal direction i. By con-structing and decomposing PC , the model identifies 4061 coherent uncertainty patterns across MC samples, thereby isolating EU from unstable model beliefs. 
+
+Step 2: Obtain prediction consistency distri-bution. We define the prediction consistency distri-bution s as a class-wise summary of these principal components V:,i . For each class j, its score sj is computed as the weighted sum of the principal di-rections {V:,i }ri=1 associated with that class, using singular values {σi}ri=1 as weights: 
+
+s = [ sj ]j∈[1 ,2,...,C ], (3) where sj = ∑ri=1 Vj,i σi, and Vj, : denotes the j-th row of V . The singular values capture how domi-nant each principal direction is among all stochastic predictions, while Vj, : measures how much class 
+
+j aligns with these stable directions. Therefore, a higher sj indicates that class j consistently receives similar predictions across multiple MC-dropout samples, corresponding to lower EU. 
+
+Step 3: Refine the sample with prediction con-sistency distribution. We define the refined proba-bility p(y|xt, θ Tt , s) as Eq. 4, where the prediction consistency distribution s is softmax-transformed to re-weight the original probabilities.        
+
+> p(y|xt, θ Tt,s) = softmax (softmax (s)⊙p(y|xt, θ Tt)) ,(4)
+
+where ⊙ is Hadamard product. For high-EU sam-ples, we replace teacher’s prediction in Eq. 1 with refined probability p(y|xt, θ Tt , s) to reduce EU. 
+
+Filtering via Prediction Consistency Score 
+
+Since AU originates from data noise and cannot be directly mitigated, we apply a filter guided by the prediction consistency score s to reduce AU. Specifically, we filter out samples if its prediction consistency score smax = max j [sj ]j∈[1 ,2,..., C] is be-low the threshold τ , where [sj ]j∈[1 ,2,..., C] (as eq. 3) is the prediction consistency distribution. When the sample xt is dominated by data noise, the con-sistency matrix PC exhibits random behavior and causes a drop in smax . Therefore, setting a thresh-old τ to filter out smaller smax enables effective masking of samples with high AU (The proof of the upper bound of consistency score is in App. C). 
+
+3.3 Cross-Domain Accumulation for Domain-Aware Teacher 
+
+We propose a Cross-Domain Accumulation for Domain-Aware Teacher (CDA) module that en-ables a domain-aware teacher to dynamically ac-cumulate cross-domain semantic information for text understanding in CTTA. Most teacher-student CTTA models adopt a fixed-weight exponential moving average (EMA) update (Tarvainen and Valpola, 2017). We argue that a domain-aware teacher should dynamically absorb student knowl-edge based on cross-domain shifts. Traditional EMA updates the teacher θTt at each time t as: 
+
+θTt+1 = αθ Tt + (1 − α)θSt+1 , (5) where the θSt+1 is updated student model through Eq. 1. However, traditional EMA, using a static accumulation rate α, fails to perceive domain shifts in streaming data, leading to either over-adaptation or under-adaptation in evolving text domains. To improve domain-aware accumulation, CDA dynam-ically adjusts the update rate α by measuring the semantic distance between all historical and cur-rent domains via incremental principal component analysis (IPCA) (Ross et al., 2008) in two steps: 
+
+Step 1: Measuring domain semantic distance. 
+
+We use IPCA to extract low-dimensional seman-tic representations C and measure the semantic shift distance between the current and historical do-mains. The motivation for using IPCA is its ability to incrementally encode domain semantics into a compact representation, enabling continual track-ing of cross-domain evolution without storing past data. Specifically, we treat the covariance matrix as a proxy for domain-level semantics, as it captures co-occurrence patterns among features, reflecting the domain structure. At each time t, we compute the covariance matrix Ct from all historical sam-ples X≤t, and apply singular value decomposition (SVD) to obtain the principal component space Vt
+
+(Ct = VtΛtV ⊤ 
+
+> t
+
+). When new data Xt+1 arrives, IPCA integrates the new domain’s semantic statis-tics into the Ct, updating to Ct+1 (as Eq.6). See App. B.1 for detailed IPCA derivation.                 
+
+> Ct+1 ≈NtCt+nˆC+NtnNt+n(μt−ˆμ) ( μt−ˆμ)⊤
+> Nt+n,(6)
+
+where Nt, μt denote the count and mean of histor-ical samples, and n, ˆμ, ˆC are the numbers, mean, and covariance of current samples. This allows us to incrementally maintain an up-to-date semantic representation Ct+1 without storing all samples. The corresponding principal component matrices 
+
+Vt and Vt+1 represent the main semantic axes of the historical and current domains. Since the princi-pal component space captures the densest semantic directions, the Frobenius norm of their variation, 
+
+distance ≈ ∥ ∆V ∥2 
+
+> F
+
+, (7) 4062 where ∆V = Vt − Vt+1 , measures how much the domain semantics have shifted over time (see App. B.2 for distance detailed derivation). The Frobe-nius norm summarizes the squared difference of each component axis, offering an intuitive and effi-cient measure of domain-level variation. In conclu-sion, IPCA allows us to accumulate cross-domain semantics in a low-dimensional space and dynami-cally quantify domain shift over time, forming the basis for domain-aware teacher adaptation in CDA. Analyses of robustness of IPCA are in App. B.3. 
+
+Step 2: Obtain teacher weight α according to domain semantic distance. We obtain the teacher’s update weight α based on the semantic distance measured in Step 1. Intuitively, a large shift distance (large ∆V ) indicates that the current domain introduces substantial semantic change. To address it, the teacher needs to obtain more up-to-date domain information provided by the student (θSt+1 ) to adapt effectively. Conversely, small ∆V
+
+implies high semantic similarity between current and historical domains, so retaining prior knowl-edge and relying more on previous parameters ( θTt )is better. To formalize the relation, we define F
+
+that reflects the trade-off between aligning with the current student and preserving past information: 
+
+F(θTt+1 ) = ∥ ∆V ∥2 
+
+> F
+
+· (θTt+1 − θSt+1 )2
+
++(1 − ∥ ∆V ∥2 
+
+> F
+
+) · (θTt+1 − θTt )2. (8) It shows that when the distance between the his-torical and current domains increases (i.e., large 
+
+∆V ), the term (θTt+1 − θSt+1 )2 is emphasized, forc-ing the teacher to align with the student and adapt to the new domain. When ∆V is small, the term 
+
+(θTt+1 − θTt )2 is emphasized, forcing the teacher to retain historical domains information by pushing teacher to its previous parameters. Then, we differ-entiate Eq. 8 to obtain the gradient for updating the teacher model. Finally, we combine the result of the differentiation with Eq. 5 to derive the weight as α = 1 − distance . To stabilize the model, we map α to a bounded range. (derivation in App. B.4). The CDA provides a theoretical mechanism to re-place the fixed α with a domain-aware update rule. When ∆V is large, the update weight α de-creases, prompting the teacher to absorb more from the student and better adapt to the current domain; vice versa, preserving historical parameters to pre-vent overfitting and maintain general information. CDA continuously adjusts α to modulate the trade-off between general knowledge retention and new domain-specific knowledge in CTTA. 
+
+3.4 Stochastic Restoration for Generalized Teacher 
+
+We propose a Stochastic Restoration for Gener-alized Teachers (SRT) module that enhances the generalization ability of the teacher model by ran-domly restoring a portion of its parameters to their initial source values. The motivation is to en-hance the generalization of the teacher by injecting source-domain knowledge, thereby preventing it from overfitting to transient and potentially noisy test-time domains. Specifically, for each parame-ter tensor, we independently sample a binary mask 
+
+M ∈ { 0, 1}d from a Bernoulli distribution with restoration probability p, i.e., M ∼ Bernoulli (p).The restoration operation is defined as: 
+
+θTt+1 = M ⊙ θ0 + (1 − M ) ⊙ θTt+1 , (9) where ⊙ denotes Hadamard product, θ0 is source parameters, and θTt+1 is teacher parameter updated via Eq. 5. By partially restoring the teacher’s pa-rameters, SRT constrains the deviation from gen-eral representations to improve generalization. Note that SRT is compatible with our CDA (§3.3), while CDA adapts the teacher to current domain, SRT injects source general signals, jointly balancing adaptation and generalization. SRT is inspired by CoTTA (Wang et al., 2022), but it dif-fers from CoTTA: restoration is applied to teacher rather than student. This avoids affecting inference-critical parameters and enhances the generalization. 
+
+4 Experiments 
+
+4.1 Experimental Settings Benchmark Construction. We construct a text-understanding CTTA benchmark with two task streams: Question Answering (QA) and Sentiment Analysis (SA). 1) The QA stream comprises 11 subtasks covering Robust QA (Ravichander et al., 2021), Cross-lingual QA (Artetxe et al., 2020), and Reading Comprehension (Fisch et al., 2019) datasets. The Robust QA task has two subsets (natural and synthetic noise), each with three sub-tasks (speech, keyboard, and translation errors). The Reading Comprehension includes Search and Trivia subtasks, while Cross-lingual QA includes translations into Chinese, Arabic, and Spanish. The QA stream is organized into a short sequence with 7 subtasks and a long sequence with all 11 sub-tasks. The SA stream comprises 7 subtasks cover-ing IMDb (Maas et al., 2011a) and Multilingual-Sentiment-Classification (tabularisai et al., 2025), 4063 Short Sequence Long Sequence Order Order1 (t −→ ) Order2 (t −→ ) Order3 (t −→ ) Order4 (t−→ ) Order5 (t−→ ) Order6 (t−→ ) Avg 
+
+Methods EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 base 52.52 65.45 52.52 65.45 52.52 65.45 55.94 68.27 55.94 68.27 55.94 68.27 54.23 66.86 Tent 28.83 34.43 29.66 39.89 38.34 51.23 36.04 43.63 19.69 27.19 8.27 12.20 26.81 34.76 OIL 39.53 53.31 36.89 47.69 46.60 56.55 37.77 44.43 43.48 53.42 28.07 35.09 38.72 48.42 CoTTA 53.81 65.75 44.19 55.74 49.15 61.01 47.65 57.68 23.77 31.84 15.99 22.14 39.09 49.03 SAR 51.80 61.68 52.13 64.50 52.52 64.69 53.08 65.10 52.77 64.55 50.36 62.42 52.11 63.82 SoTTA 35.23 45.67 45.43 56.60 48.83 60.20 47.37 58.56 38.15 50.20 30.25 41.97 40.88 52.20 REM 39.45 49.16 44.31 55.25 44.93 54.07 45.08 54.63 35.28 44.94 34.55 46.31 40.60 50.73 
+
+CTTA-T (ours) 54.14 66.57 53.88 66.01 54.07 66.12 57.74 69.33 57.63 69.33 57.71 69.24 55.86 67.77 
+
+xTune 56.96 68.98 56.96 68.98 56.96 68.98 59.93 71.44 59.93 71.44 59.93 71.44 58.45 70.21 Tent 50.72 62.13 44.79 56.64 44.52 54.47 39.06 49.06 23.06 29.26 55.91 67.63 43.01 53.20 OIL 44.59 57.01 48.78 60.34 54.37 65.64 41.08 48.04 51.00 61.19 39.20 47.28 46.50 56.58 CoTTA 51.49 63.57 53.24 65.77 52.02 64.18 54.80 66.70 55.57 67.61 56.28 68.04 53.90 65.98 SAR 55.50 66.86 56.19 67.54 56.15 67.56 58.10 69.02 55.59 66.78 49.99 61.21 55.25 66.50 SoTTA 42.41 53.79 56.34 67.54 54.76 65.89 54.72 65.71 47.04 57.79 45.91 56.62 50.20 61.22 REM 49.72 61.07 49.72 62.24 51.57 62.82 52.34 63.76 50.69 62.15 45.94 58.77 50.00 61.80 
+
+CTTA-T (ours) 57.85 69.72 57.99 69.76 58.00 69.80 60.84 72.08 60.92 72.18 60.86 71.96 59.41 70.92 
+
+Table 1: Main results (%). We report EM and F1, and the final column shows the average score across all orders. 
+
+Bold : the best. Underline: the second-best. “t →”: the adaptation on a temporally ordered task stream. All results are statistically significant based on the t-test ( p < 0.01 ), details in App. N. Hyperparameter analysis is in App. M                                                                                                                                                                             
+
+> Short Sequence Long Sequence
+> Order TS-CTTA CDA RFP SRT Order1 (t −→ )Order2 (t −→ )Order3 (t −→ )Order4 (t −→ )Order5 (t −→ )Order6 (t −→ )Avg
+> base EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 A✓37.24 48.11 44.72 56.44 49.32 60.93 40.83 51.05 42.18 52.18 29.81 37.83 40.68 51.09 B✓✓45.91 56.17 47.95 59.05 49.79 60.81 44.48 53.56 47.89 58.75 35.67 45.15 45.28 55.58 C✓✓✓48.12 59.35 46.37 57.29 51.22 62.78 48.71 58.74 51.90 63.17 39.46 49.76 47.63 58.52
+> CTTA-T (ours) ✓✓✓✓54.14 66.57 53.88 66.01 54.07 66.12 57.74 69.33 57.63 69.33 57.71 69.24 55.86 67.77
+> xTune EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 A✓46.43 55.97 47.74 58.03 53.33 63.86 45.02 53.62 46.15 54.35 37.38 47.41 46.01 55.54 B✓✓50.01 60.28 53.77 64.78 55.76 65.96 54.72 65.43 57.75 68.69 51.52 61.99 53.92 64.52 C✓✓✓55.12 66.58 55.45 66.85 57.22 68.85 55.36 65.71 57.46 68.49 53.68 64.58 55.72 66.84
+> CTTA-T (ours) ✓✓✓✓57.85 69.72 57.99 69.76 58.00 69.80 60.84 72.08 60.92 72.18 60.86 71.96 59.41 70.92
+
+Table 2: Ablation study of the four CTTA-T modules in the QA stream. Bold : the best results. 
+
+including both cross-lingual settings (e.g., English, Chinese, Arabic, and Spanish) and cross-domain scenarios (e.g., movie, restaurant, hotel, travel, and written reviews). Details of the benchmark con-struction are in the App. E. 
+
+Baselines. Tent (Wang et al., 2021) minimizes the outputs entropy. OIL (Ye et al., 2022) employs a teacher-student framework (T-S) and causal in-ference. CoTTA (Wang et al., 2022) uses a T-S and data augmentation. SAR (Niu et al., 2023) fil-ters low-entropy samples and sharpens-aware mini-mization (SAM). SoTTA (Gong et al., 2023) buffers class-balanced samples and SAM. REM (Han et al., 2025) enforces difficulty-aware adaptation via rank-ing masked consistency. We also compare with GPT-4 Turbo, o3, and Gemini 2.5 Pro. 
+
+Implementation Details. Following prior work (Ye et al., 2022; Su et al., 2023), we use XLM-RoBERTa-Base (Conneau et al., 2020) and the robustness-tuned XLMR-Base-xTune (Zheng et al., 2021) as backbones. Both are pre-trained on SQuAD (Rajpurkar et al., 2016) using XTREME configurations (Hu et al., 2020). See more detailed 
+
+Implementation Details and Metrics in App. D. 
+
+Table 3: The results of our method and baselines on the sentiment analysis data stream.                                                                  
+
+> Time →imdb eng zho ara spa jpn rus Avg Method Acc Acc Acc Acc Acc Acc Acc Acc base 87.64 92.01 58.71 50.63 77.05 44.08 64.81 70.94 CoTTA 87.63 90.26 54.31 48.96 72.31 34.62 58.02 67.17 SoTTA 87.69 92.03 53.96 48.84 74.52 35.62 57.46 67.73 SAR 86.75 91.59 54.58 49.45 76.95 39.86 61.57 69.12 RAcc 87.02 91.25 52.98 47.63 72.13 34.91 55.12 66.61 CTTA-T (ours) 89.95 92.12 59.45 51.06 78.38 59.26 65.02 73.42
+
+4.2 Main Results 
+
+Tab. 1 reports overall results across task streams (Orders 1 to 6), evaluated using exact match (EM) and F1 scores. Each score denotes the average performance after applying CTTA under the cor-responding order. The task streams vary in length 4064 and order, offering a comprehensive evaluation of CTTA capabilities. Our method achieves SOTA performance with both backbones (i.e., the pre-trained model). Averaged over backbones, our method exhibits improvement over SAR (+3.96% in EM, +4.19% in F1) and REM (+12.31% in EM, +13.08% in F1), while outperforming the vanilla forward (no adaptation), Tent, OIL, CoTTA, and SoTTA. In addition, CTTA-T achieves more sta-ble performance across orders for baselines (see App. J). As shown in Tab. 6, our method outper-forms GPT-4 Turbo, o3, and Gemini 2.5 Pro us-ing zero-shot prompting by 4.61%, 1.25%, and 0.33%, respectively, in Order1-6. More analyses with LLMs are in App. F. As shown in Tab. 3, our method achieves strong performance on the sen-timent analysis task, outperforming SAR, REM, and vanilla forward by 4.3%, 6.81%, and 2.48% accuracy, respectively. 
+
+Figure 3: Performance of ours and baselines on order 5. 
+
+4.3 Ablation Studies 
+
+We follow standard CTTA evaluation protocols (Wang et al., 2022; Jiang et al., 2024) for ablation studies. Tab. 2 summarizes the contribution of each module. Row A (TS-CTTA, §3.1) serves as the baseline. Adding CDA enhances performance via dynamic cross-domain accumulation, enabling the teacher to gain domain awareness through IPCA-based semantic tracking. RFS further improves sta-bility and accuracy by enforcing prediction consis-tency and filtering uncertain guidance. However, as shown in Row C, prediction errors still accumulate and degrade performance over time. SRT alleviates this issue by periodically restoring the teacher to the source state, reintroducing general knowledge. Further analyses are provided in App. K. 
+
+4.4 Analysis Studies Analyses of Error Accumlation. To analyze error accumulation, we evaluate all methods on short and long task sequences, focusing on hard tasks (e.g., Search and Trivial), where error accumula-tion tends to be more severe. As shown in Fig. 3, 
+
+Figure 4: Performance of different filtering strategies. 
+
+all baselines suffered error accumulation (i.e., col-lapse), while ours remained stable or showed only minimal decline. Highlighting ours effectively mit-igates error accumulation. Baseline collapse arises from uncontrolled error accumulation due to noisy pseudo-labels, though the underlying reasons differ across methods. More analyses are in App. H. CTTA-T REM SoTTA SAR CoTTA No adaptation Backbone Time (s) Time (s) Time (s) Time (s) Time (s) Time (s) Base 0.043 0.061 0.051 0.044 0.196 0.032 xTune 0.040 0.062 0.050 0.042 0.200 0.032 
+
+Table 4: Comparison of the time cost. 
+
+Cost Comparison. We evaluate the cost (per-sample adaptation plus inference time). Since Tent and OIL are designed for standard TTA rather than CTTA, and exhibit severe performance drops under continual shifts (see Tab. 1), we exclude them from the comparison, which focuses on CTTA methods. We compare with baselines: CoTTA, SAR, SoTTA, and REM. Tab. 4 reports the average time across Orders. Compared with baselines, CTTA-T is the most efficient. Compared with the no-adaptation model (lowest bound), CTTA-T introduces only a small cost (<35%), which is acceptable. The cost analyses of each module are in App. G. 
+
+Figure 5: Performance of our method and model using fixed weights under domain shift (report EM each step). 
+
+Analyses of Filtering Strategies. To verify the effectiveness of our RFP (Sec. 3.2), we compare it with other strategies: 1) no filter (removes the RFP), 2) confidence filter (filters samples with low confidence), and 3) RFP w/o Filtering (disables the RFP’s filtering). As shown in Fig. 4, the RFP (red) outperformed all strategies, confirming its 4065 effectiveness in improving prediction by refining prediction and filtering noise. Using only refin-ing (green) ranks second, showing that refining improves prediction, while the confidence filter (or-ange) underperforms no filter (blue), indicating that only relying on prediction confidence is harmful in CTTA, where domain shifts cause overconfident wrong predictions. 
+
+Analyses of CDA versus Fixed Teacher Updates. 
+
+To verify that our CDA (Sec. 3.3) facilitates faster recovery of model performance under continual do-main shift, we compared CDA with fixed weights (α=0 /0.5/0.99 /1.0) on a task stream with domain shifts at t=10 /15 /19 . As shown in Fig. 5, our method maintains or improves performance under shifts, while fixed-weight baselines drop sharply and recover slowly. This is because CDA performs dynamic cross-domain accumulation, equipping the teacher with domain awareness by dynamically balancing domain-specific and domain-general se-mantic information. In contrast, fixed weights can-not adapt to domain shifts, causing instability. 
+
+5 Conclusion 
+
+We propose CTTA-T, a novel CTTA framework for text understanding. CTTA-T adopts a teacher-student framework to provide a foundation for con-tinuous test-time adaptation (CTTA). First, we de-sign a refine-then-filter module based on prediction consistency to improve prediction quality. Then, we propose a domain-aware teacher module that dynamically accumulates cross-domain semantic knowledge. To further enhance generalization, the teacher is partially restored to the source state. Moreover, we introduce a benchmark for CTTA in text understanding. Experiments show that CTTA-T achieves strong performance. 
+
+Limitations 
+
+Although CTTA-T shows strong and stable perfor-mance across diverse continual domain shift set-tings, there remain several natural limitations. First, our benchmark primarily covers QA, reading com-prehension, cross-lingual QA, and sentiment anal-ysis. Notably, this evaluation scope is consistent with a large body of prior work in the CTTA and test-time adaptation literature, where methods are typically validated on a limited subset of represen-tative tasks rather than the full spectrum of text understanding problems. Extending CTTA to other text understanding tasks is our future work. While we theoretically establish key properties (e.g., prediction consistency bound and domain-aware update rule), more general theoretical guar-antees under arbitrary domain shifts remain open. Importantly, these limitations do not undermine the practical effectiveness of our framework but instead suggest fruitful avenues for future research. 
+
+Acknowledgements 
+
+This work was supported by the National Nat-ural Science Foundation of China under Grant No.62376284 and No.62306330. 
+
+References          
+
+> Mikel Artetxe, Sebastian Ruder, Dani Yogatama, and Liu. 2020. On the cross-lingual transferability of monolingual representations. In Proceedings of the 58th Annual Meeting of the Association for Compu-tational Linguistics , pages 4623–4637. Maurice Stevenson Bartlett. 1937. Properties of suffi-ciency and statistical tests. Proceedings of the Royal Society of London. Series A-Mathematical and Phys-ical Sciences , 160(901):268–282. Malik Boudiaf, Romain Mueller, Ismail Ben Ayed, and Luca Bertinetto. 2022. Parameter-free online test-time adaptation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recog-nition , pages 8344–8353. Yu Cao, Meng Fang, Baosheng Yu, and Joey Tianyi Zhou. 2020. Unsupervised domain adaptation on reading comprehension. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 34, pages 7480–7487. Chaoqi Chen, Weiping Xie, Wenbing Huang, Yu Rong, Xinghao Ding, Yue Huang, Tingyang Xu, and Jun-zhou Huang. 2019. Progressive feature alignment for unsupervised domain adaptation. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 627–636. Dian Chen, Dequan Wang, Trevor Darrell, and Sayna Ebrahimi. 2022. Contrastive test-time adaptation. In
+> Proceedings of the IEEE/CVF Conference on Com-puter Vision and Pattern Recognition , pages 295– 305. Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume Wenzek, Francisco Guzmán, Édouard Grave, Myle Ott, Luke Zettle-moyer, and Veselin Stoyanov. 2020. Unsupervised cross-lingual representation learning at scale. In Pro-ceedings of the 58th Annual Meeting of the Asso-ciation for Computational Linguistics , pages 8440– 8451.
+
+4066 Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. BERT: Pre-training of deep bidirectional transformers for language under-standing. In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Tech-nologies, Volume 1 (Long and Short Papers) , pages 4171–4186, Minneapolis, Minnesota. Association for Computational Linguistics. Kenneth Enevoldsen, Isaac Chung, Imene Kerboua, Márton Kardos, Ashwin Mathur, David Stap, Jay Gala, Wissam Siblini, Dominik Krzemi´ nski, Genta Indra Winata, and 1 others. Mmteb: Massive multilingual text embedding benchmark. In The Thir-teenth International Conference on Learning Repre-sentations .Adam Fisch, Alon Talmor, Robin Jia, Minjoon Seo, Eunsol Choi, and Danqi Chen. 2019. Mrqa 2019 shared task: Evaluating generalization in reading comprehension. In Proceedings of the 2nd Workshop on Machine Reading for Question Answering , pages 1–13. Taesik Gong, Yewon Kim, Taeckyung Lee, Sorn Chot-tananurak, and Sung-Ju Lee. 2023. Sotta: Robust test-time adaptation on noisy data streams. Advances in Neural Information Processing Systems , 36:14070– 14093. Chuan Guo, Geoff Pleiss, Yu Sun, and Kilian Q Wein-berger. 2017. On calibration of modern neural net-works. In International conference on machine learn-ing , pages 1321–1330. PMLR. Jisu Han, Jaemin Na, and Wonjun Hwang. 2025. Ranked entropy minimization for continual test-time adaptation. In Forty-second International Confer-ence on Machine Learning .Moritz Hardt and Yu Sun. 2024. Test-time training on nearest neighbors for large language models. In 
+
+The Twelfth International Conference on Learning Representations .Junjie Hu, Sebastian Ruder, Aditya Siddhant, Graham Neubig, Orhan Firat, and Melvin Johnson. 2020. Xtreme: A massively multilingual multi-task bench-mark for evaluating cross-lingual generalisation. In 
+
+International conference on machine learning , pages 4411–4421. PMLR. Minghao Hu, Yuxing Peng, Zhen Huang, Xipeng Qiu, Furu Wei, and Ming Zhou. 2018. Reinforced mnemonic reader for machine reading comprehen-sion. In Proceedings of the Twenty-Seventh Inter-national Joint Conference on Artificial Intelligence, IJCAI-18 , pages 4099–4106. International Joint Con-ferences on Artificial Intelligence Organization. Soyeong Jeong, Jinheon Baek, Sukmin Cho, Sung Hwang, and Jong Park. 2023. Test-time self-adaptive small language models for question answering. In 
+
+Findings of the Association for Computational Lin-guistics: EMNLP 2023 , pages 15459–15469, Singa-pore. Association for Computational Linguistics. Jincen Jiang, Qianyu Zhou, Yuhang Li, Xinkui Zhao, Meili Wang, Lizhuang Ma, Jian Chang, Jian Zhang, Xuequan Lu, and 1 others. 2024. Pcotta: Contin-ual test-time adaptation for multi-task point cloud understanding. Advances in Neural Information Pro-cessing Systems , 37:96229–96253. Nazmul Karim, Niluthpol Chowdhury Mithun, Abhinav Rajvanshi, Han-pang Chiu, Supun Samarasekera, and Nazanin Rahnavard. 2023. C-sfda: A curriculum learning aided self-training framework for efficient source free domain adaptation. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 24120–24131. Alex Kendall and Yarin Gal. 2017. What uncertainties do we need in bayesian deep learning for computer vision? Advances in neural information processing systems , 30. Dong-Hyun Lee and 1 others. 2013. Pseudo-label: The simple and efficient semi-supervised learning method for deep neural networks. In Workshop on challenges in representation learning, ICML , volume 3, page 896. Atlanta. Jonghyun Lee, Dahuin Jung, Saehyung Lee, Junsung Park, Juhyeon Shin, Uiwon Hwang, and Sungroh Yoon. Entropy is not enough for test-time adapta-tion: From the perspective of disentangled factors. In The Twelfth International Conference on Learning Representations .Geyu Lin, Bin Wang, Zhengyuan Liu, and Nancy F. Chen. 2025. CrossIn: An efficient instruction tun-ing approach for cross-lingual knowledge alignment. In Proceedings of the Second Workshop on Scaling Up Multilingual & Multi-Cultural Evaluation , pages 12–23, Abu Dhabi. Association for Computational Linguistics. Jiaming Liu, Senqiao Yang, Peidong Jia, Renrui Zhang, Ming Lu, Yandong Guo, Wei Xue, and Shanghang Zhang. 2023. Vida: Homeostatic visual domain adapter for continual test time adaptation. arXiv preprint arXiv:2306.04344 .Y Liu. 2000. Statistical behavior of the eigenvalues of random matrices. In Proceedings of the Mathemati-cal Junior Seminar .Ilya Loshchilov and Frank Hutter. 2019. Decoupled weight decay regularization. In International Confer-ence on Learning Representations .Fan Lyu, Kaile Du, Yuyang Li, Hanyu Zhao, Zhang Zhang, Guangcan Liu, and Liang Wang. 2024. Varia-tional continual test-time adaptation. arXiv preprint arXiv:2402.08182 .Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang, Andrew Y. Ng, and Christopher Potts. 2011a. Learning word vectors for sentiment analysis. In Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies , pages 142–150, Portland, 4067 Oregon, USA. Association for Computational Lin-guistics. Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang, Andrew Y. Ng, and Christopher Potts. 2011b. Learning word vectors for sentiment analysis. In Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies , pages 142–150, Portland, Oregon, USA. Association for Computational Lin-guistics. Niklas Muennighoff, Nouamane Tazi, Loic Magne, and Nils Reimers. 2023. MTEB: Massive text embedding benchmark. In Proceedings of the 17th Conference of the European Chapter of the Association for Com-putational Linguistics , pages 2014–2037, Dubrovnik, Croatia. Association for Computational Linguistics. Shuaicheng Niu, Chunyan Miao, Guohao Chen, Pengcheng Wu, and Peilin Zhao. 2024. Test-time model adaptation with only forward passes. In In-ternational Conference on Machine Learning , pages 38298–38315. PMLR. Shuaicheng Niu, Jiaxiang Wu, Yifan Zhang, Yaofo Chen, Shijian Zheng, Peilin Zhao, and Mingkui Tan. 2022. Efficient test-time model adaptation without forgetting. In International conference on machine learning , pages 16888–16905. PMLR. Shuaicheng Niu, Jiaxiang Wu, Yifan Zhang, Zhiquan Wen, Yaofo Chen, Peilin Zhao, and Mingkui Tan. 2023. Towards stable test-time adaptation in dy-namic wild world. In The Eleventh International Conference on Learning Representations .Pranav Rajpurkar, Jian Zhang, Konstantin Lopyrev, and Percy Liang. 2016. SQuAD: 100,000+ questions for machine comprehension of text. In Proceedings of the 2016 Conference on Empirical Methods in Natu-ral Language Processing , pages 2383–2392, Austin, Texas. Association for Computational Linguistics. Abhilasha Ravichander, Siddharth Dalmia, Maria Ryskina, Florian Metze, Eduard Hovy, and Alan W Black. 2021. NoiseQA: Challenge set evaluation for user-centric question answering. In Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume , pages 2976–2992, Online. Association for Computational Linguistics. David A. Ross, Jongwoo Lim, Ruei Sung Lin, and Ming Hsuan Yang. 2008. Incremental learning for robust visual tracking. International Journal of Com-puter Vision , 77(1-3):125–141. Richard Socher, Alex Perelygin, Jean Wu, Jason Chuang, Christopher D. Manning, Andrew Ng, and Christopher Potts. 2013. Recursive deep models for semantic compositionality over a sentiment treebank. In Proceedings of the 2013 Conference on Empiri-cal Methods in Natural Language Processing , pages 1631–1642, Seattle, Washington, USA. Association for Computational Linguistics. Yi Su, Yixin Ji, Juntao Li, Hai Ye, and Min Zhang. 2023. Beware of model collapse! fast and stable test-time adaptation for robust question answering. In Proceed-ings of the 2023 Conference on Empirical Methods in Natural Language Processing , pages 12998–13011, Singapore. Association for Computational Linguis-tics. tabularisai, Samuel Gyamfi, Vadim Borisov, and Richard H. Schreiber. 2025. multilingual-sentiment-analysis (revision 69afb83). Antti Tarvainen and Harri Valpola. 2017. Mean teachers are better role models: Weight-averaged consistency targets improve semi-supervised deep learning re-sults. Advances in neural information processing systems , 30. Dequan Wang, Evan Shelhamer, Shaoteng Liu, Bruno Olshausen, and Trevor Darrell. 2021. Tent: Fully test-time adaptation by entropy minimization. In In-ternational Conference on Learning Representations .Qin Wang, Olga Fink, Luc Van Gool, and Dengxin Dai. 2022. Continual test-time domain adaptation. In Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 7201–7211. Yanshuo Wang, Jie Hong, Ali Cheraghian, Shafin Rah-man, David Ahmedt-Aristizabal, Lars Petersson, and Mehrtash Harandi. 2024. Continual test-time do-main adaptation via dynamic sample selection. In 
+
+Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision , pages 1701–1710. Hai Ye, Yuyang Ding, Juntao Li, and Hwee Tou Ng. 2022. Robust question answering against distribution shifts with test-time adaption: An empirical study. In Findings of the Association for Computational Linguistics: EMNLP 2022 , pages 6179–6192. Zhenrui Yue, Huimin Zeng, Ziyi Kou, Lanyu Shang, and Dong Wang. 2022. Contrastive domain adapta-tion for early misinformation detection: A case study on covid-19. In Proceedings of the 31st ACM in-ternational conference on information & knowledge management , pages 2423–2433. Bo Zheng, Li Dong, Shaohan Huang, Wenhui Wang, Zewen Chi, Saksham Singhal, Wanxiang Che, Ting Liu, Xia Song, and Furu Wei. 2021. Consistency reg-ularization for cross-lingual fine-tuning. In Proceed-ings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers) , pages 3403–3417. Xingzhi Zhou, Zhiliang Tian, Boyang Zhang, Yibo Zhang, Ka Chun Cheung, Simon See, Hao Yang, Yun Zhou, and Nevin L Zhang. 2025. Test-time adaptation on noisy data via model-pruning-based filtering and flatness-aware entropy minimization. In 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , volume 39, pages 10852–10860. 4068 A Problem Definition 
+
+Let the data distribution of the source domain be denoted as Ps, and the data distribution of the target domain vary over time as Pt, where t indicates the time step. Given an initial model θ0, it is pre-trained on the source domain dataset {Xs, Y s} ∼ 
+
+Ps. At each time step t, the model receives an unlabeled test sample xTt ∈ XTt from the target domain and produces a prediction yTt ∈ Y Tt , where 
+
+{XTt , Y Tt } ∼ Pt. The model then immediately updates its parameters θt using the pseudo-label yTt .It is important to note that during the adaptation process, the model has no access to the source training data Xs, past test samples XT<t , or future test samples XT>t ; it can only utilize the current test instance XTt for online adaptation. Our objective is to enable the model to continuously adapt to the evolving target distribution during test time, thereby enhancing its prediction performance in the target domain. The overall procedure of the CTTA setting is illustrated in Fig. 6. 
+
+B Theoretical derivation of the CDA module 
+
+B.1 The derivation process of IPCA 
+
+Let the input embedding at time step t be denoted by Xt ∈ Rn×d, where n represents the number of samples and d is the embedding dimension. The symmetric covariance matrix Ct and the mean μt
+
+of the historical data are defined as 
+
+Ct = 1
+
+NtNt∑
+
+> i=1
+
+(Xi − μt)⊤(Xi − μt),μt = 1
+
+NtNt∑
+
+> j=1
+
+X(j) 
+
+> i
+
+.
+
+(10) where Nt denotes the number of historical samples. SVD is applied to Ct = VtΛtV T 
+
+> t
+
+, extracting the principal component space Vt ∈ Rd×k. When the new samples Xt+1 arrives, the statistics are recur-sively updated using IPCA: 
+
+Ct+1 ≈ NtCt + nC new 
+
+Nt + n
+
++ NtnNt + n
+
+(μt − μnew ) ( μt − μnew )⊤
+
+Nt + n ,μt+1 = Ntμt + nμ new 
+
+Nt + n .
+
+(11) where Cnew = 1 
+
+> n
+
+(Xt+1 − μnew )⊤(Xt+1 − μnew )
+
+denotes the covariance matrix after the new sample 
+
+Xt+1 is added. μnew = 1
+
+> n
+
+∑nj=1 X(j) 
+
+> t+1
+
+denotes the mean of the embedding layer after the new sample 
+
+Xt+1 is added. 
+
+B.2 Proof of Domain Semantic Distance between Historical and Current Domain 
+
+Let ∆V = Vt+1 − Vt denote the change in the principal directions after incorporating a new batch of data into the principal component space. The principal component space of the historical data are denoted as V = [ vt, 1, v t, 2, . . . , v t,i , . . . , v t,k ],while after adding the new data, the up-dated principal component space are given by 
+
+Vt+1 = [vt+1 ,1, v t+1 ,2, . . . , v t+1 ,i , . . . , v t+1 ,k ],where vt+1 ,i represents the i-th principal compo-nent direction. We define the principal component similarity as the average cosine similarity between the old and new principal component spaces: 
+
+similarity = 1
+
+k
+
+> k
+
+∑
+
+> i=1
+
+cos θi = 1
+
+k
+
+> k
+
+∑
+
+> i=1
+
+(v⊤ 
+
+> t,i
+
+· vt+1 ,i ),
+
+(12) where θi denotes the angle between vt,i and 
+
+vt+1 ,i . Since both vt,i and vt+1 ,i are unit vec-tors, the cosine similarity can be expressed as 
+
+cos θi = vT 
+
+> t,i
+
+· vt+1 ,i . Given that the new batch is small relative to the historical data, the change in principal directions is slight, implying that θi
+
+is also small. Thus, using a Taylor expansion, we have the approximation 
+
+cos θi ≈ 1 − θ2
+
+> i
+
+2 (13) Let ∆vi denote the perturbation of the i-th principal component direction, so that vt+1 ,i =
+
+vt,i + ∆ vi. Since both vt,i and vt+1 ,i are unit vec-tors, it follows that 
+
+∥vt+1 ,i ∥2 = 1 = ∥vt,i + ∆ vi∥2
+
+= 1 + 2 v⊤
+
+> t,i
+
+∆vi + ∥∆vi∥2. (14) which leads to v⊤
+
+> t,i
+
+∆vi = − ∥∆vi∥2 
+
+> 2
+
+. The cosine similarity between vt,i and vt+1 ,i can thus be ex-panded as 
+
+cos θi = v⊤
+
+> t,i
+
+·vt+1 ,i = v⊤
+
+> t,i
+
+(vt,i +∆ vi) = 1+ v⊤
+
+> t,i
+
+∆vi,
+
+(15) hence: 
+
+1 + v⊤
+
+> t,i
+
+∆vi = 1 − θ2
+
+> i
+
+2 =⇒
+
+v⊤
+
+> t,i
+
+∆vi = − ∥∆vi∥2
+
+2 ≈ − θ2
+
+> i
+
+2 .
+
+(16) 4069 Figure 6: Illustrating the setting of Continual Test-Time Adaptation (CTTA). To better reflect real-world environment, the target test data arrives sequentially, with its domain shifting continuously over time. At each time step, the model only accesses the current data. A model pre-trained on the source domain is used to perform online prediction and adaptation to the current target data, without access to any source domain data. 
+
+Consequently, the angle θi can be approximated as θi ≈∥ ∆vi ∥. By substituting this approximation into the Taylor expansion of the cosine similarity, we obtain: 
+
+cos θi ≈ 1 − ∥ ∆vi ∥2
+
+2 . (17) Substituting this expression into the definition of principal component similarity yields: 
+
+similarity = 1
+
+k
+
+> k
+
+∑
+
+> i=1
+
+cos θi (18) 
+
+≈ 1
+
+k
+
+> k
+
+∑
+
+> i=1
+
+(
+
+1 − ∥ ∆vi ∥2
+
+2
+
+)
+
+(19) 
+
+= 1 − 12k
+
+> k
+
+∑
+
+> i=1
+
+∥ ∆vi ∥2 . (20) Let ∆V = [∆ v1, ∆v2, . . . , ∆vk] denote the per-turbation matrix, whose Frobenius norm satisfies 
+
+∥ ∆V ∥2 
+
+> F
+
+=
+
+> k
+
+∑
+
+> i=1
+
+∥ ∆vi ∥2, (21) where ∥ · ∥ F denotes the Frobenius norm. Ac-cordingly, the principal component similarity can be approximated as: 
+
+similarity ≈ 1 − 12k ∥ ∆V ∥2 
+
+> F
+
+. (22) To intuitively capture domain shifts, we use the dis-tance as a proxy for domain similarity and simplify Eq. 22: 
+
+distance = 2 k · (1 − similarity ) = ∥ ∆V ∥2
+
+> F
+
+(23) 
+
+B.3 Proof for the Robustness of IPCA regarding Domain Shifts 
+
+Lemma 1. ∆V lies in the orthogonal complement of Vt, it sensitively captures subtle shifts, enabling accurate quantification .
+
+Proof. Since both Vt and Vt+1 are orthogonal matrices, they satisfy the orthogonality condition 
+
+V T
+
+> t+1
+
+Vt+1 = I, where I denotes the identity ma-trix. By substituting Vt+1 = Vt + ∆ V into the orthogonality condition, we obtain: 
+
+(Vt + ∆ V )⊤(Vt + ∆ V ) = IV ⊤ 
+
+> t
+
+Vt + V ⊤ 
+
+> t
+
+∆V + ∆ V ⊤Vt + ∆ V ⊤∆V = I. 
+
+(24) Given that V T 
+
+> t
+
+Vt = I and neglecting the second-order infinitesimal term ∆V ⊤∆V ≈ 0, it follows that: V T 
+
+> t
+
+∆V + ∆ V TVt = 0 . Rearranging the terms, we conclude that ∆V resides in the orthog-onal complement space of V .When the shift ∆V (∆V = Vt+1 − Vt) between the current domain Vt and the newly arrived do-main Vt+1 is too subtle, IPCA can still effectively capture it. This is because the subtle shift ∆V lies along directions orthogonal to the current principal component space Vt, so it lies along directions that are previously unseen with the Vt. Then, these pre-viously unseen directions will not be suppressed by Vt, thus, even when ∆V is very subtle, it will still produce an observable effect with Vt, allowing IPCA to sensitively detect such subtle shifts ∆V .
+
+Lemma 2. The domain shifts occurring in non-primary directions will be pushed into the primary components. 4070 Proof. When a new domain arrives, it changes the energy distribution of the global covariance matrix, which in turn causes a rotation of the prin-cipal component subspace. This rotation allows directions that originally had low variance (and thus were not part of the primary components) to become part of the updated principal component space Vt+1 . As a result, even if the domain shift occurs mainly along non-primary component di-rections, IPCA can still capture these changes by gradually incorporating them into the evolving prin-cipal subspace. According to Eq. 11 in the paper, the covariance matrix C is updated incrementally: 
+
+Ct+1 ≈ NtCt + nC new 
+
+Nt + n .
+
+Assume that the current domain shift mainly oc-curs in non-primary directions of Vt (i.e., those corresponding to very small eigenvalues in Ct, rep-resenting the noise subspace). When the new batch of data (containing the do-main shift) arrives, its covariance matrix Cnew con-tains significant variance along this "non-primary direction". Through the weighted averaging update above, the corresponding entries in Ct+1 will in-crease significantly. When we perform SVD on the updated Ct+1 to obtain Vt+1 , the increased energy (eigenvalue) in this direction leads to reordering among the original principal components, causing a rotation of the eigenvector basis. The direction that previously belonged to the noise subspace becomes the new k-th principal component. Since ∆V = Vt+1 − Vt, any such ro-tation of Vt+1 (i.e., when the new and old principal component spaces no longer coincide) will yield a significant value in ∥∆V ∥2 
+
+> F
+
+.Therefore, when a shift carries informative varia-tion, even if it initially lies in a non–principal com-ponent direction, it will typically enter the principal component space Vt+1 through the cumulative up-date of the covariance matrix. As a result, in most cases, IPCA is capable of sensing shifts that occur outside the original primary component space. 
+
+B.4 Derivation of the Relationship between CDA Weight α and Domain Semantic Distance 
+
+We construct the following regularization function 
+
+F:
+
+F(θTt+1 ) = ∥ ∆V ∥2 
+
+> F
+
+(θTt+1 − θSt+1 )2
+
++ (1 − ∥ ∆V ∥2 
+
+> F
+
+) ( θTt+1 − θTt )2 (25) By differentiating F concerning θTt+1 and setting the derivative to zero, we obtain the optimal update direction for the teacher parameters: 
+
+∂F
+
+∂θ Tt+1 
+
+= 2 ∥ ∆V ∥2 
+
+> F
+
+(θTt+1 − θSt+1 )+ 2 (1 − ∥ ∆V ∥2 
+
+> F
+
+)( θTt+1 − θTt )= 0 
+
+(26) Rearranging the terms, we have: 
+
+θTt+1 = (1 − ∥ ∆V ∥2 
+
+> F
+
+)θTt + ∥ ∆V ∥2 
+
+> F
+
+θSt+1 
+
+(1 − ∥ ∆V ∥2 
+
+> F
+
+)+ ∥ ∆V ∥2
+
+> F
+
+= (1 − ∥ ∆V ∥2 
+
+> F
+
+)θTt + ∥ ∆V ∥2 
+
+> F
+
+θSt+1 .
+
+(27) Meanwhile, the standard EMA update formula is given by: 
+
+θTt+1 = αθ Tt + (1 − α)θSt+1 . (28) By applying the method of undetermined coeffi-cients, it follows that: 
+
+α = 1 − ∥ ∆V ∥2 
+
+> F
+
+= 1 − distance. (29) Since α varies with time step t, it is appropriate to define α as αt. Due to the model’s high sensitiv-ity to parameter changes, we map αt to the range 
+
+[αbound , 1] . Specifically, 
+
+αt = 1 − αbound 
+
+2 · αt + αbound + 1 2 . (30) This mapping ensures smooth and bounded adap-tation of αt, preventing excessively small values while preserving sensitivity to the similarity dy-namics. By default, the value of αbound is set to 0.999. 
+
+C Theoretical derivation of the RFP module 
+
+The Proof of the Upper Bound of the Consis-tency Score. Given a classification model with C
+
+output classes and a stochastic dropout mechanism, we denote by pi ∈ RC the predicted softmax prob-ability vector of a single input sample after the i-th stochastic forward pass (with dropout enabled). Re-peating this process for N stochastic passes yields a prediction consistency matrix P (The main text uses PC ): 
+
+P =
+
+
+
+p1
+
+p2
+
+...
+
+pN
+
+ ∈ RN ×C . (31) 4071 Table 5: Task sequences (Orders 1–6) in the CTTA benchmark. The QA streams: Orders 1–3 are short sequences comprising 7 subtasks, and Orders 4–6 are long sequences comprising 11 subtasks.                                                                                                                     
+
+> Order Task Sequence Question Answer
+> 1syn.Keyboard →syn.ASR →syn.Translation →Search →Zh →Ar →Es 2syn.ASR →Es →Zh →syn.Keyboard →Search →syn.Translation →Ar 3Es →syn.ASR →syn.Keyboard →Zh →syn.Translation →Search →Ar 4syn.Keyboard →syn.ASR →syn.Translation →na.Keyboard →na.ASR →na.Translation →Search →Trivia →Zh →Ar →Es 5Zh →na.Keyboard →Ar →syn.ASR →Trivia →na.ASR →Es →na.Translation →Search →syn.Keyboard →syn.Translation 6syn.Translation →Zh →Trivia →Ar →na.ASR →Search →na.Translation →syn.Keyboard →syn.ASR →Es →na.Keyboard
+> Sentiment Analysis
+> 1IMDb →MSC.eng →MSC.zho →MSC.ara →MSC.spa →MSC.jpn →MSC.rus
+
+Each row of P corresponds to the model’s proba-bilistic prediction under a specific dropout mask, and collectively, P encodes the model’s belief dis-tribution consistency under randomness. We focus on high-noise or ambiguous samples, which are typically difficult to classify due to a lack of discriminative information. Models tend to produce less confident and more uniform pre-dictions for such inputs. For a high-noise sam-ple, each row vector pi ∈ RC in P satisfies: 
+
+∀i ∈ {1, . . . , N }, pi ≈ uC , where uC =[ 1 
+
+> C
+
+, . . . , 1
+
+> C
+
+] ∈ RC denotes the uniform distribu-tion over classes. We perform singular value decomposition (SVD) on P :
+
+P = U ΣV ⊤, (32) where U ∈ RN ×N is the matrix of left singular vec-tors, Σ = diag( σ1, σ 2, . . . , σ r) ∈ RN ×C where 
+
+U ∈ RN ×N is the diagonal matrix of singular val-ues σ1 ≥ σ2 ≥ · · · ≥ σr > 0, V ∈ RC×C is the matrix of right singular vectors, which corre-sponds to directions in the class space. Since V ⊤
+
+spans the class space, it captures how predictions distribute and align along different class directions. Specifically, each row vj ∈ RC in V represents a class-wise projection of a principal direction in the model’s output distribution. We define a class-level prediction consistency vector ⃗s ∈ R C , where each element sj reflects how strongly the principal components align with class j. The score is computed as a weighted sum over principal components projected onto the class 
+
+j:
+
+sj =
+
+> r
+
+∑
+
+> k=1
+
+σk · vk,j , (33) where vk,j is the j-th entry of the k-th right singular vector (i.e., the projection of the k-th component of the class j), σk is the singular value corresponding to the k-th component, which serves as its impor-tance weight. A peaky consistency score sj (i.e., one class dominates) indicates that the principal directions of the model’s predictions are aligned toward a particular class, reflecting high agreement across dropout samples. A flat sj suggests that the model’s predictions fluctuate in multiple directions and no class dominates, indicating low consistency and potentially high noise. We define a consistency score for each test sam-ple: 
+
+smax = max  
+
+> j∈{ 1,..., C}
+
+sj , (34) We set a filtering threshold τ and discard samples whose smax < τ . Below, we provide theoretical justification for this filtering rule by proving that noisy samples are likely to exhibit lower smax val-ues. Define the average prediction vector: 
+
+¯p = 1
+
+N
+
+> N
+
+∑
+
+> i=1
+
+pi. (35) Then, the consistency score satisfies: 
+
+smax ≤ max  
+
+> j
+
+¯pj + ϵ, (36) where ϵ is a function of the variance among the pi
+
+and alignment between singular vectors and class axes. When pi is stable and aligned (low-noise), singular vectors align with dominant class j∗, and softmax amplifies this; when pi is diverse (high-noise), ¯p becomes flat and singular directions point to mixed class subspaces; this reduces the ⃗s j value for any j, leading to lower smax . In conclusion, when the sample xt is dominated by data noise, the consistency matrix P exhibits random behav-ior and causes a drop in smax . Therefore, setting a threshold τ to filter out the lower smax enables effective masking of samples with high AU. 4072 The Tightness Analyses of the Upper Bound of the Consistency Score. As discussed in Sec. 3.2, the bound smax ≤ max j pj + ϵ is derived specifi-cally to account for the inherent noise in the data. Our theoretical derivation shows that the bound remains tight across all noise conditions. Under both high-noise and low-noise conditions (the two extremes), smax ≈ max j pj + ϵ. In the medium-noise regime, max j pj +ϵ is slightly larger than smax , ensuring that the bound closely approxi-mates smax across all noise conditions. 
+
+Detailed derivation: We have the consistency ma-trix P = U ΣV ⊤, the consistency vector s =∑rk=1 σkvk, and the average prediction vector 
+
+¯p = 1
+
+> N
+
+∑Ni=1 pi = 1 
+
+> N
+
+P ⊤1N . For each class j,
+
+sj − ¯pj =
+
+> r
+
+∑
+
+> k=1
+
+σkvk,j 
+
+(
+
+1 − 1
+
+N u⊤ 
+
+> k
+
+1N
+
+)
+
+, (37) so that 
+
+|sj − ¯pj | ≤ 
+
+> r
+
+∑
+
+> k=1
+
+σk|vk,j | ∣∣1 − 1
+
+N u⊤ 
+
+> k
+
+1N
+
+∣∣ ≤ ϵ, (38) where ϵ = max j
+
+∑rk=1 σk|vk,j | ∣∣1 − 1 
+
+> N
+
+u⊤ 
+
+> k
+
+1N
+
+∣∣.
+
+Thus, for the maximal class j∗:
+
+smax = sj∗
+
+= ¯ pj∗ +
+
+> r
+
+∑
+
+> k=1
+
+σk|vk,j ∗ |∣∣1 − 1
+
+N u⊤ 
+
+> k
+
+1N
+
+∣∣
+
+≤ ¯pmax + ϵ. 
+
+(39) Noise conditions case analyses: • Low-noise samples: pi are highly aligned with a dominant class j∗. Then ¯pmax ≈ 1, smax ≈√N , and ϵ ≈ (√N −1)¯ pmax . So, ¯pmax +ϵ ≈
+
+smax . The bound is tight. • High-noise samples: pi are nearly uniform. Then ¯pmax ≈ 1/C , smax ≈ √N /C , and ϵ ≈
+
+(√N − 1) /C . So, ¯pmax + ϵ ≈ smax . The bound is tight. • Intermediate-noise samples: Assume pi are partially concentrated, i.e., neither fully aligned nor fully uniform. The ϵ is very close to the sum for the maximal class j∗, because 
+
+j∗ naturally selects the class whose singular vectors align most with the principal direc-tions (as shown in Eq. 39). Therefore, even for intermediate-noise samples, the alignment term is rigorously upper-bounded by ϵ,guaranteeing the tightness of the bound. 
+
+D Implementation Details and Metrics 
+
+Implementation Details. In the QA task, we em-ploy XLM-RoBERTa-Base (Conneau et al., 2020) and XLMR-Base-xTune as backbone models, fol-lowing configurations used in prior studies(Ye et al., 2022)(Su et al., 2023). The latter uses xTune(Zheng et al., 2021), a strong robustness tuning method, to train a source model on XLM-RoBERTa-base. All backbone models are pre-trained on the SQuAD(Rajpurkar et al., 2016), which serves as the source domain, using the de-fault configuration provided by XTREME (Hu et al., 2020). In the sentiment analysis task, we pre-trained the Bert-base (Devlin et al., 2019) back-bone using the SST-2 (Socher et al., 2013) dataset. Under the CTTA setting, we sequentially adapt each method to the sentiment analysis data stream. During the CTTA phase, target test samples are sequentially fed into the model following the de-signed input order. At each time step t, the model is exposed solely to the current target test data. Each input sample is first evaluated and then immediately used for adaptation, with the student model’s pre-diction adopted as the final prediction. Our method is implemented using PyTorch, and all experiments are conducted on an NVIDIA N800 GPU. We set the batch size to 16 and utilize the AdamW opti-mizer (Loshchilov and Hutter, 2019). The learning rate is uniformly set to 1e-5 across all methods. For our approach, the hyperparameter γ is set to 0.4; τ is set to 1.2 when using XLMR-Base and 0.6 when using XLMR-Base-xTune. Baseline hy-perparameters follow the default hyperparameters reported in the original works. All experiments are repeated three times with different random seeds, and the average results are reported. For IPCA-based representation dynamics modeling, we ex-tract sequence-level embeddings from the embed-ding layer of the encoder. Specifically, for each input sample in a batch, the embedding module produces a fixed-dimensional representation, re-sulting in a two-dimensional embedding matrix with the batch size as the first dimension. Each row, therefore, corresponds to a single input sequence embedding. Importantly, as there is no existing work on CTTA in NLP, all baseline methods are adapted from closely related TTA approaches. Specifically, Tent and OIL—originally designed for test-time adaptation on a fixed target domain—are modified to operate on the long and short sequence target 4073 task streams (Order 1 to 6) defined above. For span-based QA adaptation, Eq. 1 is applied separately to the start and end position predictions, yielding two losses, denoted as Ls and Le, respec-tively. The final training loss is obtained by aver-aging these two terms. Regarding the RFP module (Section 3.2), pseudo-label refinement is performed independently for the start and end positions. If the consistency score smax of either the start or the end prediction falls below the threshold τ , the corre-sponding sample is filtered out and excluded from adaptation. For CoTTA, which was originally de-veloped for CTTA in computer vision, we adapt the task from image classification to text understand-ing and replace the image-based augmentation with text-based augmentation, such as random token re-placement and deletion. 
+
+Metrics. EM follows a strict criterion: a predic-tion is considered correct if it exactly matches the ground truth (i.e., a character-level exact match); otherwise, it is deemed incorrect. F1 score, being the harmonic mean of Precision and Recall, offers a balanced measure of the model’s performance. EM emphasizes exact correspondence between the predicted answer and the reference answer, where a prediction is considered correct only if it matches the ground truth at the character level. This reflects the model’s ability to achieve strict semantic align-ment. In contrast, the F1 captures partial overlaps between the prediction and the reference. Even if the prediction is not entirely correct, it can still re-ceive credit as long as it contains key information, making F1 more tolerant to minor discrepancies. 
+
+E Tasks and CTTA Benchmark 
+
+We establish a CTTA benchmark for text under-standing across multiple domains and adaptation orders, covering three tasks: Robust QA (Ravichan-der et al., 2021), Reading Comprehension (Fisch et al., 2019), and Cross-lingual QA (Artetxe et al., 2020). The Robust QA task has two subsets (nat-ural and synthetic noise), each with three sub-tasks (speech recognition, keyboard, and transla-tion errors). The Reading Comprehension task in-cludes Search and Trivia subtasks, while Cross-lingual QA includes translations into Chinese, Ara-bic, and Spanish. Each subtask is treated indepen-dently, resulting in 11 tasks. We construct short-sequence (7 tasks) and long-sequence (11 tasks) target task streams to evaluate performance under CTTA. To construct long and short sequence target task streams, we use the following method: For the long-sequence setting (Orders 4 to 6), we orga-nize the three task categories—Robust QA, Read-ing Comprehension, and Cross-lingual QA—into a fixed order (Order 4), numbering tasks 1 to 11. We then apply the Fisher-Yates shuffle (Liu, 2000) twice to generate two randomized long-sequence streams (Orders 5 and 6). The short-sequence stream (Order 1) and its two randomized variants (Orders 2 and 3) are constructed similarly, exclud-ing Robust QA-na and the Trivia subtask from Reading Comprehension. The CTTA benchmark for sentiment analysis includes cross-lingual settings (e.g., English, Chi-nese, Arabic, Spanish) and cross-domain settings (e.g., movie, restaurant, hotel, travel, and written reviews), and is constructed based on the IMDb (Maas et al., 2011a) and Multilingual-Sentiment-Classification (MSC) (tabularisai et al., 2025; Maas et al., 2011b; Muennighoff et al., 2023; Enevoldsen et al.) datasets. Details of task orders are provided in Tab. 5.         
+
+> Table 6: Comparison with LLMs that exhibit strong zero-shot performance
+> Method CTTA-T (ours) GPT-4 Turbo o3 Gemini 2.5 Pro
+> Order 1-6 (EM) 57.64 53.03 56.39 57.31
+
+F Comparison with LLMs that Exhibit Strong Zero-shot Performance 
+
+We report zero-shot LLM results on benchmarks in Tab. 6. The results show that even strong LLMs struggle when directly applied in a zero-shot man-ner to the challenging benchmarks considered in CTTA. By contrast, our method explicitly leverages online adaptation and is able to maintain substan-tially higher accuracy throughout domain shift. Although LLMs demonstrate strong zero-shot capabilities, this ability fundamentally relies on their static pre-trained knowledge. In reality, knowledge evolves rapidly: new domain knowl-edge, specific noise patterns, and language usage continually emerge. Once trained, LLM parame-ters are frozen, making it difficult to cope with such fast-changing domain knowledge. In contrast, CTTA provides an online self-adaptation mechanism that continuously leverages unlabeled test-stream data, allowing models to adapt in real time to newly emerging domains. The CTTA overcomes the limitations of static pre-4074 trained models, enabling good performance even in unseen or rapidly changing environments. 
+
+G Time Cost of Each Module 
+
+We conduct a time cost experiment of each mod-ule, and the results are shown in Tab. 7, where the w/o IPCA & w/o RFP mean ablations on the cost introduced by the RFP module (Sec. 3.2) and the CDA module (Sec. 3.3). The No adaptation 
+
+means the backbone model without any adapta-tion. The results show that: 1) IPCA and RFP are computationally lightweight, increasing latency only marginally (<17%). Importantly, both IPCA and RFP contribute significantly to performance improvements (see Tab. 1). Thus, their small com-putational cost is well justified. 2) CTTA-T intro-duces only a small overhead compared with the non-adapted backbone (<35%), which is accept-able. Overall, CTTA-T maintains low cost while delivering strong performance, confirming its prac-ticality for real-time and online test-time settings.                
+
+> Table 7: The cost results of the ablation experiment at the module level.
+> CTTA-T w/o IPCA w/o RFP No adaptation Backbone Time (s) Time (s) Time (s) Time (s) Base 0.043 0.037 0.036 0.032 xTune 0.040 0.036 0.034 0.032
+
+H Further Analyses Study of Error Accumulation 
+
+To further analyze error accumulation, we compare our method with baselines on both short and long task sequences, with an emphasis on hard tasks (e.g., Search and Trivial) where accumulated errors are most likely to dominate. Specifically, the short sequence includes Search, while the long sequence includes both Search and Trivial. As shown in Fig. 7, we report the EM variations of each method under continuous domain shifts from Order 1 to Order 6 (excluding Order 5). All baselines exhibited severe error accumula-tion on hard tasks, whereas our method remained stable or showed only minimal degradation, high-lighting its robustness in CTTA. OIL, SAR, SoTTA, and REM suffered from progressive error accumu-lation due to noisy and degrading pseudo-labels, which irreversibly propagated over time. Tent, by involving all samples in its entropy minimization, rapidly degenerated into a trivial solution where outputs were biased toward specific classes, lead-ing to the earliest failure. CoTTA deteriorated even earlier in Order 2, as its recovery strategy over-wrote sensitive parameters, thereby accelerating error accumulation. 
+
+I Analyses Study of Backbone Influence 
+
+Since the teacher model is initialized from a pre-trained backbone, its quality may influence the overall CTTA performance. To study this factor, we evaluate different methods under two types of back-bone initialization: a standard pretrained model (base) and a robustness-enhanced model (xTune). The results are summarized in Tab. 1. We observe that our method achieves consistently stable perfor-mance across both backbones. In contrast, other CTTA baselines perform unstably when using the weaker base backbone, and their results become relatively more stable with xTune , but still lag be-hind our method. This demonstrates that a stronger backbone indeed improves the quality of pseudo-labels and benefits all approaches, but our method is less sensitive to the initial teacher quality and remains reliable even with a weaker backbone. 
+
+J Analyses Study of the Stability of Each Method 
+
+To further assess stability under different adapta-tion orders, we report the variance of EM and F1 in Table 8. The variance is computed within each short-sequence (Orders 1–3) and long-sequence (Orders 4–6) setting, reflecting the sensitivity of each method to order variations. A smaller variance indicates more consistent performance across dif-ferent orders. Our method (CTTA-T) consistently achieves the lowest variance across both metrics and sequence types, while baseline methods often display substantially larger variances. These results confirm that our method maintains stable adapta-tion behavior and is less affected by the sequence order, thereby validating its robustness in CTTA. 
+
+K Ablation Study of Effect of Each Component 
+
+In Tab. 9, we assess the contribution of each com-ponent by removing it from the full model. Replac-ing the CDA module (Sec. 3.4) with a fixed EMA weight ( α = 0.99) leads to a performance drop, in-dicating that dynamically adjusting EMA weights in response to domain shift enhances adaptation in 4075 Figure 7: Further Analyses Study of Model Collapse. The EM variations of each method under continuous domain shifts from Order 1 to Order 6 (excluding order 5) Table 8: Variance across long and short sequences. We report the variance of three adaptation orders within each sequence, calculated on a per-sequence basis. Bold : the smallest variance. 
+
+Short Seq CTTA-T (ours) REM SoTTA SAR CoTTA OIL Tent Method V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) base 0.017 0.081 6.004 6.954 0.087 1.894 33.396 38.172 16.804 13.398 16.804 37.931 18.497 48.961 
+
+xtune 0.005 0.001 23.050 18.332 0.100 0.106 38.785 37.577 0.537 0.860 16.050 12.628 8.186 10.392 
+
+Long Seq CTTA-T (ours) REM SoTTA SAR CoTTA OIL Tent Method V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) V(EM) V(F1) base 0.003 0.003 0.761 0.530 1.478 1.336 48.946 45.872 181.460 224.987 40.462 56.005 129.879 164.758 
+
+xtune 0.002 0.012 7.361 4.324 1.157 0.862 15.319 16.303 0.365 0.312 26.798 40.776 179.894 245.460 4076 CTTA settings. Similarly, removing the RFP mod-ule results in degraded performance, suggesting that the RFP module improves pseudo-label qual-ity and effectively filters noisy samples. Notably, removing the SRT module causes the most sub-stantial decline in performance, demonstrating its crucial role in breaking the chain of noise-induced erroneous updates and improving generalization. 
+
+L Strong Baseline Comparison 
+
+To further evaluate the adaptability of our method under the CTTA setting, we design a rigorous com-parative experiment by selecting Anti-CF (Su et al., 2023), a state-of-the-art method for test-time adap-tation (TTA) in NLP, as a strong baseline. Anti-CF regularizes the adaptation process using outputs from the source model, which effectively mitigates the issue of model collapse commonly observed in TTA. However, it relies on a critical assumption: the availability of source training data during test-ing to warm up a side network—this fundamentally violates the CTTA principle of source-free test-time adaptation. Despite this violation, we include Anti-CF in our comparison to provide a compre-hensive assessment of our method. As shown in Tab. 10, our method surpasses Anti-CF with an average improvement of 1.22% in EM and 0.78% in F1. Notably, when using xTune as the back-bone model, Anti-CF even underperforms vanilla inference. This observation highlights the intrin-sic difficulty of achieving stable adaptation under continually shifting domains, further demonstrat-ing the robustness and practical value of our CTTA method. 
+
+M Hyperparameter Analyses 
+
+We conduct a hyperparameter search for γc and τ in the RFP module (Sec. 3.3) using Order. The thresh-old used in the main text is γc, and γc = γ log C.Therefore, we only analyze γ. Since γ and τ are in-terdependent, jointly searching them incurs a com-putational complexity of O(n2). To address this, we first simplify the second-stage filtering in the RFP module. Specifically, instead of applying the 
+
+max operation (i.e., max j πj = πmax < γ ), we sort 
+
+π(yT ) in descending order and compute the aver-age of the top-k values πavg that account for 30% of the distribution mass. Samples with πavg < 0.2
+
+are filtered out. This modification approximates the model’s consistency scoring across all samples as being uniform, effectively decoupling the influence of τ and enabling the isolated searching of γ. After selecting an appropriate γ, we restore the original second-stage filtering of the RFP module and pro-ceed with τ tuning. Fig. 8 (a) and (b) present the EM and F1 scores results for different values of 
+
+γ and τ using the base backbone, and the optimal configuration is γ = 0 .4 and τ = 1 .2. Similarly, Fig. 8 (c) and (d) show the results for the xTune backbone, with the selected hyperparameters being 
+
+γ = 0 .4 and τ = 0 .6.
+
+N Significance Test 
+
+To assess whether the performance improvements achieved by our method are statistically signifi-cant across various evaluation metrics, we perform 
+
+t-tests (Bartlett, 1937) on the main experimental results. This test evaluates whether the differences in means between our method and baseline ap-proaches are significant across different task orders. As shown in Tab. 11, the computed p-values for all orders are below 0.01, indicating that the ob-served performances are consistent and statistically significant rather than due to random chance. 
+
+O Societal Impacts 
+
+The proposed CTTA-T framework addresses a crit-ical challenge in real-world natural language pro-cessing systems: continual domain shift. By en-abling the model to adapt continuously to changing test distributions, our method enhances the robust-ness and long-term viability of text understanding systems across various scenarios. These advance-ments could benefit users in multilingual, under-represented, or rapidly changing environments, re-ducing performance degradation and decreasing de-pendence on expensive retraining or annotated data. However, adaptive models that update without ex-plicit human control may become challenging to interpret and audit. While our method provides a solid foundation for continuous test-time adap-tation in test understanding tasks, it is crucial to consider responsible and ethical usage policies in broader applications, particularly in areas involving sensitive data or high-risk decisions. 
+
+P AI Assistants Disclosure 
+
+We use AI tools for language polishing, grammar correction, and improving English expressions. 4077 Table 9: Ablation study on the short and long sequence benchmarks. w/o CDA, w/o RFP, and w/o SRT indicate the removal of the corresponding modules from our framework. Bold : the best results. 
+
+Short Sequence Long Sequence Order Order1 (t −→ ) Order2 (t −→ ) Order3 (t −→ ) Order4 (t−→ ) Order5 (t−→ ) Order6 (t−→ ) Avg 
+
+base EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 
+
+CTTA-T (ours) 54.14 66.57 53.88 66.01 54.07 66.12 57.74 69.33 57.63 69.33 57.71 69.24 55.86 67.77 
+
+w/o CDA 53.51 65.83 53.40 65.55 53.14 65.40 57.30 68.86 57.43 68.95 57.36 68.83 55.36 67.24 w/o RFP 53.66 65.94 53.69 66.12 53.72 65.97 57.50 68.09 57.45 68.94 57.30 68.84 55.55 67.32 w/o SRT 48.12 59.35 46.37 57.29 51.22 62.78 48.71 58.74 51.90 63.17 39.46 49.76 47.63 58.52 xTune EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 
+
+CTTA-T (ours) 57.85 69.72 57.99 69.76 58.00 69.80 60.84 72.08 60.92 72.18 60.86 71.96 59.41 70.92 
+
+w/o CDA 57.53 69.60 57.69 69.59 57.92 69.59 60.33 71.50 60.88 71.92 60.58 71.72 59.16 70.65 w/o RFP 57.42 69.41 57.42 69.49 57.65 69.46 60.52 71.75 60.74 71.83 60.58 71.80 59.06 70.62 w/o SRT 55.12 66.58 55.45 66.85 57.22 68.85 55.36 65.71 57.46 68.49 53.68 64.58 55.72 66.84 
+
+Figure 8: Effect of different hyperparameters γ and τ in the RFP module. Table 10: Performance of our method and a strong baseline, Anti-CF, on Orders 1 - 6. Bold : the best results. 
+
+Short Sequence Long Sequence Order Order1 (t −→ ) Order2 (t −→ ) Order3 (t −→ ) Order4 (t−→ ) Order5 (t−→ ) Order6 (t−→ ) Avg 
+
+Methods EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 base 54.23 66.86 Anti-CF 52.83 65.57 53.35 65.69 53.23 65.64 56.47 68.50 56.22 68.37 56.18 68.32 54.71 67.02 
+
+CTTA-T (ours) 54.14 66.57 53.88 66.01 54.07 66.12 57.74 69.33 57.63 69.33 57.71 69.24 55.86 67.77 
+
+xTune 58.45 70.21 Anti-CF 56.47 68.94 56.82 68.96 56.67 68.95 59.73 71.49 59.47 71.19 59.54 71.11 58.12 70.11 
+
+CTTA-T (ours) 57.85 69.72 57.99 69.76 58.00 69.80 60.84 72.08 60.92 72.18 60.86 71.96 59.41 70.92 
+
+Table 11: The p-values of the t-test on our method. 
+
+Order Order1 Order2 Order3 Order4 Order5 Order6 
+
+base EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 
+
+CTTA-T 0.0001 0.0012 0.0002 0.0005 1.80e-5 0.0020 9.48e-5 0.0003 6.68e-8 0.0013 0.0003 0.0008 xtune EM F1 EM F1 EM F1 EM F1 EM F1 EM F1 
+
+CTTA-T 7.08e-5 4.41e-6 2.34e-7 4.16e-5 2.78e-6 2.09e-5 0.0001 9.89e-5 6.74e-7 1.16e-5 1.27e-6 0.0006 4078
