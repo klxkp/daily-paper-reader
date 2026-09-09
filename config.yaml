@@ -25,7 +25,37 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
-  intent_profiles: []
+  intent_profiles:
+    - tag: few-shot
+      description: 查找跨域小样本分类相关论文
+      enabled: true
+      paper_sources:
+        - arxiv
+      keywords:
+        - keyword: cross-domain few-shot classification
+          keyword_cn: 跨域小样本分类
+          query: classification task where training and test domains differ and only a few labeled samples are available
+        - keyword: domain shift
+          keyword_cn: 域偏移
+          query: distribution mismatch between source and target domains causing performance degradation
+        - keyword: domain adaptation
+          keyword_cn: 域适应
+          query: techniques for adapting a model from a source domain to a target domain with different data distribution
+        - keyword: domain generalization
+          keyword_cn: 域泛化
+          query: learning a model that can generalize to unseen domains without fine-tuning
+      intent_queries:
+        - query: What methods are proposed to handle domain shift in few shot classification tasks
+          query_cn: 小样本分类任务中有哪些处理域偏移的方法
+          enabled: true
+          source: manual
+          note: ''
+        - query: How can meta learning be applied to cross domain few shot classification
+          query_cn: 元学习如何应用于跨域小样本分类
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-09-09T09:18:32.059Z'
 source_backends:
   arxiv:
     papers_table: arxiv_papers
